@@ -1,0 +1,3598 @@
+swagger: '2.0'
+info:
+  version: 1.0.0
+  title: Wrike Native API
+  description: Wrike API based on Wrike API Spec
+host: app-eu.wrike.com
+basePath: /api/v4/
+schemes:
+  - https
+consumes: []
+produces:
+  - application/json
+tags:
+  - name: Contacts
+    description: Contacts related operations
+  - name: Project/Folder
+    description: Operations for projects and folders
+  - name: Task
+    description: Operations for task
+  - name: Webhooks
+    description: Webhook related operations
+paths:
+  /contacts:
+    get:
+      summary: Query Contacts
+      tags:
+        - Contacts
+      description: This API call will get all the contacts or me
+      operationId: QueryContacts
+      parameters:
+        - name: me
+          in: query
+          required: false
+          type: string
+        - name: textSearch
+          in: query
+          type: array
+          items:
+            type: string
+          required: false
+        - name: deleted
+          in: query
+          required: false
+          type: string
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    firstName:
+                      type: string
+                      description: firstName
+                    lastName:
+                      type: string
+                      description: lastName
+                    type:
+                      type: string
+                      description: type
+                    profiles:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          accountId:
+                            type: string
+                            description: accountId
+                          role:
+                            type: string
+                            description: role
+                          external:
+                            type: boolean
+                            description: external
+                          admin:
+                            type: boolean
+                            description: admin
+                          owner:
+                            type: boolean
+                            description: owner
+                          email:
+                            type: string
+                            description: email
+                      description: profiles
+                    avatarUrl:
+                      type: string
+                      description: avatarUrl
+                    timezone:
+                      type: string
+                      description: timezone
+                    locale:
+                      type: string
+                      description: locale
+                    deleted:
+                      type: boolean
+                      description: deleted
+                    memberIds:
+                      type: array
+                      items:
+                        type: string
+                      description: memberIds
+                    metadata:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                            description: key
+                          value:
+                            type: string
+                            description: value
+                      description: metadata
+                    me:
+                      type: boolean
+                      description: me
+                    phone:
+                      type: string
+                      description: phone
+                    primaryEmail:
+                      type: string
+                      description: primaryEmail
+                description: data
+  /contacts/{contactid}:
+    get:
+      tags:
+        - Contacts
+      summary: Get Information about specific contact by Contact Id
+      description: https://developers.wrike.com/api/v4/contacts/#query-contacts
+      operationId: GetInformationAboutSpecificContact
+      parameters:
+        - name: contactid
+          in: path
+          type: string
+          required: true
+        - name: fields
+          default: '[metadata,workScheduleId]'
+          in: query
+          type: string
+          required: true
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+    put:
+      tags:
+        - Contacts
+      summary: Update Metadata on Specific Contact
+      description: https://developers.wrike.com/api/v4/contacts/#modify-contact
+      operationId: UpdateMetadataOnSpecificContact
+      parameters:
+        - name: contactid
+          in: path
+          type: string
+          required: true
+        - name: metadata
+          default: '[{"key":"ForeignKey","value":"100"}]'
+          in: query
+          type: string
+          required: true
+      responses:
+        default:
+          description: default
+          schema: {}
+  /internal/contact_ids:
+    get:
+      tags:
+        - Contacts
+      summary: Get Information about specific contact by Email
+      description: Internal API for contact lookup by email
+      operationId: GetContactByEmail
+      parameters:
+        - name: emails
+          in: query
+          type: array
+          items:
+            type: string
+          required: true
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                description: data
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    email:
+                      type: string
+                      description: Email
+  /users/{userid}:
+    get:
+      tags:
+        - Users
+      summary: Get Specific User by User Id
+      description: https://developers.wrike.com/api/v4/users/#query-user
+      operationId: GetSpecificUser
+      parameters:
+        - name: userid
+          in: path
+          type: string
+          required: true
+      responses:
+        default:
+          description: default
+          schema: {}
+    put:
+      tags:
+        - Users
+      summary: Update Specific User
+      description: https://developers.wrike.com/api/v4/users/#modify-user
+      operationId: UpdateSpecificUser
+      parameters:
+        - name: userid
+          in: path
+          type: string
+          required: true
+        - name: profile
+          default: '{"accountId":"IEACW7SV","role":"User","external":"true"}'
+          in: query
+          type: string
+          required: true
+      responses:
+        default:
+          description: default
+          schema: {}
+  /spaces:
+    get:
+      tags:
+        - Spaces
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    title:
+                      type: string
+                      description: title
+                    avatarUrl:
+                      type: string
+                      description: avatarUrl
+                    accessType:
+                      type: string
+                      description: accessType
+                    archived:
+                      type: boolean
+                      description: archived
+                    defaultProjectWorkflowId:
+                      type: string
+                      description: defaultProjectWorkflowId
+                    defaultTaskWorkflowId:
+                      type: string
+                      description: defaultTaskWorkflowId
+                description: data
+      summary: Get Spaces
+      description: Get Spaces
+      operationId: GetSpaces
+      x-ms-visibility: advanced
+      parameters:
+        - name: withArchived
+          in: query
+          required: false
+          type: boolean
+        - name: userIsMember
+          in: query
+          required: false
+          type: boolean
+  /folders/{folderid}/folders:
+    get:
+      tags:
+        - Project/Folder
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    createdDate:
+                      type: string
+                      description: createdDate
+                    updatedDate:
+                      type: string
+                      description: updatedDate
+                    description:
+                      type: string
+                      description: description
+                    sharedIds:
+                      type: array
+                      items:
+                        type: string
+                      description: sharedIds
+                    parentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: parentIds
+                    childIds:
+                      type: array
+                      items: {}
+                      description: childIds
+                    scope:
+                      type: string
+                      description: scope
+                    permalink:
+                      type: string
+                      description: permalink
+                    workflowId:
+                      type: string
+                      description: workflowId
+                    project:
+                      type: object
+                      properties:
+                        authorId:
+                          type: string
+                          description: authorId
+                        ownerIds:
+                          type: array
+                          items:
+                            type: string
+                          description: ownerIds
+                        customStatusId:
+                          type: string
+                          description: customStatusId
+                        startDate:
+                          type: string
+                          description: startDate
+                        createdDate:
+                          type: string
+                          description: createdDate
+                        completedDate:
+                          type: string
+                          description: completedDate
+                      description: project
+                description: data
+      summary: Get Folders and Projects
+      description: Get Folders and Projects
+      operationId: GetFoldersProjects
+      parameters:
+        - name: folderid
+          in: path
+          required: true
+          type: string
+        - name: permalink
+          in: query
+          required: false
+          type: string
+        - name: descendants
+          in: query
+          required: false
+          type: boolean
+          default: true
+          description: Adds all descendant folders to search scope
+          x-ms-summary: Adds all descendant folders to search scope
+        - name: metadata
+          in: query
+          required: false
+          type: string
+        - name: customFields
+          in: query
+          required: false
+          type: string
+        - name: updatedDate
+          in: query
+          required: false
+          type: string
+        - name: withInvitations
+          in: query
+          required: false
+          type: boolean
+          description: Include invitations in sharedIds list
+          x-ms-summary: Include invitations in sharedIds list
+        - name: project
+          in: query
+          required: false
+          type: boolean
+          description: Filter only projects (true) / only folders (false)
+          x-ms-summary: Filter only projects (true) / only folders (false)
+        - name: contractTypes
+          in: query
+          required: false
+          type: string
+        - name: plainTextCustomFields
+          in: query
+          required: false
+          type: boolean
+          description: Strip HTML tags from custom fields
+          x-ms-summary: Strip HTML tags from custom fields
+        - name: customItemTypes
+          in: query
+          required: false
+          type: string
+        - name: pageSize
+          in: query
+          required: false
+          type: integer
+          description: >-
+            The number of folders to return (max 1000 items per page). Only
+            'folders' kind is supported
+          x-ms-summary: >-
+            The number of folders to return (max 1000 items per page). Only
+            'folders' kind is supported
+        - name: nextPageToken
+          in: query
+          required: false
+          type: string
+        - name: fields
+          in: query
+          required: false
+          type: string
+    post:
+      tags:
+        - Project/Folder
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    createdDate:
+                      type: string
+                      description: createdDate
+                    updatedDate:
+                      type: string
+                      description: updatedDate
+                    description:
+                      type: string
+                      description: description
+                    sharedIds:
+                      type: array
+                      items:
+                        type: string
+                      description: sharedIds
+                    parentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: parentIds
+                    childIds:
+                      type: array
+                      items: {}
+                      description: childIds
+                    scope:
+                      type: string
+                      description: scope
+                    permalink:
+                      type: string
+                      description: permalink
+                    workflowId:
+                      type: string
+                      description: workflowId
+                    project:
+                      type: object
+                      properties:
+                        authorId:
+                          type: string
+                          description: authorId
+                        ownerIds:
+                          type: array
+                          items:
+                            type: string
+                          description: ownerIds
+                        customStatusId:
+                          type: string
+                          description: customStatusId
+                        startDate:
+                          type: string
+                          description: startDate
+                        createdDate:
+                          type: string
+                          description: createdDate
+                        completedDate:
+                          type: string
+                          description: completedDate
+                      description: project
+                description: data
+      summary: Create folder
+      description: Create Folder
+      operationId: CreateFolder
+      parameters:
+        - name: folderid
+          in: path
+          required: true
+          type: string
+        - name: description
+          in: query
+          required: false
+          type: boolean
+        - name: requestbody
+          in: body
+          required: false
+          schema:
+            properties:
+              ownersAdd:
+                type: array
+                items:
+                  type: string
+              ownersRemove:
+                type: array
+                items:
+                  type: string
+              customStatusId:
+                type: string
+              startDate:
+                type: string
+              endDate:
+                type: string
+              customFields:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - value
+                  properties:
+                    id:
+                      type: string
+                    value:
+                      type: string
+  /customfields/{customfieldid}:
+    get:
+      tags:
+        - Custom Fields
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    type:
+                      type: string
+                      description: type
+                    sharedIds:
+                      type: array
+                      items: {}
+                      description: sharedIds
+                    settings:
+                      type: object
+                      properties:
+                        inheritanceType:
+                          type: string
+                          description: inheritanceType
+                        values:
+                          type: array
+                          items:
+                            type: string
+                          description: values
+                        options:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              value:
+                                type: string
+                                description: value
+                          description: options
+                        optionColorsEnabled:
+                          type: boolean
+                          description: optionColorsEnabled
+                        allowOtherValues:
+                          type: boolean
+                          description: allowOtherValues
+                        readOnly:
+                          type: boolean
+                          description: readOnly
+                        allowTime:
+                          type: boolean
+                          description: allowTime
+                      description: settings
+                description: data
+      summary: Query Custom Fields
+      operationId: QueryCustomFields
+      description: Query Custom Fields
+      parameters:
+        - name: customfieldid
+          in: path
+          required: true
+          type: string
+  /folders/{folderidcommalist}:
+    put:
+      tags:
+        - Project/Folder
+      summary: Update the list of folders projects
+      description: Update the list of folders projects
+      operationId: UpdateListOfFolderProject
+      parameters:
+        - name: folderidcommalist
+          in: path
+          required: true
+          type: string
+        - name: customFields
+          in: query
+          required: false
+          type: string
+        - name: fields
+          in: query
+          required: false
+          type: string
+        - name: title
+          in: query
+          required: false
+          type: string
+        - name: description
+          in: query
+          required: false
+          type: string
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    createdDate:
+                      type: string
+                      description: createdDate
+                    updatedDate:
+                      type: string
+                      description: updatedDate
+                    description:
+                      type: string
+                      description: description
+                    sharedIds:
+                      type: array
+                      items:
+                        type: string
+                      description: sharedIds
+                    parentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: parentIds
+                    childIds:
+                      type: array
+                      items:
+                        type: string
+                      description: childIds
+                    superParentIds:
+                      type: array
+                      items: {}
+                      description: superParentIds
+                    scope:
+                      type: string
+                      description: scope
+                    hasAttachments:
+                      type: boolean
+                      description: hasAttachments
+                    permalink:
+                      type: string
+                      description: permalink
+                    workflowId:
+                      type: string
+                      description: workflowId
+                    metadata:
+                      type: array
+                      items: {}
+                      description: metadata
+                    customFields:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            description: id
+                          value:
+                            type: string
+                            description: value
+                      description: customFields
+                    project:
+                      type: object
+                      properties:
+                        authorId:
+                          type: string
+                          description: authorId
+                        ownerIds:
+                          type: array
+                          items: {}
+                          description: ownerIds
+                        customStatusId:
+                          type: string
+                          description: customStatusId
+                        createdDate:
+                          type: string
+                          description: createdDate
+                      description: project
+                description: data
+  /ids:
+    get:
+      tags:
+        - IDs
+      summary: Convert the provided list of Ids to v4 Ids
+      description: Convert the provided list of Ids to v4 Ids ApiV2Account
+      operationId: ConvertIds
+      parameters:
+        - name: type
+          in: query
+          type: string
+          required: true
+        - name: ids
+          in: query
+          type: string
+          required: true
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    apiV2Id:
+                      type: string
+                      description: apiV2Id
+                description: data
+  /folders/{folderId}/webhooks:
+    x-ms-notification-content:
+      schema:
+        type: array
+        items:
+          type: object
+          properties:
+            customFieldId:
+              type: string
+              description: customFieldId
+            value:
+              type: string
+              description: value
+            folderId:
+              type: string
+              description: folderId
+            taskId:
+              type: string
+              description: taskId
+            webhookId:
+              type: string
+              description: webhookId
+            eventAuthorId:
+              type: string
+              description: eventAuthorId
+            eventType:
+              type: string
+              description: eventType
+            lastUpdatedDate:
+              type: string
+              description: lastUpdatedDate
+      description: Folder Webhook Response
+    post:
+      tags:
+        - Webhooks
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    hookUrl:
+                      type: string
+                      description: hookUrl
+                    status:
+                      type: string
+                      description: status
+                description: data
+      summary: Wrike Folder Level Webhook
+      description: Wrike Folder Level Webhook
+      operationId: WrikeFolderWebhook
+      x-ms-trigger: single
+      parameters:
+        - name: folderId
+          in: path
+          required: true
+          type: string
+        - name: events
+          in: query
+          required: false
+          type: string
+        - name: recursive
+          in: query
+          required: false
+          type: string
+        - name: hookUrl
+          in: header
+          required: true
+          type: string
+          x-ms-notification-url: true
+          format: ''
+          x-ms-visibility: internal
+      x-ms-visibility: advanced
+  /folders/{folderid}/:
+    get:
+      tags:
+        - Project/Folder
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    createdDate:
+                      type: string
+                      description: createdDate
+                    updatedDate:
+                      type: string
+                      description: updatedDate
+                    briefDescription:
+                      type: string
+                      description: briefDescription
+                    description:
+                      type: string
+                      description: description
+                    color:
+                      type: string
+                      description: color
+                    sharedIds:
+                      type: array
+                      items:
+                        type: string
+                      description: sharedIds
+                    parentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: parentIds
+                    childIds:
+                      type: array
+                      items:
+                        type: string
+                      description: childIds
+                    superParentIds:
+                      type: array
+                      items: {}
+                      description: superParentIds
+                    scope:
+                      type: string
+                      description: scope
+                    hasAttachments:
+                      type: boolean
+                      description: hasAttachments
+                    permalink:
+                      type: string
+                      description: permalink
+                    workflowId:
+                      type: string
+                      description: workflowId
+                    metadata:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                            description: key
+                          value:
+                            type: string
+                            description: value
+                      description: metadata
+                    customFields:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            description: id
+                          value:
+                            type: string
+                            description: value
+                      description: customFields
+                    project:
+                      type: object
+                      properties:
+                        authorId:
+                          type: string
+                          description: authorId
+                        ownerIds:
+                          type: array
+                          items:
+                            type: string
+                          description: ownerIds
+                        customStatusId:
+                          type: string
+                          description: customStatusId
+                        startDate:
+                          type: string
+                          description: startDate
+                        endDate:
+                          type: string
+                          description: endDate
+                        createdDate:
+                          type: string
+                          description: createdDate
+                      description: project
+                description: data
+      summary: Get Folder
+      description: Get Specific Folder by ID
+      operationId: GetFolderProject
+      parameters:
+        - name: folderid
+          in: path
+          required: true
+          type: string
+        - name: withInvitations
+          in: query
+          required: false
+          type: boolean
+        - name: plainTextCustomFields
+          in: query
+          required: false
+          type: boolean
+        - name: fields
+          in: query
+          required: false
+          type: string
+          items:
+            type: string
+          format: ''
+    put:
+      tags:
+        - Project/Folder
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    description:
+                      type: string
+                      description: description
+                    briefDescription:
+                      type: string
+                      description: briefDescription
+                    parentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: parentIds
+                    superParentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: superParentIds
+                    sharedIds:
+                      type: array
+                      items:
+                        type: string
+                      description: sharedIds
+                    responsibleIds:
+                      type: array
+                      items:
+                        type: string
+                      description: responsibleIds
+                    status:
+                      type: string
+                      description: status
+                    importance:
+                      type: string
+                      description: importance
+                    createdDate:
+                      type: string
+                      description: createdDate
+                    updatedDate:
+                      type: string
+                      description: updatedDate
+                    dates:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          description: type
+                        duration:
+                          type: integer
+                          format: int32
+                          description: duration
+                        start:
+                          type: string
+                          description: start
+                        due:
+                          type: string
+                          description: due
+                      description: dates
+                    scope:
+                      type: string
+                      description: scope
+                    authorIds:
+                      type: array
+                      items:
+                        type: string
+                      description: authorIds
+                    customStatusId:
+                      type: string
+                      description: customStatusId
+                    hasAttachments:
+                      type: boolean
+                      description: hasAttachments
+                    attachmentCount:
+                      type: integer
+                      format: int32
+                      description: attachmentCount
+                    permalink:
+                      type: string
+                      description: permalink
+                    priority:
+                      type: string
+                      description: priority
+                    followedByMe:
+                      type: boolean
+                      description: followedByMe
+                    followerIds:
+                      type: array
+                      items:
+                        type: string
+                      description: followerIds
+                    superTaskIds:
+                      type: array
+                      items:
+                        type: string
+                      description: superTaskIds
+                    subTaskIds:
+                      type: array
+                      items: {}
+                      description: subTaskIds
+                    dependencyIds:
+                      type: array
+                      items:
+                        type: string
+                      description: dependencyIds
+                    metadata:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                            description: key
+                          value:
+                            type: string
+                            description: value
+                      description: metadata
+                    customFields:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            description: id
+                          value:
+                            type: string
+                            description: value
+                      description: customFields
+                description: data
+      summary: Modify Folder
+      description: Modify Folder
+      operationId: Modifyfolder
+      parameters:
+        - name: folderid
+          in: path
+          required: true
+          type: string
+        - name: title
+          in: query
+          required: false
+          type: string
+        - name: description
+          in: query
+          required: false
+          type: string
+        - name: requestbody
+          in: body
+          required: false
+          schema:
+            properties:
+              ownersAdd:
+                type: array
+                items:
+                  type: string
+              ownersRemove:
+                type: array
+                items:
+                  type: string
+              customStatusId:
+                type: string
+              startDate:
+                type: string
+              endDate:
+                type: string
+              customFields:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - id
+                    - value
+                  properties:
+                    id:
+                      type: string
+                    value:
+                      type: string
+  /folders/{folderId}/tasks:
+    get:
+      tags:
+        - Tasks
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    status:
+                      type: string
+                      description: status
+                    importance:
+                      type: string
+                      description: importance
+                    createdDate:
+                      type: string
+                      description: createdDate
+                    updatedDate:
+                      type: string
+                      description: updatedDate
+                    dates:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          description: type
+                      description: dates
+                    scope:
+                      type: string
+                      description: scope
+                    customStatusId:
+                      type: string
+                      description: customStatusId
+                    permalink:
+                      type: string
+                      description: permalink
+                    priority:
+                      type: string
+                      description: priority
+                    customFields:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            description: id
+                          value:
+                            type: string
+                            description: value
+                      description: customFields
+                description: data
+      summary: Query Tasks by Folder Id
+      description: Query Tasks by Folder Id
+      operationId: QueryTasksByFolderId
+      parameters:
+        - name: folderId
+          in: path
+          required: true
+          type: string
+        - name: descendants
+          in: query
+          required: false
+          type: string
+        - name: fields
+          in: query
+          required: false
+          type: string
+        - name: subTasks
+          in: query
+          required: false
+          type: string
+        - name: pageSize
+          in: query
+          required: false
+          type: number
+        - name: nextPageToken
+          in: query
+          required: false
+          type: string
+        - name: status
+          in: query
+          required: false
+          type: string
+          x-ms-visibility: advanced
+          enum:
+            - Active
+            - Completed
+            - Deferred
+            - Cancelled
+  /spaces/{spaceId}/tasks:
+    get:
+      tags:
+        - Tasks
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    status:
+                      type: string
+                      description: status
+                    importance:
+                      type: string
+                      description: importance
+                    createdDate:
+                      type: string
+                      description: createdDate
+                    updatedDate:
+                      type: string
+                      description: updatedDate
+                    dates:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          description: type
+                      description: dates
+                    scope:
+                      type: string
+                      description: scope
+                    customStatusId:
+                      type: string
+                      description: customStatusId
+                    permalink:
+                      type: string
+                      description: permalink
+                    priority:
+                      type: string
+                      description: priority
+                    customFields:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            description: id
+                          value:
+                            type: string
+                            description: value
+                      description: customFields
+                description: data
+      summary: Query Tasks by Space Id
+      description: Query Tasks by Space Id
+      operationId: QueryTasksBySpaceId
+      parameters:
+        - name: spaceId
+          in: path
+          required: true
+          type: string
+        - name: descendants
+          in: query
+          required: false
+          type: string
+        - name: pageSize
+          in: query
+          required: false
+          type: number
+        - name: fields
+          in: query
+          required: false
+          type: string
+        - name: subTasks
+          in: query
+          required: false
+          type: string
+        - name: customFields
+          in: query
+          type: string
+        - name: status
+          in: query
+          required: false
+          type: string
+          x-ms-visibility: advanced
+          enum:
+            - Active
+            - Completed
+            - Deferred
+            - Cancelled
+  /tasks:
+    get:
+      tags:
+        - Tasks
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    description:
+                      type: string
+                      description: description
+                    briefDescription:
+                      type: string
+                      description: briefDescription
+                    parentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: parentIds
+                    superParentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: superParentIds
+                    sharedIds:
+                      type: array
+                      items:
+                        type: string
+                      description: sharedIds
+                    responsibleIds:
+                      type: array
+                      items:
+                        type: string
+                      description: responsibleIds
+                    status:
+                      type: string
+                      description: status
+                    importance:
+                      type: string
+                      description: importance
+                    createdDate:
+                      type: string
+                      description: createdDate
+                    updatedDate:
+                      type: string
+                      description: updatedDate
+                    dates:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          description: type
+                        duration:
+                          type: integer
+                          format: int32
+                          description: duration
+                        start:
+                          type: string
+                          description: start
+                        due:
+                          type: string
+                          description: due
+                      description: dates
+                    scope:
+                      type: string
+                      description: scope
+                    authorIds:
+                      type: array
+                      items:
+                        type: string
+                      description: authorIds
+                    customStatusId:
+                      type: string
+                      description: customStatusId
+                    hasAttachments:
+                      type: boolean
+                      description: hasAttachments
+                    attachmentCount:
+                      type: integer
+                      format: int32
+                      description: attachmentCount
+                    permalink:
+                      type: string
+                      description: permalink
+                    priority:
+                      type: string
+                      description: priority
+                    followedByMe:
+                      type: boolean
+                      description: followedByMe
+                    followerIds:
+                      type: array
+                      items:
+                        type: string
+                      description: followerIds
+                    superTaskIds:
+                      type: array
+                      items:
+                        type: string
+                      description: superTaskIds
+                    subTaskIds:
+                      type: array
+                      items: {}
+                      description: subTaskIds
+                    dependencyIds:
+                      type: array
+                      items:
+                        type: string
+                      description: dependencyIds
+                    metadata:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                            description: key
+                          value:
+                            type: string
+                            description: value
+                      description: metadata
+                    customFields:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            description: id
+                          value:
+                            type: string
+                            description: value
+                      description: customFields
+                description: data
+      summary: Query Tasks
+      description: Query Tasks
+      operationId: QueryTasksPlain
+      parameters:
+        - name: nextPageToken
+          in: query
+          required: false
+          type: string
+        - name: withInvitations
+          in: query
+          required: false
+          type: boolean
+        - name: plainTextCustomFields
+          in: query
+          required: false
+          type: boolean
+        - name: fields
+          in: query
+          required: false
+          type: string
+  /tasks/{taskid}:
+    get:
+      tags:
+        - Tasks
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    description:
+                      type: string
+                      description: description
+                    briefDescription:
+                      type: string
+                      description: briefDescription
+                    parentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: parentIds
+                    superParentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: superParentIds
+                    sharedIds:
+                      type: array
+                      items:
+                        type: string
+                      description: sharedIds
+                    responsibleIds:
+                      type: array
+                      items:
+                        type: string
+                      description: responsibleIds
+                    status:
+                      type: string
+                      description: status
+                    importance:
+                      type: string
+                      description: importance
+                    createdDate:
+                      type: string
+                      description: createdDate
+                    updatedDate:
+                      type: string
+                      description: updatedDate
+                    dates:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          description: type
+                        duration:
+                          type: integer
+                          format: int32
+                          description: duration
+                        start:
+                          type: string
+                          description: start
+                        due:
+                          type: string
+                          description: due
+                      description: dates
+                    scope:
+                      type: string
+                      description: scope
+                    authorIds:
+                      type: array
+                      items:
+                        type: string
+                      description: authorIds
+                    customStatusId:
+                      type: string
+                      description: customStatusId
+                    hasAttachments:
+                      type: boolean
+                      description: hasAttachments
+                    attachmentCount:
+                      type: integer
+                      format: int32
+                      description: attachmentCount
+                    permalink:
+                      type: string
+                      description: permalink
+                    priority:
+                      type: string
+                      description: priority
+                    followedByMe:
+                      type: boolean
+                      description: followedByMe
+                    followerIds:
+                      type: array
+                      items:
+                        type: string
+                      description: followerIds
+                    superTaskIds:
+                      type: array
+                      items:
+                        type: string
+                      description: superTaskIds
+                    subTaskIds:
+                      type: array
+                      items: {}
+                      description: subTaskIds
+                    dependencyIds:
+                      type: array
+                      items:
+                        type: string
+                      description: dependencyIds
+                    metadata:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                            description: key
+                          value:
+                            type: string
+                            description: value
+                      description: metadata
+                    customFields:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            description: id
+                          value:
+                            type: string
+                            description: value
+                      description: customFields
+                description: data
+      summary: Query Tasks
+      description: Query Tasks
+      operationId: QueryTasks
+      parameters:
+        - name: taskid
+          in: path
+          required: true
+          type: string
+        - name: withInvitations
+          in: query
+          required: false
+          type: boolean
+        - name: plainTextCustomFields
+          in: query
+          required: false
+          type: boolean
+        - name: fields
+          in: query
+          required: false
+          type: string
+    put:
+      tags:
+        - Tasks
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    description:
+                      type: string
+                      description: description
+                    briefDescription:
+                      type: string
+                      description: briefDescription
+                    parentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: parentIds
+                    superParentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: superParentIds
+                    sharedIds:
+                      type: array
+                      items:
+                        type: string
+                      description: sharedIds
+                    responsibleIds:
+                      type: array
+                      items:
+                        type: string
+                      description: responsibleIds
+                    status:
+                      type: string
+                      description: status
+                    importance:
+                      type: string
+                      description: importance
+                    createdDate:
+                      type: string
+                      description: createdDate
+                    updatedDate:
+                      type: string
+                      description: updatedDate
+                    dates:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          description: type
+                        duration:
+                          type: integer
+                          format: int32
+                          description: duration
+                        start:
+                          type: string
+                          description: start
+                        due:
+                          type: string
+                          description: due
+                      description: dates
+                    scope:
+                      type: string
+                      description: scope
+                    authorIds:
+                      type: array
+                      items:
+                        type: string
+                      description: authorIds
+                    customStatusId:
+                      type: string
+                      description: customStatusId
+                    hasAttachments:
+                      type: boolean
+                      description: hasAttachments
+                    attachmentCount:
+                      type: integer
+                      format: int32
+                      description: attachmentCount
+                    permalink:
+                      type: string
+                      description: permalink
+                    priority:
+                      type: string
+                      description: priority
+                    followedByMe:
+                      type: boolean
+                      description: followedByMe
+                    followerIds:
+                      type: array
+                      items:
+                        type: string
+                      description: followerIds
+                    superTaskIds:
+                      type: array
+                      items:
+                        type: string
+                      description: superTaskIds
+                    subTaskIds:
+                      type: array
+                      items: {}
+                      description: subTaskIds
+                    dependencyIds:
+                      type: array
+                      items:
+                        type: string
+                      description: dependencyIds
+                    metadata:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                            description: key
+                          value:
+                            type: string
+                            description: value
+                      description: metadata
+                    customFields:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            description: id
+                          value:
+                            type: string
+                            description: value
+                      description: customFields
+                description: data
+      summary: Modify Task
+      description: Modify Task
+      operationId: Modifytask
+      parameters:
+        - name: taskid
+          in: path
+          required: true
+          type: string
+        - name: title
+          in: query
+          description: Title of task
+          required: false
+          type: string
+        - name: description
+          in: query
+          description: Task Description
+          required: false
+          type: string
+        - name: status
+          in: query
+          required: false
+          enum:
+            - Active
+            - Deferred
+            - Completed
+            - Cancelled
+          type: string
+        - name: importance
+          in: query
+          required: false
+          enum:
+            - High
+            - Low
+            - Normal
+          type: string
+        - name: dates
+          in: query
+          description: Reschedule task and/or change task type
+          required: false
+          type: string
+        - name: addParents
+          in: query
+          required: false
+          type: string
+        - name: removeParents
+          in: query
+          description: >-
+            Remove task from specified folders. Can not contain RecycleBin
+            folder
+          required: false
+          type: string
+        - name: addShareds
+          in: query
+          description: Shared task with specified users or invitations
+          required: false
+          type: string
+        - name: removeShareds
+          in: query
+          description: Unshare task from specified users or invitations
+          required: false
+          type: string
+        - name: addResponsibles
+          in: query
+          description: Add specified users or invitations to assignee list
+          required: false
+          type: string
+        - name: removeResponsibles
+          in: query
+          description: Remove specified users or invitations from assignee list
+          required: false
+          type: string
+        - name: addResponsiblePlaceholders
+          in: query
+          description: Add specified placeholders to placeholder assignee list
+          required: false
+          type: string
+        - name: removeResponsiblePlaceholders
+          in: query
+          description: Remove specified placeholders from placeholder assignee list
+          required: false
+          type: string
+        - name: addFollowers
+          in: query
+          description: Add specified users to task followers
+          required: false
+          type: string
+        - name: follow
+          in: query
+          description: Follow task
+          required: false
+          type: boolean
+        - name: priorityBefore
+          in: query
+          description: Put task in task list before specified task
+          required: false
+          pattern: ^([A-Z0-9]){16}$
+          type: string
+        - name: priorityAfter
+          in: query
+          description: Put task in task list after specified task
+          required: false
+          pattern: ^([A-Z0-9]){16}$
+          type: string
+        - name: addSuperTasks
+          in: query
+          description: Add the task as subtask to specified tasks
+          required: false
+          type: string
+        - name: removeSuperTasks
+          in: query
+          description: Remove the task form specified tasks subtasks
+          required: false
+          type: string
+        - name: metadata
+          in: query
+          required: false
+          type: string
+        - name: customFields
+          in: query
+          required: false
+          type: string
+        - name: customStatus
+          in: query
+          description: Custom status ID
+          required: false
+          type: string
+        - name: restore
+          in: query
+          description: Restore task from Recycled Bin
+          required: false
+          type: boolean
+        - name: effortAllocation
+          in: query
+          description: 'Set Task Effort fields: mode, total Effort'
+          required: false
+          type: string
+        - name: billingType
+          in: query
+          required: false
+          enum:
+            - Billable
+            - NonBillable
+          type: string
+        - name: withInvitations
+          in: query
+          description: Include invitations in sharedIds & responsibleIds lists
+          required: false
+          type: boolean
+        - name: convertToCustomItemType
+          in: query
+          description: Custom Item Type id
+          required: false
+          type: string
+        - name: plainTextCustomFields
+          in: query
+          description: Strip HTML tags from custom fields
+          required: false
+          type: boolean
+        - name: fields
+          in: query
+          required: false
+          type: string
+  /groups/{groupId}:
+    put:
+      tags:
+        - User Groups
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    memberIds:
+                      type: array
+                      items:
+                        type: string
+                      description: memberIds
+                    childIds:
+                      type: array
+                      items:
+                        type: string
+                      description: childIds
+                    parentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: parentIds
+                    avatarUrl:
+                      type: string
+                      description: avatarUrl
+                    metadata:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                            description: key
+                          value:
+                            type: string
+                            description: value
+                      description: metadata
+                description: data
+      summary: Modify Group
+      description: Modify Group
+      operationId: Modifygroup
+      parameters:
+        - name: groupId
+          in: path
+          required: true
+          type: string
+        - name: title
+          in: query
+          required: false
+          type: string
+        - name: addMembers
+          in: query
+          required: false
+          type: string
+        - name: removeMembers
+          in: query
+          required: false
+          type: string
+        - name: addInvitations
+          in: query
+          required: false
+          type: string
+        - name: removeInvitations
+          in: query
+          required: false
+          type: string
+        - name: parent
+          in: query
+          required: false
+          type: string
+        - name: avatar
+          in: query
+          required: false
+          type: string
+        - name: metadata
+          in: query
+          required: false
+          type: string
+  /invitations:
+    get:
+      tags:
+        - Invitations
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    email:
+                      type: string
+                      description: email
+                    status:
+                      type: string
+                      description: status
+                    inviterUserId:
+                      type: string
+                      description: inviterUserId
+                    invitationDate:
+                      type: string
+                      description: invitationDate
+                    resolvedDate:
+                      type: string
+                      description: resolvedDate
+                    role:
+                      type: string
+                      description: role
+                    external:
+                      type: boolean
+                      description: external
+                    firstName:
+                      type: string
+                      description: firstName
+                    lastName:
+                      type: string
+                      description: lastName
+                description: data
+      summary: Get all invitations
+      description: Get all invitations
+      operationId: GetInvitations
+      x-ms-visibility: advanced
+      parameters: []
+  /webhooks/:
+    get:
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    folderId:
+                      type: string
+                      description: folderId
+                    hookUrl:
+                      type: string
+                      description: hookUrl
+                    recursive:
+                      type: boolean
+                      description: recursive
+                    status:
+                      type: string
+                      description: status
+                    events:
+                      type: array
+                      items:
+                        type: string
+                      description: events
+                description: data
+      summary: Get Webhooks
+      description: Get Webhooks
+      operationId: GetWebhooks
+      parameters: []
+  /webhooks:
+    x-ms-notification-content:
+      schema:
+        type: array
+        items:
+          type: object
+          properties:
+            webhookId:
+              type: string
+              description: webhookId
+            eventAuthorId:
+              type: string
+              description: eventAuthorId
+            eventType:
+              type: string
+              description: eventType
+            taskId:
+              type: string
+              description: taskId
+            lastUpdatedDate:
+              type: string
+              description: lastUpdatedDate
+            oldValue:
+              type: string
+              description: oldValue
+            title:
+              type: string
+              description: title
+            status:
+              type: string
+              description: status
+            oldCustomStatusId:
+              type: string
+              description: oldCustomStatusId
+            customStatusId:
+              type: string
+              description: customStatusId
+            attachmentId:
+              type: string
+              description: attachmentId
+      description: Webhook Response
+    post:
+      tags:
+        - Webhooks
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    hookUrl:
+                      type: string
+                      description: hookUrl
+                    status:
+                      type: string
+                      description: status
+                description: data
+      summary: Wrike Account Level Webhook
+      description: Wrike Account Level Webhook
+      operationId: WrikeAccountWebhook
+      x-ms-visibility: advanced
+      x-ms-trigger: single
+      parameters:
+        - name: secret
+          in: query
+          required: false
+          type: string
+        - name: events
+          in: query
+          required: false
+          type: string
+        - name: hookUrl
+          in: header
+          required: true
+          type: string
+          x-ms-notification-url: true
+          x-ms-visibility: internal
+  /spaces/{spaceId}/webhooks:
+    x-ms-notification-content:
+      schema:
+        type: array
+        items:
+          type: object
+          properties:
+            webhookId:
+              type: string
+              description: webhookId
+            eventAuthorId:
+              type: string
+              description: eventAuthorId
+            eventType:
+              type: string
+              description: eventType
+            taskId:
+              type: string
+              description: taskId
+            lastUpdatedDate:
+              type: string
+              description: lastUpdatedDate
+            oldValue:
+              type: string
+              description: oldValue
+            title:
+              type: string
+              description: title
+            status:
+              type: string
+              description: status
+            oldCustomStatusId:
+              type: string
+              description: oldCustomStatusId
+            customStatusId:
+              type: string
+              description: customStatusId
+            attachmentId:
+              type: string
+              description: attachmentId
+      description: Webhook Response
+    post:
+      tags:
+        - Spaces
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    hookUrl:
+                      type: string
+                      description: hookUrl
+                    status:
+                      type: string
+                      description: status
+                description: data
+      summary: Wrike Space Level Webhook
+      description: Wrike Space Level Webhook
+      operationId: WrikeSpaceWebhook
+      x-ms-visibility: advanced
+      x-ms-trigger: single
+      parameters:
+        - name: spaceId
+          in: path
+          required: true
+          type: string
+        - name: secret
+          in: query
+          required: false
+          type: string
+        - name: events
+          in: query
+          required: false
+          type: string
+        - name: recursive
+          in: query
+          required: false
+          type: string
+        - name: hookUrl
+          in: header
+          required: true
+          type: string
+          x-ms-notification-url: true
+          x-ms-visibility: internal
+  /spaces/{spaceId}:
+    get:
+      tags:
+        - Spaces
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              errorDescription:
+                type: string
+                description: errorDescription
+              error:
+                type: string
+                description: error
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    title:
+                      type: string
+                      description: title
+                    avatarUrl:
+                      type: string
+                      description: avatarUrl
+                    accessType:
+                      type: string
+                      description: accessType
+                    archived:
+                      type: boolean
+                      description: archived
+                    defaultProjectWorkflowId:
+                      type: string
+                      description: defaultProjectWorkflowId
+                    defaultTaskWorkflowId:
+                      type: string
+                      description: defaultTaskWorkflowId
+                description: data
+      summary: Get Space by Id
+      description: Get Space by Id
+      operationId: GetSpaceById
+      parameters:
+        - name: spaceId
+          in: path
+          required: true
+          type: string
+        - name: fields
+          in: query
+          required: false
+          type: string
+          enum:
+            - members
+            - suggestedProjectWorkflows
+            - suggestedTaskWorkflows
+  /folder_blueprints/{folder_blueprintId}/launch_async:
+    post:
+      tags:
+        - Blueprints
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    status:
+                      type: string
+                      description: status
+                    progressPercent:
+                      type: integer
+                      format: int32
+                      description: progressPercent
+                    type:
+                      type: string
+                      description: type
+                description: data
+      summary: Folder Blueprint Async Work Creation
+      description: Folder Blueprint Launch, returns async job.
+      operationId: FolderBlueprintAsyncWorkCreation
+      parameters:
+        - name: folder_blueprintId
+          in: path
+          required: true
+          type: string
+        - name: parent
+          in: query
+          required: false
+          type: string
+        - name: title
+          in: query
+          required: false
+          type: string
+        - name: titlePrefix
+          in: query
+          required: false
+          type: string
+        - name: copyDescriptions
+          in: query
+          required: false
+          type: boolean
+          enum:
+            - true
+            - false
+        - name: notifyResponsibles
+          in: query
+          required: false
+          type: boolean
+          enum:
+            - true
+            - false
+        - name: copyResponsibles
+          in: query
+          required: false
+          type: boolean
+          enum:
+            - true
+            - false
+        - name: copyCustomFields
+          in: query
+          required: false
+          type: boolean
+          enum:
+            - true
+            - false
+        - name: copyAttachments
+          in: query
+          required: false
+          type: boolean
+          enum:
+            - true
+            - false
+        - name: rescheduleDate
+          in: query
+          required: false
+          type: string
+        - name: rescheduleMode
+          in: query
+          required: false
+          type: string
+          enum:
+            - Start
+            - End
+        - name: entryLimit
+          in: query
+          required: false
+          type: integer
+          format: int32
+  /async_job/{async_jobId}:
+    get:
+      tags:
+        - Async Job
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    status:
+                      type: string
+                      description: status
+                    progressPercent:
+                      type: integer
+                      format: int32
+                      description: progressPercent
+                    totalCount:
+                      type: integer
+                      format: int32
+                      description: totalCount
+                    processedCount:
+                      type: integer
+                      format: int32
+                      description: processedCount
+                    type:
+                      type: string
+                      description: type
+                    result:
+                      type: object
+                      properties:
+                        folderId:
+                          type: string
+                          description: folderId
+                      description: result
+                description: data
+      summary: Get Async Job
+      description: Get Async Job Status
+      operationId: GetAsyncJob
+      parameters:
+        - name: async_jobId
+          in: path
+          required: true
+          type: string
+  /spaces/{spaceId}/folders:
+    get:
+      tags:
+        - Project/Folder
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    createdDate:
+                      type: string
+                      description: createdDate
+                    updatedDate:
+                      type: string
+                      description: updatedDate
+                    description:
+                      type: string
+                      description: description
+                    sharedIds:
+                      type: array
+                      items:
+                        type: string
+                      description: sharedIds
+                    parentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: parentIds
+                    childIds:
+                      type: array
+                      items: {}
+                      description: childIds
+                    scope:
+                      type: string
+                      description: scope
+                    permalink:
+                      type: string
+                      description: permalink
+                    workflowId:
+                      type: string
+                      description: workflowId
+                    customFields:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            description: id
+                          value:
+                            type: string
+                            description: value
+                      description: customFields
+                    customColumnIds:
+                      type: array
+                      items:
+                        type: string
+                      description: customColumnIds
+                    project:
+                      type: object
+                      properties:
+                        authorId:
+                          type: string
+                          description: authorId
+                        ownerIds:
+                          type: array
+                          items:
+                            type: string
+                          description: ownerIds
+                        customStatusId:
+                          type: string
+                          description: customStatusId
+                        createdDate:
+                          type: string
+                          description: createdDate
+                      description: project
+                description: data
+      summary: Get Folder Tree by Space Id
+      description: Get Folder Tree by Space Id
+      operationId: GetFolderTreeBySpaceId
+      parameters:
+        - name: spaceId
+          in: path
+          required: true
+          type: string
+        - name: permalink
+          in: query
+          required: false
+          type: string
+        - name: descendants
+          in: query
+          required: false
+          type: boolean
+          description: Adds all descendant folders to search scope
+          x-ms-summary: Adds all descendant folders to search scope
+        - name: metadata
+          in: query
+          required: false
+          type: string
+        - name: customFields
+          in: query
+          required: false
+          type: string
+        - name: updatedDate
+          in: query
+          required: false
+          type: string
+        - name: project
+          in: query
+          required: false
+          type: boolean
+          description: Filter only projects (true), only folders (false)
+          x-ms-summary: Filter only projects (true), only folders (false)
+        - name: deleted
+          in: query
+          required: false
+          type: boolean
+          description: >-
+            Get folders from Root (false), Recycle Bin (true). This parameter
+            does not affect method's mode. Get folders from Root (false),
+            Recycle Bin (true). This parameter does not affect method's mode.
+        - name: contractTypes
+          in: query
+          required: false
+          type: string
+          enum:
+            - Billable
+            - NonBillable
+          description: Contract type filter
+          x-ms-summary: Contract type filter
+        - name: plainTextCustomFields
+          in: query
+          required: false
+          type: boolean
+          description: Strip HTML tags from custom fields
+          x-ms-summary: Strip HTML tags from custom fields
+        - name: fields
+          in: query
+          required: false
+          type: string
+  /customfields:
+    get:
+      tags:
+        - Custom Fields
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    type:
+                      type: string
+                      description: type
+                    spaceId:
+                      type: string
+                      description: spaceId
+                    sharedIds:
+                      type: array
+                      items: {}
+                      description: sharedIds
+                    settings:
+                      type: object
+                      properties:
+                        inheritanceType:
+                          type: string
+                          description: inheritanceType
+                        applicableEntityTypes:
+                          type: array
+                          items:
+                            type: string
+                          description: applicableEntityTypes
+                        values:
+                          type: array
+                          items:
+                            type: string
+                          description: values
+                        options:
+                          type: array
+                          items:
+                            type: object
+                            properties:
+                              value:
+                                type: string
+                                description: value
+                          description: options
+                        optionColorsEnabled:
+                          type: boolean
+                          description: optionColorsEnabled
+                        allowOtherValues:
+                          type: boolean
+                          description: allowOtherValues
+                        readOnly:
+                          type: boolean
+                          description: readOnly
+                        allowTime:
+                          type: boolean
+                          description: allowTime
+                      description: settings
+                description: data
+      summary: Get all Custom Fields
+      description: Get all Custom Fields
+      operationId: GetAllCustomFields
+      parameters: []
+  /groups:
+    get:
+      tags:
+        - User Groups
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    memberIds:
+                      type: array
+                      items: {}
+                      description: memberIds
+                    childIds:
+                      type: array
+                      items: {}
+                      description: childIds
+                    parentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: parentIds
+                    avatarUrl:
+                      type: string
+                      description: avatarUrl
+                description: data
+      summary: Get Groups
+      description: Get Groups
+      operationId: QueryAllGroups
+      parameters: []
+    post:
+      tags:
+        - User Groups
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    memberIds:
+                      type: array
+                      items:
+                        type: string
+                      description: memberIds
+                    childIds:
+                      type: array
+                      items: {}
+                      description: childIds
+                    parentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: parentIds
+                    avatarUrl:
+                      type: string
+                      description: avatarUrl
+                    metadata:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                            description: key
+                          value:
+                            type: string
+                            description: value
+                      description: metadata
+                description: data
+      summary: Create Group
+      description: Create Group
+      operationId: CreateGroup
+      parameters:
+        - name: body
+          in: body
+          required: false
+          schema:
+            type: object
+            properties:
+              title:
+                type: string
+                description: title
+              members:
+                type: array
+                items:
+                  type: string
+                description: members
+              parent:
+                type: string
+                description: parent
+  /request_forms:
+    get:
+      tags:
+        - Request Forms
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    title:
+                      type: string
+                      description: title
+                    description:
+                      type: string
+                      description: description
+                    pages:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            description: id
+                          title:
+                            type: string
+                            description: title
+                          fields:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  description: id
+                                title:
+                                  type: string
+                                  description: title
+                                type:
+                                  type: string
+                                  description: type
+                                mandatory:
+                                  type: boolean
+                                  description: mandatory
+                                helperText:
+                                  type: string
+                                  description: helperText
+                                dateFormat:
+                                  type: string
+                                  description: dateFormat
+                                limit:
+                                  type: object
+                                  properties:
+                                    type:
+                                      type: string
+                                      description: type
+                                  description: limit
+                                lineCount:
+                                  type: integer
+                                  format: int32
+                                  description: lineCount
+                                items:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                        description: id
+                                      title:
+                                        type: string
+                                        description: title
+                                      selectedByDefault:
+                                        type: boolean
+                                        description: selectedByDefault
+                                  description: items
+                            description: fields
+                      description: pages
+                description: data
+      summary: Get Request Form (Account Level)
+      description: Get Request Form (Account Level)
+      operationId: GetRequestFormAccountLevel
+      parameters:
+        - name: pageSize
+          in: query
+          required: false
+          type: integer
+  /spaces/{spaceId}/request_forms:
+    get:
+      tags:
+        - Request Forms
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    title:
+                      type: string
+                      description: title
+                    description:
+                      type: string
+                      description: description
+                    pages:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            description: id
+                          title:
+                            type: string
+                            description: title
+                          fields:
+                            type: array
+                            items:
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                                  description: id
+                                title:
+                                  type: string
+                                  description: title
+                                type:
+                                  type: string
+                                  description: type
+                                mandatory:
+                                  type: boolean
+                                  description: mandatory
+                                helperText:
+                                  type: string
+                                  description: helperText
+                                dateFormat:
+                                  type: string
+                                  description: dateFormat
+                                limit:
+                                  type: object
+                                  properties:
+                                    type:
+                                      type: string
+                                      description: type
+                                  description: limit
+                                lineCount:
+                                  type: integer
+                                  format: int32
+                                  description: lineCount
+                                items:
+                                  type: array
+                                  items:
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                        description: id
+                                      title:
+                                        type: string
+                                        description: title
+                                      selectedByDefault:
+                                        type: boolean
+                                        description: selectedByDefault
+                                  description: items
+                            description: fields
+                      description: pages
+                description: data
+      summary: Get Request Form (Space level)
+      description: Get Request Form (Space level)
+      operationId: GetRequestFormSpaceLevel
+      parameters:
+        - name: spaceId
+          in: path
+          required: true
+          type: string
+  /folders/{folderId}/comments:
+    post:
+      tags:
+        - Comments
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    authorId:
+                      type: string
+                      description: authorId
+                    text:
+                      type: string
+                      description: text
+                    updatedDate:
+                      type: string
+                      description: updatedDate
+                    createdDate:
+                      type: string
+                      description: createdDate
+                    folderId:
+                      type: string
+                      description: folderId
+                    attachmentIds:
+                      type: array
+                      items: {}
+                      description: attachmentIds
+                description: data
+      summary: Add Comment to Folder
+      description: Add Comment to Folder
+      operationId: AddCommentToFolder
+      parameters:
+        - name: folderId
+          in: path
+          required: true
+          type: string
+        - name: body
+          in: body
+          required: true
+          schema:
+            type: object
+            properties:
+              text:
+                type: string
+                description: text
+              plainText:
+                type: boolean
+                description: plainText
+  /tasks/{taskId}/comments:
+    get:
+      summary: Get Comments
+      deprecated: false
+      parameters:
+        - name: taskId
+          in: path
+          description: ''
+          required: true
+          pattern: ^([A-Z0-9]){16}$
+          type: string
+        - name: plainText
+          in: query
+          description: Get comment text as plain text, HTML otherwise
+          required: false
+          type: boolean
+        - name: types
+          in: query
+          required: false
+          type: string
+        - name: fields
+          in: query
+          required: false
+          type: string
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    authorId:
+                      type: string
+                      description: authorId
+                    text:
+                      type: string
+                      description: text
+                    updatedDate:
+                      type: string
+                      description: updatedDate
+                    createdDate:
+                      type: string
+                      description: createdDate
+                    taskId:
+                      type: string
+                      description: folderId
+                    attachmentIds:
+                      type: array
+                      items: {}
+                      description: attachmentIds
+                description: data
+      produces:
+        - application/json
+      operationId: GET_comments_multi
+    post:
+      summary: Create Comment
+      deprecated: false
+      operationId: POST_tasks_single_comments
+      tags:
+        - Comments
+      parameters:
+        - name: taskId
+          in: path
+          description: ''
+          required: true
+          pattern: ^([A-Z0-9]){16}$
+          type: string
+          x-example: ''
+        - name: text
+          in: query
+          required: true
+          type: string
+        - name: plainText
+          in: query
+          description: Treat comment text as plain text, HTML otherwise
+          required: false
+          type: boolean
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    authorId:
+                      type: string
+                      description: authorId
+                    text:
+                      type: string
+                      description: text
+                    updatedDate:
+                      type: string
+                      description: updatedDate
+                    createdDate:
+                      type: string
+                      description: createdDate
+                    taskId:
+                      type: string
+                      description: folderId
+                    attachmentIds:
+                      type: array
+                      items: {}
+                      description: attachmentIds
+                description: data
+      produces:
+        - application/json
+  /webhooks/{webhookid}:
+    get:
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    folderId:
+                      type: string
+                      description: folderId
+                    hookUrl:
+                      type: string
+                      description: hookUrl
+                    recursive:
+                      type: boolean
+                      description: recursive
+                    status:
+                      type: string
+                      description: status
+                    events:
+                      type: array
+                      items:
+                        type: string
+                      description: events
+                description: data
+      summary: Get Webhooks
+      description: Get Webhooks by Id
+      operationId: GetWebhooksById
+      x-ms-visibility: advanced
+      parameters:
+        - name: webhookid
+          in: path
+          required: true
+          type: string
+    put:
+      tags:
+        - Webhooks
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    folderId:
+                      type: string
+                      description: folderId
+                    hookUrl:
+                      type: string
+                      description: hookUrl
+                    events:
+                      type: array
+                      items:
+                        type: string
+                      description: events
+                    recursive:
+                      type: boolean
+                      description: recursive
+                    status:
+                      type: string
+                      description: status
+                description: data
+      summary: Update Webhook By ID
+      description: Update Webhook by ID
+      operationId: UpdateWebhookById
+      x-ms-visibility: advanced
+      parameters:
+        - name: webhookid
+          in: path
+          required: true
+          type: string
+        - name: status
+          in: query
+          required: false
+          type: string
+definitions: {}
+parameters: {}
+responses: {}
+securityDefinitions:
+  api_key:
+    type: apiKey
+    in: header
+    name: Authorization
+security:
+  - api_key: []
