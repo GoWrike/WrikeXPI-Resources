@@ -1,42 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-R-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wrike Campaign Submitter</title>
-    
+    <title>Campaign Submission Portal</title>
+    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                },
-            }
-        }
-    </script>
-
     <style>
-        /* Base page styling */
-        body {
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
-        
-        /* Fix for date picker icon color in dark mode */
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(0.8);
-            cursor: pointer;
-        }
-
-        /* Custom scrollbar for a more modern feel */
+        /* Custom scrollbar for a more modern look */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -51,523 +22,696 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #6b7280; /* gray-500 */
         }
+        /* Force dark color scheme for date pickers */
+        input[type="date"] {
+            color-scheme: dark;
+        }
     </style>
+    <script>
+        // Tailwind dark mode configuration
+        tailwind.config = {
+            darkMode: 'class', // This app is dark mode by default
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <!-- Simple SVG loader icon -->
+    <svg xmlns="http://www.w3.org/2000/svg" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <defs>
+        <symbol id="loader-icon">
+          <line x1="12" y1="2" x2="12" y2="6"></line>
+          <line x1="12" y1="18" x2="12" y2="22"></line>
+          <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
+          <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
+          <line x1="2" y1="12" x2="6" y2="12"></line>
+          <line x1="18" y1="12" x2="22" y2="12"></line>
+          <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
+          <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
+        </symbol>
+      </defs>
+    </svg>
 </head>
 
-<body class="bg-gray-900 text-gray-200 font-sans">
+<body class="h-full font-sans bg-gray-900 text-gray-200 dark">
 
-    <div id="app-container" class="flex min-h-screen">
-
-        <nav id="sidebar" class="bg-gray-800 w-64 p-4 space-y-2 flex-shrink-0 flex-col hidden shadow-lg">
+    <!-- A. Login Module -->
+    <div id="login-view" class="flex items-center justify-center min-h-full px-4 py-12">
+        <div class="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-2xl shadow-2xl">
             <div>
-                <h2 class="text-xl font-bold text-white px-2 mb-4">Modules</h2>
-                <a href="#" id="nav-home" class="block px-4 py-2 rounded-md text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
-                    Home
-                </a>
-                <a href="#" id="nav-campaign" class="block px-4 py-2 rounded-md text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
-                    Campaign Submission
-                </a>
+                <h2 class="text-3xl font-extrabold text-center text-white">
+                    Sign in to your account
+                </h2>
             </div>
-            <div class="flex-grow"></div> <div>
-                <button id="logout-button" class="w-full text-left px-4 py-2 rounded-md text-gray-300 bg-red-800 hover:bg-red-700 hover:text-white transition-colors">
-                    Logout
-                </button>
-            </div>
-        </nav>
-
-        <div class="flex-1 flex flex-col overflow-hidden">
-            
-            <header id="main-header" class="bg-gray-800 shadow-md p-4 hidden">
-                <button id="toggle-sidebar" class="text-gray-300 hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
-                    </svg>
-                </button>
-            </header>
-
-            <main class="flex-1 p-4 md:p-8 overflow-auto">
-
-                <div id="login-module" class="max-w-md mx-auto mt-10 md:mt-20">
-                    <div class="bg-gray-800 p-8 rounded-lg shadow-xl border border-gray-700">
-                        <h2 class="text-2xl font-bold text-center text-white mb-6">Wrike API Login</h2>
-                        
-                        <form id="login-form">
-                            <div class="mb-4">
-                                <label for="username" class="block text-sm font-medium text-gray-300 mb-1">User Name</label>
-                                <input type="text" id="username" required
-                                       class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-                            
-                            <div class="mb-6">
-                                <label for="password" class="block text-sm font-medium text-gray-300 mb-1">Password</label>
-                                <input type="password" id="password" required
-                                       class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            </div>
-                            
-                            <button type="submit" id="login-button" 
-                                    class="w-full px-4 py-2 font-semibold rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                                Login
-                            </button>
-                        </form>
-
-                        <div id="login-feedback" class="mt-4 text-center text-sm min-h-[1.25rem]"></div>
+            <form id="login-form" class="space-y-6">
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-300">User Name</label>
+                    <div class="mt-1">
+                        <input id="username" name="username" type="text" required
+                            class="w-full px-3 py-2 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                 </div>
-
-                <div id="home-module" class="max-w-4xl mx-auto hidden">
-                    <div class="bg-gray-800 p-8 rounded-lg shadow-xl border border-gray-700 text-center">
-                        <h2 class="text-3xl font-bold text-white mb-4">Welcome!</h2>
-                        <p class="text-lg text-gray-300 mb-8">Please select a module from the sidebar to begin.</p>
-                        <button id="home-nav-campaign" 
-                                class="px-6 py-3 font-semibold rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 transition-colors">
-                            Go to Campaign Submission
-                        </button>
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-300">Password</label>
+                    <div class="mt-1">
+                        <input id="password" name="password" type="password" required
+                            class="w-full px-3 py-2 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
                     </div>
                 </div>
-
-
-                <div id="campaign-module" class="max-w-4xl mx-auto hidden">
-                    <div class="bg-gray-800 p-6 md:p-8 rounded-lg shadow-xl border border-gray-700">
-                        <h2 class="text-2xl font-bold text-white mb-6">Create New Campaign</h2>
-                        
-                        <form id="campaign-form">
-                            <input type="hidden" id="type" value="Campaign Request">
-                            <input type="hidden" id="space" value="GRM-MYS-GMN">
-                            <input type="hidden" id="entity" value="Campaign">
-                            <input type="hidden" id="varientId" value="1">
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-                                
-                                <div class="md:col-span-2">
-                                    <label for="campaignname" class="block text-sm font-medium text-gray-300 mb-1">Campaign Name</label>
-                                    <input type="text" id="campaignname" value="World Pinball Day 7000" required
-                                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-
-                                <div>
-                                    <label for="client" class="block text-sm font-medium text-gray-300 mb-1">Client</label>
-                                    <input type="text" id="client" value="Adidas Group"
-                                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-
-                                <div>
-                                    <label for="brand" class="block text-sm font-medium text-gray-300 mb-1">Brand</label>
-                                    <input type="text" id="brand" value="World Pinball"
-                                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-
-                                <div>
-                                    <label for="agency" class="block text-sm font-medium text-gray-300 mb-1">Agency</label>
-                                    <input type="text" id="agency" value="Eightbar"
-                                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-
-                                <div>
-                                    <label for="debtor" class="block text-sm font-medium text-gray-300 mb-1">Debtor</label>
-                                    <input type="text" id="debtor" value="Adidas Malaysia Sdn Bhd"
-                                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-                                
-                                <hr class="md:col-span-2 border-gray-600 my-2">
-
-                                <div>
-                                    <label for="requestedstartdate" class="block text-sm font-medium text-gray-300 mb-1">Requested Start Date</label>
-                                    <input type="date" id="requestedstartdate" value="2026-07-01"
-                                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-
-                                <div>
-                                    <label for="campaignstartdate" class="block text-sm font-medium text-gray-300 mb-1">Campaign Start Date</label>
-                                    <input type="date" id="campaignstartdate" value="2026-08-29"
-                                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-
-                                <div>
-                                    <label for="campaignenddate" class="block text-sm font-medium text-gray-300 mb-1">Campaign End Date</label>
-                                    <input type="date" id="campaignenddate" value="2026-10-29"
-                                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-
-                                <div>
-                                    <label for="campaignobjective" class="block text-sm font-medium text-gray-300 mb-1">Campaign Objective</label>
-                                    <input type="text" id="campaignobjective" value="Upper Funnel / Awareness"
-                                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-
-                                <hr class="md:col-span-2 border-gray-600 my-2">
-
-                                <div>
-                                    <label for="overallbudget" class="block text-sm font-medium text-gray-300 mb-1">Overall Budget</label>
-                                    <input type="number" id="overallbudget" value="100" step="0.01"
-                                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-
-                                <div>
-                                    <label for="currency" class="block text-sm font-medium text-gray-300 mb-1">Currency</label>
-                                    <input type="text" id="currency" value="SGD"
-                                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-                                
-                                <div>
-                                    <label for="pod" class="block text-sm font-medium text-gray-300 mb-1">Pod</label>
-                                    <input type="text" id="pod" value="Pod 1A"
-                                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-                                
-                                <div>
-                                    <label for="requestormarket" class="block text-sm font-medium text-gray-300 mb-1">Requestor Market</label>
-                                    <input type="text" id="requestormarket" value="Singapore"
-                                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                </div>
-
-                                <div>
-                                    <label for="optin" class="block text-sm font-medium text-gray-300 mb-1">Opt-in</label>
-                                    <select id="optin"
-                                            class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="No" selected>No</option>
-                                        <option value="Yes">Yes</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label for="porequired" class="block text-sm font-medium text-gray-300 mb-1">PO Required</label>
-                                    <select id="porequired"
-                                            class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                                        <option value="No" selected>No</option>
-                                        <option value="Yes">Yes</option>
-                                    </select>
-                                </div>
-
-                                <div class="md:col-span-2">
-                                    <label for="selectedchannels" class="block text-sm font-medium text-gray-300 mb-1">Selected Channels (comma-separated)</label>
-                                    <input type="text" id="selectedchannels" value="Twitter"
-                                           class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                           placeholder="e.g., Twitter, Facebook, Google">
-                                </div>
-
-                            </div> <div class="mt-8 text-right">
-                                <button type="submit" id="submit-campaign"
-                                        class="px-6 py-2 font-semibold rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">
-                                    Submit Campaign
-                                </button>
-                            </div>
-                        </form>
-
-                        <div id="form-result" class="mt-6 hidden">
-                            <h3 class="text-lg font-semibold mb-2 text-white">Submission Result:</h3>
-                            <pre id="result-content" class="bg-gray-900 p-4 rounded-md overflow-x-auto text-sm whitespace-pre-wrap break-all"></pre>
-                        </div>
-
-                    </div>
+                <div>
+                    <button id="login-button" type="submit"
+                        class="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span class="button-text">Login</span>
+                        <svg class="w-5 h-5 ml-2 text-white animate-spin button-loader" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="display: none;">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
                 </div>
-
-            </main>
+            </form>
+            <!-- Feedback area for login -->
+            <div id="login-feedback" class="p-4 text-sm text-center rounded-md" style="display: none;"></div>
         </div>
     </div>
 
+    <!-- Main App Layout (Sidebar + Content) -->
+    <div id="main-app-view" class="flex h-full" style="display: none;">
+        
+        <!-- Sidebar -->
+        <div id="sidebar" class="flex flex-col w-64 bg-gray-800 shadow-xl transition-all duration-300">
+            <div class="flex items-center justify-between h-16 px-4 border-b border-gray-700">
+                <span class="text-xl font-bold text-white">Campaign Portal</span>
+                <button id="toggle-sidebar" class="p-1 text-gray-400 rounded-md md:hidden hover:text-white hover:bg-gray-700">
+                    <!-- Menu close icon -->
+                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <nav class="flex-1 px-2 py-4 space-y-1">
+                <a href="#" id="nav-home" data-module="module-list-view"
+                    class="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group module-nav-link">
+                    <svg class="w-6 h-6 mr-3 text-gray-400 group-hover:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6-4a1 1 0 001-1v-1a1 1 0 10-2 0v1a1 1 0 001 1z" />
+                    </svg>
+                    Home / Modules
+                </a>
+                <a href="#" id="nav-campaign-submission" data-module="campaign-submission-view"
+                    class="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group module-nav-link">
+                    <svg class="w-6 h-6 mr-3 text-gray-400 group-hover:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Campaign Submission
+                </a>
+            </nav>
+            <div class="px-2 py-4 border-t border-gray-700">
+                <div id="user-profile" class="flex items-center px-2 py-2">
+                    <!-- User avatar/info will be injected here -->
+                </div>
+                <a href="#" id="nav-logout"
+                    class="flex items-center w-full px-2 py-2 mt-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group">
+                    <svg class="w-6 h-6 mr-3 text-gray-400 group-hover:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    Logout
+                </a>
+            </div>
+        </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        <!-- Sidebar toggle button (for mobile) -->
+        <button id="sidebar-open-btn" class="fixed z-10 p-2 text-gray-400 bg-gray-800 rounded-md top-4 left-4 md:hidden">
+            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
 
-            // --- Element Selection ---
-            const loginModule = document.getElementById('login-module');
-            const homeModule = document.getElementById('home-module');
-            const campaignModule = document.getElementById('campaign-module');
-            const allModules = [loginModule, homeModule, campaignModule];
-
-            const sidebar = document.getElementById('sidebar');
-            const mainHeader = document.getElementById('main-header');
-            const toggleSidebarButton = document.getElementById('toggle-sidebar');
+        <!-- Main Content Area -->
+        <main id="main-content" class="flex-1 overflow-y-auto">
             
-            // Navigation
-            const navHome = document.getElementById('nav-home');
-            const navCampaign = document.getElementById('nav-campaign');
-            const homeNavCampaign = document.getElementById('home-nav-campaign');
-            const logoutButton = document.getElementById('logout-button');
+            <!-- Module: List -->
+            <div id="module-list-view" class="p-4 md:p-8 module-content">
+                <h1 class="text-3xl font-bold text-white">Modules</h1>
+                <div class="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div data-module="campaign-submission-view"
+                        class="p-6 overflow-hidden transition-all duration-300 bg-gray-800 rounded-lg shadow-lg cursor-pointer hover:bg-gray-700 hover:shadow-xl hover:-translate-y-1 module-card">
+                        <h3 class="text-xl font-semibold text-white">Campaign Submission</h3>
+                        <p class="mt-2 text-gray-400">Create a new Wrike Campaign by submitting the required form fields.</p>
+                    </div>
+                    <div class="p-6 bg-gray-800 rounded-lg shadow-lg opacity-50 cursor-not-allowed">
+                        <h3 class="text-xl font-semibold text-white">Reports (Coming Soon)</h3>
+                        <p class="mt-2 text-gray-400">View campaign performance and reports.</p>
+                    </div>
+                </div>
+            </div>
 
-            // Login Form
-            const loginForm = document.getElementById('login-form');
-            const loginButton = document.getElementById('login-button');
-            const usernameInput = document.getElementById('username');
-            const passwordInput = document.getElementById('password');
-            const loginFeedback = document.getElementById('login-feedback');
+            <!-- B. Campaign Submission Module -->
+            <div id="campaign-submission-view" class="p-4 md:p-8 module-content" style="display: none;">
+                <h1 class="text-3xl font-bold text-white">Campaign Submission Form</h1>
+                <p class="mt-2 text-gray-400">Fill in the details below to create a new campaign.</p>
 
-            // Campaign Form
-            const campaignForm = document.getElementById('campaign-form');
-            const submitCampaignButton = document.getElementById('submit-campaign');
-            const formResult = document.getElementById('form-result');
-            const resultContent = document.getElementById('result-content');
-
-
-            // --- Cookie Helper Functions ---
-            // NOTE: Storing passwords in cookies is insecure (vulnerable to XSS).
-            // This is implemented *only* to match the prompt's explicit requirement.
-            // A production app should use an HTTP-only session token.
-            function setCookie(name, value, days) {
-                let expires = "";
-                if (days) {
-                    const date = new Date();
-                    date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                    expires = "; expires=" + date.toUTCString();
-                }
-                document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax; Secure";
-            }
-
-            function getCookie(name) {
-                const nameEQ = name + "=";
-                const ca = document.cookie.split(';');
-                for (let i = 0; i < ca.length; i++) {
-                    let c = ca[i];
-                    while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-                    if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-                }
-                return null;
-            }
-
-            function deleteCookie(name) {
-                document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-            }
-
-
-            // --- Authentication & State Functions ---
-            function isAuthenticated() {
-                return getCookie('username') && getCookie('password');
-            }
-
-            function getAuthHeader() {
-                const user = getCookie('username');
-                const pass = getCookie('password');
-                if (user && pass) {
-                    return 'Basic ' + btoa(user + ':' + pass);
-                }
-                return null;
-            }
-
-            function showModule(moduleId) {
-                // Hide all modules
-                allModules.forEach(module => module.classList.add('hidden'));
-                
-                // Show the target module
-                const targetModule = document.getElementById(moduleId);
-                if (targetModule) {
-                    targetModule.classList.remove('hidden');
-                }
-
-                // Toggle main UI elements based on auth state
-                if (moduleId === 'login-module') {
-                    sidebar.classList.add('hidden');
-                    sidebar.classList.remove('flex');
-                    mainHeader.classList.add('hidden');
-                } else {
-                    sidebar.classList.remove('hidden');
-                    sidebar.classList.add('flex'); // Make it flex column
-                    mainHeader.classList.remove('hidden');
-                }
-            }
-
-
-            // --- Event Listener: Login Form ---
-            loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                loginButton.disabled = true;
-                loginButton.textContent = 'Logging in...';
-                loginFeedback.textContent = '';
-                loginFeedback.className = 'mt-4 text-center text-sm min-h-[1.25rem]'; // Reset classes
-                
-                const username = usernameInput.value;
-                const password = passwordInput.value;
-                const basicAuth = 'Basic ' + btoa(username + ':' + password);
-                const loginUrl = 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me';
-
-                try {
-                    const response = await fetch(loginUrl, {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': basicAuth
-                        }
-                    });
-
-                    const data = await response.json();
-
-                    if (response.ok && data.success === true && data.data.length > 0) {
-                        // SUCCESS
-                        const user = data.data[0];
-                        loginFeedback.textContent = `${user.firstName} ${user.lastName} login successfully.`;
-                        loginFeedback.classList.add('text-green-400');
+                <form id="campaign-form" class="max-w-4xl mt-8 space-y-8">
+                    <!-- Form content card -->
+                    <div class="p-6 bg-gray-800 rounded-lg shadow-xl md:p-8">
+                        <!-- Hidden fields -->
+                        <input type="hidden" name="type" value="Campaign Request">
+                        <input type="hidden" name="space" value="GRM-MYS-GMN">
+                        <input type="hidden" name="entity" value="Campaign">
+                        <input type="hidden" name="varientId" value="1">
                         
-                        setCookie('username', username, 7);
-                        setCookie('password', password, 7);
+                        <!-- Visible fields grid -->
+                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+                            
+                            <div class="md:col-span-2">
+                                <label for="campaignname" class="block text-sm font-medium text-gray-300">Campaign Name</label>
+                                <input type="text" name="campaignname" id="campaignname" value="World Pinball Day 7000" required
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
 
-                        // Redirect to home module after a short delay
-                        setTimeout(() => {
-                            showModule('home-module');
-                            loginForm.reset();
-                            loginFeedback.textContent = '';
-                        }, 1500);
+                            <div>
+                                <label for="client" class="block text-sm font-medium text-gray-300">Client</label>
+                                <select id="client" name="client" required disabled
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50">
+                                    <option value="">Loading clients...</option>
+                                    <!-- Options will be populated by JS -->
+                                </select>
+                            </div>
 
-                    } else {
-                        // FAIL (API error or wrong credentials)
-                        loginFeedback.textContent = 'Login failed, please try again.';
-                        loginFeedback.classList.add('text-red-400');
-                    }
+                            <div>
+                                <label for="brand" class="block text-sm font-medium text-gray-300">Brand</label>
+                                <input type="text" name="brand" id="brand" value="World Pinball"
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            
+                            <div>
+                                <label for="agency" class="block text-sm font-medium text-gray-300">Agency</label>
+                                <input type="text" name="agency" id="agency" value="Eightbar"
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
 
-                } catch (error) {
-                    // FAIL (Network error)
-                    console.error('Login Error:', error);
-                    loginFeedback.textContent = 'Login failed. Check console for details.';
-                    loginFeedback.classList.add('text-red-400');
-                } finally {
-                    // Re-enable button unless we are redirecting
-                    if (!isAuthenticated()) {
-                        loginButton.disabled = false;
-                        loginButton.textContent = 'Login';
-                    }
-                }
-            });
+                            <div>
+                                <label for="debtor" class="block text-sm font-medium text-gray-300">Debtor</label>
+                                <input type="text" name="debtor" id="debtor" value="Adidas Malaysia Sdn Bhd"
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
 
+                            <div>
+                                <label for="currency" class="block text-sm font-medium text-gray-300">Currency</label>
+                                <input type="text" name="currency" id="currency" value="SGD"
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
 
-            // --- Event Listener: Campaign Form ---
-            campaignForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                
-                // Check auth before submitting
-                if (!isAuthenticated()) {
-                    alert('You are not logged in. Redirecting to login.');
-                    showModule('login-module');
-                    return;
-                }
+                            <div>
+                                <label for="pod" class="block text-sm font-medium text-gray-300">Pod</label>
+                                <input type="text" name="pod" id="pod" value="Pod 1A"
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
 
-                submitCampaignButton.disabled = true;
-                submitCampaignButton.textContent = 'Submitting...';
-                formResult.classList.add('hidden');
-                resultContent.className = 'bg-gray-900 p-4 rounded-md overflow-x-auto text-sm whitespace-pre-wrap break-all'; // Reset classes
+                            <div>
+                                <label for="campaignstartdate" class="block text-sm font-medium text-gray-300">Campaign Start Date</label>
+                                <input type="date" name="campaignstartdate" id="campaignstartdate" value="2026-08-29"
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
 
-                // 1. Parse 'selectedchannels' from text input into an array
-                const channelsValue = document.getElementById('selectedchannels').value;
-                const channelsArray = channelsValue
-                    .split(',')                  // Split by comma
-                    .map(ch => ch.trim())        // Trim whitespace
-                    .filter(ch => ch.length > 0); // Remove empty strings
+                            <div>
+                                <label for="campaignenddate" class="block text-sm font-medium text-gray-300">Campaign End Date</label>
+                                <input type="date" name="campaignenddate" id="campaignenddate" value="2026-10-29"
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            
+                            <div>
+                                <label for="requestedstartdate" class="block text-sm font-medium text-gray-300">Requested Start Date</L-abel>
+                                <input type="date" name="requestedstartdate" id="requestedstartdate" value="2026-07-01"
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
 
-                // 2. Construct the payload
-                const payload = {
-                    type: document.getElementById('type').value,
-                    space: document.getElementById('space').value,
-                    entity: document.getElementById('entity').value,
-                    varientId: parseInt(document.getElementById('varientId').value, 10),
-                    fields: {
-                        requestedstartdate: document.getElementById('requestedstartdate').value,
-                        agency: document.getElementById('agency').value,
-                        brand: document.getElementById('brand').value,
-                        client: document.getElementById('client').value,
-                        debtor: document.getElementById('debtor').value,
-                        currency: document.getElementById('currency').value,
-                        pod: document.getElementById('pod').value,
-                        campaignname: document.getElementById('campaignname').value,
-                        campaignstartdate: document.getElementById('campaignstartdate').value,
-                        campaignenddate: document.getElementById('campaignenddate').value,
-                        campaignobjective: document.getElementById('campaignobjective').value,
-                        requestormarket: document.getElementById('requestormarket').value,
-                        optin: document.getElementById('optin').value,
-                        porequired: document.getElementById('porequired').value,
-                        overallbudget: document.getElementById('overallbudget').value, // API will parse string to number
-                        selectedchannels: channelsArray
-                    }
-                };
-                
-                const campaignUrl = 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/campaign';
+                            <div>
+                                <label for="campaignobjective" class="block text-sm font-medium text-gray-300">Campaign Objective</label>
+                                <input type="text" name="campaignobjective" id="campaignobjective" value="Upper Funnel / Awareness"
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
 
-                try {
-                    const response = await fetch(campaignUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': getAuthHeader() // Use Basic Auth from cookies
-                        },
-                        body: JSON.stringify(payload)
-                    });
+                            <div>
+                                <label for="requestormarket" class="block text-sm font-medium text-gray-300">Requestor Market</label>
+                                <input type="text" name="requestormarket" id="requestormarket" value="Singapore"
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
 
-                    // Try to get response text/json regardless of status
-                    let responseData;
-                    try {
-                        responseData = await response.json();
-                    } catch (jsonError) {
-                        // If response is not JSON (e.g., 502 error page)
-                        responseData = await response.text();
-                    }
+                            <div>
+                                <label for="overallbudget" class="block text-sm font-medium text-gray-300">Overall Budget</G-label>
+                                <input type="number" name="overallbudget" id="overallbudget" value="100" step="0.01"
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                            </div>
+                            
+                            <div>
+                                <label for="optin" class="block text-sm font-medium text-gray-300">Opt-in</label>
+                                <select id="optin" name="optin"
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
 
-                    const responseOutput = (typeof responseData === 'object') 
-                        ? JSON.stringify(responseData, null, 2) 
-                        : responseData;
+                            <div>
+                                <label for="porequired" class="block text-sm font-medium text-gray-300">PO Required</l-abel>
+                                <select id="porequired" name="porequired"
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
 
+                            <div class="md:col-span-2">
+                                <label for="selectedchannels" class="block text-sm font-medium text-gray-300">Selected Channels</label>
+                                <input type="text" name="selectedchannels" id="selectedchannels" value="Twitter"
+                                    placeholder="e.g., Twitter, Facebook, Google"
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                <p class="mt-1 text-xs text-gray-400">Enter channels separated by a comma.</p>
+                            </div>
+                        </div>
 
-                    if (response.ok) {
-                        // SUCCESS (2xx status)
-                        resultContent.textContent = responseOutput;
-                        resultContent.classList.add('text-green-400');
-                    } else {
-                        // FAIL (4xx, 5xx status)
-                        resultContent.textContent = `Error: ${response.status} ${response.statusText}\n\n${responseOutput}`;
-                        resultContent.classList.add('text-red-400');
-                    }
+                        <!-- Form submission button -->
+                        <div class="pt-5 mt-8 border-t border-gray-700">
+                            <div class="flex justify-end">
+                                <button id="submit-campaign-button" type="submit"
+                                    class="flex justify-center px-6 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
+                                    <span class="button-text">Submit Campaign</span>
+                                    <svg class="w-5 h-5 ml-2 text-white animate-spin button-loader" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="display: none;">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
 
-                } catch (error) {
-                    // FAIL (Network error, CORS, etc.)
-                    console.error('Submission Error:', error);
-                    resultContent.textContent = `Network Error: ${error.message}\n\nSomething went wrong, please check the console and try again.`;
-                    resultContent.classList.add('text-red-400');
-                } finally {
-                    // Re-enable button and show result
-                    submitCampaignButton.disabled = false;
-                    submitCampaignButton.textContent = 'Submit Campaign';
-                    formResult.classList.remove('hidden');
-                    // Scroll to the result
-                    formResult.scrollIntoView({ behavior: 'smooth' });
-                }
-            });
+                <!-- Result/Feedback Section -->
+                <div id="form-result" class="max-w-4xl mt-6" style="display: none;">
+                    <h3 class="text-lg font-medium text-white">Submission Result</h3>
+                    <pre id="result-pre" class="p-4 mt-2 overflow-x-auto text-sm bg-gray-800 rounded-md shadow-inner"></pre>
+                </div>
 
+            </div>
+        </main>
+    </div>
 
-            // --- Navigation Event Listeners ---
-            navHome.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (isAuthenticated()) showModule('home-module');
-            });
+    <script type="module">
+        // --- STATE ---
+        let isAuthenticated = false;
+        let currentUser = null; // Will hold { username, password, firstName, lastName, avatarUrl }
 
-            navCampaign.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (isAuthenticated()) showModule('campaign-module');
-            });
+        // --- DOM Elements ---
+        const loginView = document.getElementById('login-view');
+        const mainAppView = document.getElementById('main-app-view');
+        const mainContent = document.getElementById('main-content');
+        const loginForm = document.getElementById('login-form');
+        const loginButton = document.getElementById('login-button');
+        const loginFeedback = document.getElementById('login-feedback');
+        
+        const campaignForm = document.getElementById('campaign-form');
+        const campaignButton = document.getElementById('submit-campaign-button');
+        const formResult = document.getElementById('form-result');
+        const resultPre = document.getElementById('result-pre');
+        const clientSelect = document.getElementById('client');
 
-            homeNavCampaign.addEventListener('click', (e) => {
-                e.preventDefault();
-                if (isAuthenticated()) showModule('campaign-module');
-            });
+        const sidebar = document.getElementById('sidebar');
+        const sidebarOpenBtn = document.getElementById('sidebar-open-btn');
+        const sidebarCloseBtn = document.getElementById('toggle-sidebar');
+        const userProfileDiv = document.getElementById('user-profile');
 
-            logoutButton.addEventListener('click', () => {
-                deleteCookie('username');
-                deleteCookie('password');
-                showModule('login-module');
-            });
+        // --- COOKIE HELPERS ---
+        function setCookie(name, value, days) {
+            let expires = "";
+            if (days) {
+                const date = new Date();
+                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
+                expires = "; expires=" + date.toUTCString();
+            }
+            document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax; Secure";
+        }
 
-            toggleSidebarButton.addEventListener('click', () => {
-                sidebar.classList.toggle('hidden');
-                sidebar.classList.toggle('flex');
-            });
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
 
+        function deleteCookie(name) {
+            document.cookie = name + '=; Max-Age=-99999999; path=/; SameSite=Lax; Secure';
+        }
 
-            // --- App Initialization ---
-            function checkInitialAuth() {
-                if (isAuthenticated()) {
-                    showModule('home-module');
-                } else {
-                    showModule('login-module');
-                }
+        // --- UI / NAVIGATION ---
+        function showLoader(button) {
+            button.disabled = true;
+            button.querySelector('.button-text').style.display = 'none';
+            button.querySelector('.button-loader').style.display = 'block';
+        }
+
+        function hideLoader(button, buttonText) {
+            button.disabled = false;
+            button.querySelector('.button-text').style.display = 'block';
+            button.querySelector('.button-text').textContent = buttonText;
+            button.querySelector('.button-loader').style.display = 'none';
+        }
+
+        function showLoginFeedback(message, isError = false) {
+            loginFeedback.textContent = message;
+            loginFeedback.className = `p-4 text-sm rounded-md ${isError ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'}`;
+            loginFeedback.style.display = 'block';
+        }
+
+        function showFormFeedback(message, isError = false) {
+            formResult.style.display = 'block';
+            resultPre.textContent = message;
+            resultPre.className = `p-4 mt-2 overflow-x-auto text-sm bg-gray-800 rounded-md shadow-inner ${isError ? 'text-red-300' : 'text-green-300'}`;
+        }
+        
+        function navigateTo(view) {
+            if (view === 'login') {
+                loginView.style.display = 'flex';
+                mainAppView.style.display = 'none';
+                sidebarOpenBtn.style.display = 'none';
+                isAuthenticated = false;
+                currentUser = null;
+            } else if (view === 'main-app' && isAuthenticated) {
+                loginView.style.display = 'none';
+                mainAppView.style.display = 'flex';
+                sidebarOpenBtn.style.display = 'block';
+                updateUserProfile();
+                navigateToModule('module-list-view'); // Default to module list
+            }
+        }
+        
+        function navigateToModule(moduleId) {
+            if (!isAuthenticated) {
+                navigateTo('login');
+                return;
             }
             
-            checkInitialAuth();
+            // Hide all modules
+            document.querySelectorAll('.module-content').forEach(module => {
+                module.style.display = 'none';
+            });
+            
+            // Highlight active nav link
+            document.querySelectorAll('.module-nav-link').forEach(link => {
+                if (link.dataset.module === moduleId) {
+                    link.classList.add('bg-gray-900', 'text-white');
+                    link.classList.remove('text-gray-300');
+                } else {
+                    link.classList.remove('bg-gray-900', 'text-white');
+                    link.classList.add('text-gray-300');
+                }
+            });
 
-        });
+            // Show target module
+            const targetModule = document.getElementById(moduleId);
+            if (targetModule) {
+                targetModule.style.display = 'block';
+            }
+            
+            // Special logic for campaign module
+            if (moduleId === 'campaign-submission-view') {
+                loadClientsDropdown();
+            }
+
+            // Close sidebar on mobile after navigation
+            if (window.innerWidth < 768) {
+                sidebar.classList.add('-translate-x-full');
+            }
+        }
+
+        function updateUserProfile() {
+            if (!currentUser) return;
+            userProfileDiv.innerHTML = `
+                <img class="w-10 h-10 rounded-full" src="${currentUser.avatarUrl || 'https://placehold.co/40x40/6b7280/FFFFFF?text=' + currentUser.firstName.charAt(0)}" alt="User Avatar">
+                <div class="ml-3">
+                    <p class="text-sm font-medium text-white">${currentUser.firstName} ${currentUser.lastName}</p>
+                    <p class="text-xs text-gray-400">${currentUser.username}</p>
+                </div>
+            `;
+        }
+        
+        // --- API & LOGIC ---
+
+        /**
+         * A wrapper for fetch that adds Basic Auth from currentUser
+         */
+        async function apiFetch(url, options = {}) {
+            if (!currentUser || !currentUser.username || !currentUser.password) {
+                throw new Error('User not authenticated.');
+            }
+
+            const headers = new Headers(options.headers || {});
+            const authString = btoa(`${currentUser.username}:${currentUser.password}`);
+            headers.set('Authorization', `Basic ${authString}`);
+            
+            if (options.body) {
+                headers.set('Content-Type', 'application/json');
+            }
+            
+            const response = await fetch(url, { ...options, headers });
+            
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(`HTTP error! status: ${response.status} ${response.statusText} - ${errorText}`);
+            }
+            
+            const contentType = response.headers.get("content-type");
+            if (contentType && contentType.indexOf("application/json") !== -1) {
+                return response.json();
+            } else {
+                return response.text();
+            }
+        }
+        
+        /**
+         * A. Login Module Logic
+         */
+        async function handleLogin(e) {
+            e.preventDefault();
+            showLoader(loginButton);
+            loginFeedback.style.display = 'none';
+            
+            const username = loginForm.username.value;
+            const password = loginForm.password.value;
+            const authHeader = 'Basic ' + btoa(username + ':' + password);
+            const loginUrl = 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me';
+
+            try {
+                const response = await fetch(loginUrl, {
+                    method: 'GET',
+                    headers: { 'Authorization': authHeader }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Login failed with status: ${response.status}`);
+                }
+
+                const data = await response.json();
+
+                if (data.success && data.data && data.data.length > 0) {
+                    const user = data.data[0];
+                    isAuthenticated = true;
+                    currentUser = {
+                        username: username,
+                        password: password, // Note: Storing password in JS state is generally discouraged, but required for subsequent API calls as per prompt.
+                        firstName: user.firstName,
+                        lastName: user.lastName,
+                        avatarUrl: user.avatarUrl
+                    };
+                    
+                    // Store credentials in a cookie
+                    setCookie('auth', JSON.stringify(currentUser), 1); // Store for 1 day
+                    
+                    showLoginFeedback(`${user.firstName} ${user.lastName} login successfully.`);
+                    
+                    // Wait 1 sec to show success, then navigate
+                    setTimeout(() => navigateTo('main-app'), 1000);
+                    
+                } else {
+                    throw new Error('Login API returned success=false or no user data.');
+                }
+
+            } catch (error) {
+                console.error('Login Error:', error);
+                showLoginFeedback('Login failed, please try again.', true);
+                isAuthenticated = false;
+                currentUser = null;
+            } finally {
+                hideLoader(loginButton, 'Login');
+            }
+        }
+
+        /**
+         * B. Campaign Module: Load Clients Dropdown
+         */
+        async function loadClientsDropdown() {
+            // Prevent re-loading if already populated
+            if (clientSelect.options.length > 1) return;
+
+            const clientUrl = 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/v1.0/value/clients-grm-mys';
+            
+            try {
+                const data = await apiFetch(clientUrl, { method: 'GET' });
+
+                if (data && data.value) {
+                    clientSelect.innerHTML = '<option value="">-- Select a Client --</option>'; // Clear "Loading..."
+                    
+                    data.value.forEach(client => {
+                        const option = document.createElement('option');
+                        option.value = client.value;
+                        option.textContent = client.value;
+                        if (client.value === "Adidas Group") {
+                            option.selected = true; // Set default
+                        }
+                        clientSelect.appendChild(option);
+                    });
+                    
+                    clientSelect.disabled = false;
+                } else {
+                    throw new Error('Invalid data structure for clients.');
+                }
+                
+            } catch (error) {
+                console.error('Failed to load clients:', error);
+                clientSelect.innerHTML = '<option value="">Failed to load clients</option>';
+            }
+        }
+        
+        /**
+         * B. Campaign Module: Handle Form Submission
+         */
+        async function handleCampaignSubmit(e) {
+            e.preventDefault();
+            showLoader(campaignButton);
+            formResult.style.display = 'none';
+            resultPre.className = 'p-4 mt-2 overflow-x-auto text-sm bg-gray-800 rounded-md shadow-inner'; // Reset colors
+
+            const formData = new FormData(campaignForm);
+            const formProps = Object.fromEntries(formData);
+            
+            // 1. Parse selectedchannels from comma-separated string to array
+            const channels = formProps.selectedchannels
+                .split(',')
+                .map(ch => ch.trim())
+                .filter(ch => ch.length > 0);
+
+            // 2. Construct the full payload
+            const payload = {
+                type: formProps.type,
+                space: formProps.space,
+                entity: formProps.entity,
+                varientId: parseInt(formProps.varientId, 10),
+                fields: {
+                    requestedstartdate: formProps.requestedstartdate,
+                    agency: formProps.agency,
+                    brand: formProps.brand,
+                    client: formProps.client,
+                    debtor: formProps.debtor,
+                    currency: formProps.currency,
+                    pod: formProps.pod,
+                    campaignname: formProps.campaignname,
+                    campaignstartdate: formProps.campaignstartdate,
+                    campaignenddate: formProps.campaignenddate,
+                    campaignobjective: formProps.campaignobjective,
+                    requestormarket: formProps.requestormarket,
+                    optin: formProps.optin,
+                    porequired: formProps.porequired,
+                    overallbudget: parseFloat(formProps.overallbudget),
+                    selectedchannels: channels
+                }
+            };
+
+            const campaignUrl = 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/campaign';
+            
+            try {
+                // 3. Make the API call
+                const data = await apiFetch(campaignUrl, {
+                    method: 'POST',
+                    body: JSON.stringify(payload)
+                });
+                
+                // 4. Show success feedback
+                showFormFeedback(JSON.stringify(data, null, 2), false);
+                
+            } catch (error) {
+                console.error('Campaign Submission Error:', error);
+                // 5. Show error feedback
+                const errorMessage = `Error: ${error.message}\n\n(Note: If this is a 'Failed to fetch' error, it may be a CORS issue. The API server 'api.wrikexpi.groupm.com' must be configured to allow requests from this page's origin.)`;
+                showFormFeedback(errorMessage, true);
+            } finally {
+                // 6. Reset button
+                hideLoader(campaignButton, 'Submit Campaign');
+            }
+        }
+
+        /**
+         * Logout Logic
+         */
+        function handleLogout() {
+            deleteCookie('auth');
+            currentUser = null;
+            isAuthenticated = false;
+            userProfileDiv.innerHTML = '';
+            navigateTo('login');
+        }
+
+        /**
+         * App Initialization
+         */
+        function init() {
+            // Attach permanent event listeners
+            loginForm.addEventListener('submit', handleLogin);
+            campaignForm.addEventListener('submit', handleCampaignSubmit);
+            document.getElementById('nav-logout').addEventListener('click', handleLogout);
+            
+            // Sidebar toggles
+            sidebarCloseBtn.addEventListener('click', () => sidebar.classList.add('-translate-x-full'));
+            sidebarOpenBtn.addEventListener('click', () => sidebar.classList.remove('-translate-x-full'));
+
+            // Module navigation listeners
+            document.querySelectorAll('.module-nav-link, .module-card').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const moduleId = e.currentTarget.dataset.module;
+                    navigateToModule(moduleId);
+                });
+            });
+
+            // Check for auth cookie
+            const authCookie = getCookie('auth');
+            if (authCookie) {
+                try {
+                    currentUser = JSON.parse(authCookie);
+                    if (currentUser.username && currentUser.password) {
+                        isAuthenticated = true;
+                        navigateTo('main-app');
+                    } else {
+                        throw new Error('Invalid auth cookie');
+                    }
+                } catch (e) {
+                    console.error('Failed to parse auth cookie', e);
+                    deleteCookie('auth');
+                    navigateTo('login');
+                }
+            } else {
+                navigateTo('login');
+            }
+        }
+
+        // Start the app
+        document.addEventListener('DOMContentLoaded', init);
+
     </script>
-
 </body>
 </html>
