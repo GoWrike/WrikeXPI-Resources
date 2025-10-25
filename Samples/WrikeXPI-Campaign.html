@@ -208,14 +208,20 @@
                             
                             <div>
                                 <label for="agency" class="block text-sm font-medium text-gray-300">Agency</label>
-                                <input type="text" name="agency" id="agency" value="Eightbar"
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                <select id="agency" name="agency" required disabled
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50">
+                                    <option value="">Loading agencies...</option>
+                                    <!-- Options will be populated by JS -->
+                                </select>
                             </div>
 
                             <div>
                                 <label for="debtor" class="block text-sm font-medium text-gray-300">Debtor</label>
-                                <input type="text" name="debtor" id="debtor" value="Adidas Malaysia Sdn Bhd"
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                <select id="debtor" name="debtor" required disabled
+                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50">
+                                    <option value="">Loading debtors...</option>
+                                    <!-- Options will be populated by JS -->
+                                </select>
                             </div>
 
                             <div>
@@ -337,6 +343,8 @@
         const formResult = document.getElementById('form-result');
         const resultPre = document.getElementById('result-pre');
         const clientSelect = document.getElementById('client');
+        const agencySelect = document.getElementById('agency');
+        const debtorSelect = document.getElementById('debtor');
 
         const sidebar = document.getElementById('sidebar');
         const sidebarOpenBtn = document.getElementById('sidebar-open-btn');
@@ -395,7 +403,7 @@
             resultPre.className = `p-4 mt-2 overflow-x-auto text-sm bg-gray-800 rounded-md shadow-inner ${isError ? 'text-red-300' : 'text-green-300'}`;
         }
         
-        function navigateTo(view) {
+        async function navigateTo(view) {
             if (view === 'login') {
                 loginView.style.display = 'flex';
                 mainAppView.style.display = 'none';
@@ -407,13 +415,13 @@
                 mainAppView.style.display = 'flex';
                 sidebarOpenBtn.style.display = 'block';
                 updateUserProfile();
-                navigateToModule('module-list-view'); // Default to module list
+                await navigateToModule('module-list-view'); // Default to module list
             }
         }
         
-        function navigateToModule(moduleId) {
+        async function navigateToModule(moduleId) {
             if (!isAuthenticated) {
-                navigateTo('login');
+                navigateTo('login'); // This will redirect synchronously
                 return;
             }
             
@@ -441,7 +449,12 @@
             
             // Special logic for campaign module
             if (moduleId === 'campaign-submission-view') {
-                loadClientsDropdown();
+                // Load all dropdowns in parallel
+                await Promise.all([
+                    loadClientsDropdown(),
+                    loadAgenciesDropdown(),
+                    loadDebtorsDropdown()
+                ]);
             }
 
             // Close sidebar on mobile after navigation
@@ -551,41 +564,81 @@
                 hideLoader(loginButton, 'Login');
             }
         }
+        
+        /**
+         * Generic helper to populate a dropdown from an API endpoint
+         */
+        async function loadDropdown(selectElement, url, defaultSelectedValue, defaultLabel = "Select") {
+            // Prevent re-loading if already populated
+            if (selectElement.options.length > 1 && !selectElement.innerHTML.includes("Failed")) return;
+
+            // Set loading state
+            selectElement.disabled = true;
+            selectElement.innerHTML = '<option value="">Loading...</option>';
+
+            try {
+                const data = await apiFetch(url, { method: 'GET' });
+
+                if (data && data.value) {
+                    selectElement.innerHTML = `<option value="">-- ${defaultLabel} --</option>`; // Clear "Loading..."
+                    
+                    let foundDefault = false;
+                    data.value.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.value;
+                        option.textContent = item.value;
+                        if (item.value === defaultSelectedValue) {
+                            option.selected = true;
+                            foundDefault = true;
+                        }
+                        selectElement.appendChild(option);
+                    });
+                    
+                    // If default value wasn't in the list, add it as the first option (if provided)
+                    // This handles cases where the default value might be old
+                    if (defaultSelectedValue && !foundDefault) {
+                         const defaultOption = document.createElement('option');
+                         defaultOption.value = defaultSelectedValue;
+                         defaultOption.textContent = defaultSelectedValue;
+                         defaultOption.selected = true;
+                         // Insert it after the placeholder
+                         selectElement.insertBefore(defaultOption, selectElement.children[1]);
+                    }
+                    
+                    selectElement.disabled = false;
+                } else {
+                    throw new Error(`Invalid data structure from ${url}`);
+                }
+                
+            } catch (error) {
+                console.error(`Failed to load dropdown for ${selectElement.id}:`, error);
+                selectElement.innerHTML = `<option value="">Failed to load ${selectElement.id}</option>`;
+                selectElement.disabled = true; // Keep it disabled on failure
+            }
+        }
 
         /**
          * B. Campaign Module: Load Clients Dropdown
          */
         async function loadClientsDropdown() {
-            // Prevent re-loading if already populated
-            if (clientSelect.options.length > 1) return;
-
             const clientUrl = 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/v1.0/value/clients-grm-mys';
-            
-            try {
-                const data = await apiFetch(clientUrl, { method: 'GET' });
+            await loadDropdown(clientSelect, clientUrl, 'Adidas Group', 'Select a Client');
+        }
 
-                if (data && data.value) {
-                    clientSelect.innerHTML = '<option value="">-- Select a Client --</option>'; // Clear "Loading..."
-                    
-                    data.value.forEach(client => {
-                        const option = document.createElement('option');
-                        option.value = client.value;
-                        option.textContent = client.value;
-                        if (client.value === "Adidas Group") {
-                            option.selected = true; // Set default
-                        }
-                        clientSelect.appendChild(option);
-                    });
-                    
-                    clientSelect.disabled = false;
-                } else {
-                    throw new Error('Invalid data structure for clients.');
-                }
-                
-            } catch (error) {
-                console.error('Failed to load clients:', error);
-                clientSelect.innerHTML = '<option value="">Failed to load clients</option>';
-            }
+        /**
+         * B. Campaign Module: Load Agencies Dropdown
+         */
+        async function loadAgenciesDropdown() {
+            const agencyUrl = 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/v1.0/value/agencies';
+            await loadDropdown(agencySelect, agencyUrl, 'Eightbar', 'Select an Agency');
+        }
+
+        /**
+         * B. Campaign Module: Load Debtors Dropdown
+         */
+        async function loadDebtorsDropdown() {
+            const debtorUrl = 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/v1.0/value/debtors-grm-mys';
+            await loadDropdown(debtorSelect, debtorUrl, 'Adidas Malaysia Sdn Bhd', 'Select a Debtor');
         }
         
         /**
@@ -669,7 +722,7 @@
         /**
          * App Initialization
          */
-        function init() {
+        async function init() {
             // Attach permanent event listeners
             loginForm.addEventListener('submit', handleLogin);
             campaignForm.addEventListener('submit', handleCampaignSubmit);
@@ -681,10 +734,10 @@
 
             // Module navigation listeners
             document.querySelectorAll('.module-nav-link, .module-card').forEach(link => {
-                link.addEventListener('click', (e) => {
+                link.addEventListener('click', async (e) => {
                     e.preventDefault();
                     const moduleId = e.currentTarget.dataset.module;
-                    navigateToModule(moduleId);
+                    await navigateToModule(moduleId);
                 });
             });
 
@@ -695,7 +748,7 @@
                     currentUser = JSON.parse(authCookie);
                     if (currentUser.username && currentUser.password) {
                         isAuthenticated = true;
-                        navigateTo('main-app');
+                        await navigateTo('main-app');
                     } else {
                         throw new Error('Invalid auth cookie');
                     }
@@ -710,8 +763,9 @@
         }
 
         // Start the app
-        document.addEventListener('DOMContentLoaded', init);
+        document.addEventListener('DOMContentLoaded', async () => await init());
 
     </script>
 </body>
 </html>
+
