@@ -1,2 +1,3 @@
-# WrikeXPI-PAO-Connector
-Wrike Connector for Power Automate
+# WrikeXPI
+
+[Sample XPI Page](Samples/WrikeXPI-Campaign.html)
