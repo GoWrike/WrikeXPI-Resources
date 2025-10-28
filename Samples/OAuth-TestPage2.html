@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth API Tester</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // Enable dark mode
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+    <!-- Set base theme to dark -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Simple spinner animation */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-left-color: #3b82f6; /* blue-500 */
+            border-radius: 50%;
+            width: 3rem; /* w-12 */
+            height: 3rem; /* h-12 */
+            animation: spin 1s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <div id="app-container" class="w-full max-w-2xl bg-gray-800 rounded-lg shadow-2xl p-8">
+        
+        <!-- App Title -->
+        <h1 class="text-3xl font-bold text-center text-blue-400 mb-6">OAuth 2.0 Test Tool</h1>
+
+        <!-- Mode 1: Authentication -->
+        <div id="auth-mode" class="hidden">
+            <p class="text-gray-300 text-center mb-8">Click the button below to start the OAuth 2.0 authentication flow.</p>
+            <button id="login-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                Login & Authenticate
+            </button>
+        </div>
+
+        <!-- Mode 2: Callback / Loading -->
+        <div id="callback-mode" class="hidden">
+            
+            <!-- Loading Spinner -->
+            <div id="loading-spinner" class="flex flex-col items-center justify-center">
+                <div class="spinner"></div>
+                <p class="text-gray-400 mt-4 text-lg">Exchanging code for token...</p>
+            </div>
+
+            <!-- Error Message -->
+            <div id="error-message" class="hidden p-4 bg-red-800 border border-red-600 text-red-100 rounded-lg">
+                <h3 class="font-bold text-lg mb-2">Error</h3>
+                <p id="error-text"></p>
+                <p id="redirect-timer" class="mt-4 text-sm text-red-200">Redirecting to start page in 10 seconds...</p>
+            </div>
+
+            <!-- API Response Display -->
+            <div id="response-display" class="hidden">
+                <h2 class="text-2xl font-semibold text-green-400 mb-4">Authentication Successful</h2>
+                <p class="text-gray-300 mb-4">Received the following response from the token exchange:</p>
+                <pre id="api-response" class="w-full bg-gray-900 text-gray-200 p-4 rounded-md overflow-x-auto text-sm"></pre>
+                <button id="start-over-button" class="mt-8 w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
+                    Start Over
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const authMode = document.getElementById('auth-mode');
+            const callbackMode = document.getElementById('callback-mode');
+            const loginButton = document.getElementById('login-button');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const errorMessage = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            const responseDisplay = document.getElementById('response-display');
+            const apiResponse = document.getElementById('api-response');
+            const startOverButton = document.getElementById('start-over-button');
+
+            const CLIENT_ID_KEY = 'oauth_tester_client_id';
+            const OAUTH_HOST = 'xpi-api.gowrike.space';
+            const ACCOUNT_ID = '3128883';
+            
+            // Get the base URL (e.g., "https://example.com/page.html")
+            const redirectUri = window.location.origin + window.location.pathname;
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const oauthCode = urlParams.get('code');
+
+            /**
+             * Generates a SHA-256 hash and returns the last 7 chars.
+             */
+            async function generateClientId() {
+                try {
+                    const data = Date.now().toString() + Math.random().toString();
+                    const encoder = new TextEncoder();
+                    const buffer = encoder.encode(data);
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    const hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                    return hexHash.slice(-7);
+                } catch (error) {
+                    console.error('Hash generation failed:', error);
+                    // Fallback to simpler random string if crypto fails
+                    return Math.random().toString(36).substring(2, 9);
+                }
+            }
+
+            /**
+             * Handles the login button click.
+             * Generates clientId, saves it, and redirects.
+             */
+            async function handleLogin() {
+                try {
+                    const clientId = await generateClientId();
+                    localStorage.setItem(CLIENT_ID_KEY, clientId);
+                    console.log('Generated clientId:', clientId);
+
+                    const authUrl = `https://${OAUTH_HOST}/?accountId=${ACCOUNT_ID}&redirectUri=${encodeURIComponent(redirectUri)}&client_id=${clientId}`;
+                    
+                    console.log('Redirecting to:', authUrl);
+                    window.location.href = authUrl;
+                } catch (err) {
+                    console.error('Login failed:', err);
+                    alert('Error preparing authentication. Check console.');
+                }
+            }
+
+            /**
+             * Handles the callback mode.
+             * Fetches token and displays response or error.
+             */
+            async function handleCallback() {
+                const clientId = localStorage.getItem(CLIENT_ID_KEY);
+                
+                // 1. Validation
+                let error = null;
+                if (!oauthCode) {
+                    error = 'No "code" parameter found in the URL.';
+                } else if (!clientId) {
+                    error = 'No "clientId" found in local storage. Please start the login flow again.';
+                }
+
+                if (error) {
+                    console.error(error);
+                    showError(error);
+                    return;
+                }
+
+                console.log('Callback mode: Success');
+                console.log('Code:', oauthCode);
+                console.log('Client ID:', clientId);
+
+                // 2. API Call
+                try {
+                    const tokenUrl = `https://${OAUTH_HOST}/api/v1/wrikexpi/token/exchange?code=${oauthCode}&client_id=${clientId}&grant_type=authorization_code`;
+                    console.log('Making GET request to:', tokenUrl);
+
+                    const response = await fetch(tokenUrl, {
+                        method: 'GET'
+                    });
+
+                    let responseData;
+                    const contentType = response.headers.get("content-type");
+                    if (contentType && contentType.includes("application/json")) {
+                        responseData = await response.json();
+                        apiResponse.textContent = JSON.stringify(responseData, null, 2);
+                    } else {
+                        responseData = await response.text();
+                        apiResponse.textContent = responseData;
+                    }
+                    
+                    console.log('API Response:', responseData);
+
+                    if (!response.ok) {
+                        throw new Error(`API Error (${response.status}): ${JSON.stringify(responseData)}`);
+                    }
+
+                    // 3. Display Response
+                    loadingSpinner.classList.add('hidden');
+                    responseDisplay.classList.remove('hidden');
+
+                } catch (err) {
+                    console.error('Token exchange failed:', err);
+                    showError(`Token exchange failed: ${err.message}`);
+                }
+            }
+
+            /**
+             * Displays an error message and starts the redirect timer.
+             */
+            function showError(message) {
+                loadingSpinner.classList.add('hidden');
+                errorText.textContent = message;
+                errorMessage.classList.remove('hidden');
+
+                let countdown = 10;
+                const timerElement = document.getElementById('redirect-timer');
+                
+                const interval = setInterval(() => {
+                    countdown--;
+                    timerElement.textContent = `Redirecting to start page in ${countdown} seconds...`;
+                    if (countdown <= 0) {
+                        clearInterval(interval);
+                        window.location.href = redirectUri;
+                    }
+                }, 1000);
+            }
+
+            /**
+             * Handles the "Start Over" button click.
+             */
+            function handleStartOver() {
+                // Clear the client ID for a fresh start? Optional, but safer.
+                // localStorage.removeItem(CLIENT_ID_KEY); 
+                window.location.href = redirectUri;
+            }
+
+            // --- App Initialization ---
+
+            loginButton.addEventListener('click', handleLogin);
+            startOverButton.addEventListener('click', handleStartOver);
+
+            if (oauthCode) {
+                // Mode 2: OAuth Callback
+                authMode.classList.add('hidden');
+                callbackMode.classList.remove('hidden');
+                handleCallback();
+            } else {
+                // Mode 1: Authentication
+                authMode.classList.remove('hidden');
+                callbackMode.classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>
+
