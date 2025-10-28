@@ -233,7 +233,7 @@
                 }
 
                 // 3. Exchange Code for Token
-                const tokenUrl = `https://xpi-api.gowrike.space/api/v1/wrikexpi/token/exchange?code=${oauthCode}`;
+                const tokenUrl = `https://xpi-api.gowrike.space/api/v1/wrikexpi/token/exchange?code=${oauthCode}&client_id=${clientId}&grant_type=authorization_code`;
                 console.log('Making POST request to:', tokenUrl);
 
                 const response = await fetch(tokenUrl, {
