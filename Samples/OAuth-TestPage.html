@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OAuth API Tester</title>
+    <!-- 1. Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 2. Configure Tailwind & Fonts -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- 3. Custom Styles -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* Simple spinner */
+        .spinner {
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
+
+    <!-- Main Application Card -->
+    <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-lg">
+        <div class="text-center mb-6">
+            <h1 class="text-3xl font-bold text-white mb-2">OAuth API Tester</h1>
+            <p class="text-gray-400">Test your OAuth2 flow and token exchange.</p>
+        </div>
+
+        <!-- 
+          View 1: Authentication Mode (Default)
+          Shown when no 'code' is in the URL.
+        -->
+        <div id="auth-view">
+            <p class="text-center text-gray-300 mb-6">Click the button below to start the authentication process.</p>
+            <button id="login-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 flex items-center justify-center shadow-lg">
+                <!-- Spinner (hidden by default) -->
+                <svg id="login-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span id="login-button-text">Login & Authenticate</span>
+            </button>
+        </div>
+
+        <!-- 
+          View 2: OAuth Callback Mode
+          Shown when 'code' is in the URL.
+        -->
+        <div id="callback-view" class="hidden">
+            <!-- Loading state while exchanging token -->
+            <div id="loading-view" class="flex flex-col items-center justify-center space-y-4">
+                <div class="spinner h-12 w-12 rounded-full border-4 border-blue-400"></div>
+                <p class="text-lg font-medium text-gray-300">Exchanging code for token, please wait...</p>
+            </div>
+
+            <!-- Response state after token exchange -->
+            <div id="response-view" class="hidden">
+                <h2 class="text-2xl font-semibold text-white mb-4">API Response</h2>
+                <pre id="response-content" class="bg-gray-900 p-4 rounded-md overflow-x-auto text-sm text-green-300 border border-gray-700"></pre>
+                <button id="start-over-button" class="mt-6 w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
+                    Start Over
+                </button>
+            </div>
+        </div>
+
+        <!-- 
+          View 3: Error Mode
+          Shown when something goes wrong.
+        -->
+        <div id="error-view" class="hidden bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded-lg" role="alert">
+            <div class="flex">
+                <div class="py-1">
+                    <!-- Heroicon: Exclamation Triangle -->
+                    <svg class="h-6 w-6 text-red-300 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-bold">Error</p>
+                    <p id="error-message" class="text-sm">Something went wrong.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 
+      JavaScript Logic & Firebase Integration
+    -->
+    <script type="module">
+        // 4. Import Firebase SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { 
+            getAuth, 
+            signInAnonymously, 
+            signInWithCustomToken, 
+            onAuthStateChanged 
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { 
+            getFirestore, 
+            doc, 
+            getDoc, 
+            setDoc,
+            setLogLevel
+        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // --- Global Variables ---
+        // These are provided by the environment
+        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-oauth-tester';
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        // Firebase services
+        let app, db, auth;
+        let userId;
+
+        // --- Helper Functions ---
+
+        /**
+         * Shows a specific view ("auth", "callback", "error") and hides others.
+         * @param {string} viewId - The ID of the view to show.
+         */
+        function showView(viewId) {
+            const views = ['auth-view', 'callback-view', 'error-view'];
+            views.forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    if (id === viewId) {
+                        el.classList.remove('hidden');
+                    } else {
+                        el.classList.add('hidden');
+                    }
+                }
+            });
+        }
+
+        /**
+         * Displays an error message.
+         * @param {string} message - The error message to display.
+         */
+        function showError(message) {
+            console.error(message); // Log to console for debugging
+            document.getElementById('error-message').textContent = message;
+            showView('error-view');
+        }
+
+        /**
+         * Generates a SHA-256 hash of a string.
+         * @param {string} str - The string to hash.
+         * @returns {Promise<string>} The hex-encoded hash.
+         */
+        async function sha256(str) {
+            const textBuffer = new TextEncoder().encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', textBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hexHash;
+        }
+
+        /**
+         * Gets the private Firestore document reference for this user.
+         * @returns {object} A Firestore DocumentReference.
+         */
+        function getUserDocRef() {
+            if (!userId) throw new Error("User is not authenticated.");
+            // Store data in a private path: /artifacts/{appId}/users/{userId}/oauth_data/client_info
+            return doc(db, 'artifacts', appId, 'users', userId, 'oauth_data', 'client_info');
+        }
+
+        // --- Mode Handlers ---
+
+        /**
+         * Mode 1: Handle Authentication (No 'code' in URL)
+         * Generates a client ID, stores it, and sets up the login button.
+         */
+        async function handleAuthMode() {
+            showView('auth-view');
+            const loginButton = document.getElementById('login-button');
+            const loginSpinner = document.getElementById('login-spinner');
+            const loginButtonText = document.getElementById('login-button-text');
+
+            loginButton.addEventListener('click', async () => {
+                try {
+                    // Show spinner
+                    loginButton.disabled = true;
+                    loginSpinner.classList.remove('hidden');
+                    loginButtonText.textContent = 'Preparing...';
+
+                    // 1. Generate Client ID
+                    const hash = await sha256(new Date().toISOString() + Math.random());
+                    const clientId = hash.slice(-7);
+                    console.log('Generated Client ID:', clientId);
+
+                    // 2. Store Client ID in Firestore
+                    const userDocRef = getUserDocRef();
+                    await setDoc(userDocRef, { 
+                        clientId: clientId,
+                        createdAt: new Date().toISOString()
+                    });
+                    console.log('Client ID stored in Firestore.');
+
+                    // 3. Construct Target URL
+                    const oauthHost = 'xpi-api.gowrike.space';
+                    const accountId = '3128883';
+                    // Get base URL (without any query strings)
+                    const redirectUri = window.location.href.split('?')[0];
+                    
+                    const oauthTargetUrl = `https://xpi-api.gowrike.space/?accountId=${accountId}&redirectUri=${encodeURIComponent(redirectUri)}&client_id=${clientId}`;
+
+                    // 4. Redirect
+                    console.log('Redirecting to:', oauthTargetUrl);
+                    window.location.href = oauthTargetUrl;
+
+                } catch (err) {
+                    showError(`Failed to start auth: ${err.message}`);
+                    loginButton.disabled = false;
+                    loginSpinner.classList.add('hidden');
+                    loginButtonText.textContent = 'Login & Authenticate';
+                }
+            });
+        }
+
+        /**
+         * Mode 2: Handle OAuth Callback (URL has 'code')
+         * Retrieves client ID, exchanges code for a token.
+         * @param {string} oauthCode - The 'code' from the URL query string.
+         */
+        async function handleCallbackMode(oauthCode) {
+            showView('callback-view');
+            document.getElementById('loading-view').classList.remove('hidden');
+            document.getElementById('response-view').classList.add('hidden');
+
+            try {
+                // 1. Retrieve Client ID from Firestore
+                const userDocRef = getUserDocRef();
+                const docSnap = await getDoc(userDocRef);
+                const clientId = docSnap.exists() ? docSnap.data().clientId : null;
+
+                console.log('Retrieved Client ID:', clientId);
+                console.log('Retrieved OAuth Code:', oauthCode);
+
+                // 2. Validate
+                if (!clientId || !oauthCode) {
+                    let missing = [];
+                    if (!clientId) missing.push("Client ID (from storage)");
+                    if (!oauthCode) missing.push("OAuth Code (from URL)");
+                    
+                    showError(`Missing required info: ${missing.join(', ')}. Redirecting in 10 seconds...`);
+
+                    setTimeout(() => {
+                        window.location.href = window.location.href.split('?')[0]; // Redirect to base URL
+                    }, 10000);
+                    return;
+                }
+
+                // 3. Exchange Code for Token
+                const tokenUrl = `https://xpi-api.gowrike.space/api/v1/wrikexpi/token/exchange?code=${oauthCode}`;
+                console.log('Making POST request to:', tokenUrl);
+
+                const response = await fetch(tokenUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                let responseData;
+                const contentType = response.headers.get("content-type");
+                
+                if (contentType && contentType.indexOf("application/json") !== -1) {
+                    responseData = await response.json();
+                } else {
+                    responseData = await response.text();
+                }
+                
+                console.log('API Response:', responseData);
+
+                // 4. Display Response
+                const responseContentEl = document.getElementById('response-content');
+                
+                if (typeof responseData === 'object') {
+                    responseContentEl.textContent = JSON.stringify(responseData, null, 2);
+                    responseContentEl.classList.remove('text-red-300');
+                    responseContentEl.classList.add('text-green-300');
+                } else {
+                    responseContentEl.textContent = responseData;
+                    if (!response.ok) {
+                         responseContentEl.classList.add('text-red-300');
+                         responseContentEl.classList.remove('text-green-300');
+                    }
+                }
+
+                if (!response.ok) {
+                    console.warn(`API request failed with status: ${response.status}`);
+                }
+                
+
+                document.getElementById('loading-view').classList.add('hidden');
+                document.getElementById('response-view').classList.remove('hidden');
+
+            } catch (err) {
+                showError(`Failed during token exchange: ${err.message}`);
+            }
+        }
+
+        // --- Application Entry Point ---
+
+        /**
+         * Main function to route logic based on URL.
+         * This runs *after* Firebase auth is confirmed.
+         */
+        function main() {
+            console.log('App logic starting. User ID:', userId);
+
+            // "Start Over" button
+            document.getElementById('start-over-button').addEventListener('click', () => {
+                window.location.href = window.location.href.split('?')[0];
+            });
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const oauthCode = urlParams.get('code');
+
+            if (oauthCode) {
+                // --- OAuth Callback Mode ---
+                handleCallbackMode(oauthCode);
+            } else {
+                // --- Authentication Mode ---
+                handleAuthMode();
+            }
+        }
+
+        /**
+         * Initializes Firebase and handles user authentication.
+         */
+        async function initialize() {
+            try {
+                app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                setLogLevel('Debug'); // Enable Firestore logging
+
+                // Listen for auth state changes
+                onAuthStateChanged(auth, (user) => {
+                    if (user) {
+                        console.log("User is signed in:", user.uid);
+                        userId = user.uid;
+                        main(); // Auth is ready, run the main app logic
+                    } else {
+                        console.log("User is signed out.");
+                        userId = null;
+                        // Handle sign-out state if necessary
+                    }
+                });
+
+                // Sign in the user
+                if (initialAuthToken) {
+                    console.log("Signing in with custom token...");
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    console.log("No custom token, signing in anonymously...");
+                    await signInAnonymously(auth);
+                }
+
+            } catch (err) {
+                showError(`Fatal Error: Could not initialize Firebase. ${err.message}`);
+            }
+        }
+
+        // Start the application on window load
+        window.onload = initialize;
+
+    </script>
+</body>
+</html>
