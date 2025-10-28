@@ -106,35 +106,9 @@
     </div>
 
     <!-- 
-      JavaScript Logic & Firebase Integration
+      JavaScript Logic
     -->
-    <script type="module">
-        // 4. Import Firebase SDKs
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { 
-            getAuth, 
-            signInAnonymously, 
-            signInWithCustomToken, 
-            onAuthStateChanged 
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { 
-            getFirestore, 
-            doc, 
-            getDoc, 
-            setDoc,
-            setLogLevel
-        } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        // --- Global Variables ---
-        // These are provided by the environment
-        const firebaseConfig = JSON.parse(typeof __firebase_config !== 'undefined' ? __firebase_config : '{}');
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-oauth-tester';
-        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-
-        // Firebase services
-        let app, db, auth;
-        let userId;
-
+    <script>
         // --- Helper Functions ---
 
         /**
@@ -178,16 +152,6 @@
             return hexHash;
         }
 
-        /**
-         * Gets the private Firestore document reference for this user.
-         * @returns {object} A Firestore DocumentReference.
-         */
-        function getUserDocRef() {
-            if (!userId) throw new Error("User is not authenticated.");
-            // Store data in a private path: /artifacts/{appId}/users/{userId}/oauth_data/client_info
-            return doc(db, 'artifacts', appId, 'users', userId, 'oauth_data', 'client_info');
-        }
-
         // --- Mode Handlers ---
 
         /**
@@ -212,13 +176,9 @@
                     const clientId = hash.slice(-7);
                     console.log('Generated Client ID:', clientId);
 
-                    // 2. Store Client ID in Firestore
-                    const userDocRef = getUserDocRef();
-                    await setDoc(userDocRef, { 
-                        clientId: clientId,
-                        createdAt: new Date().toISOString()
-                    });
-                    console.log('Client ID stored in Firestore.');
+                    // 2. Store Client ID in Local Storage
+                    localStorage.setItem('oauth_client_id', clientId);
+                    console.log('Client ID stored in Local Storage.');
 
                     // 3. Construct Target URL
                     const oauthHost = 'xpi-api.gowrike.space';
@@ -252,10 +212,8 @@
             document.getElementById('response-view').classList.add('hidden');
 
             try {
-                // 1. Retrieve Client ID from Firestore
-                const userDocRef = getUserDocRef();
-                const docSnap = await getDoc(userDocRef);
-                const clientId = docSnap.exists() ? docSnap.data().clientId : null;
+                // 1. Retrieve Client ID from Local Storage
+                const clientId = localStorage.getItem('oauth_client_id');
 
                 console.log('Retrieved Client ID:', clientId);
                 console.log('Retrieved OAuth Code:', oauthCode);
@@ -328,10 +286,9 @@
 
         /**
          * Main function to route logic based on URL.
-         * This runs *after* Firebase auth is confirmed.
          */
         function main() {
-            console.log('App logic starting. User ID:', userId);
+            console.log('App logic starting.');
 
             // "Start Over" button
             document.getElementById('start-over-button').addEventListener('click', () => {
@@ -350,46 +307,10 @@
             }
         }
 
-        /**
-         * Initializes Firebase and handles user authentication.
-         */
-        async function initialize() {
-            try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                setLogLevel('Debug'); // Enable Firestore logging
-
-                // Listen for auth state changes
-                onAuthStateChanged(auth, (user) => {
-                    if (user) {
-                        console.log("User is signed in:", user.uid);
-                        userId = user.uid;
-                        main(); // Auth is ready, run the main app logic
-                    } else {
-                        console.log("User is signed out.");
-                        userId = null;
-                        // Handle sign-out state if necessary
-                    }
-                });
-
-                // Sign in the user
-                if (initialAuthToken) {
-                    console.log("Signing in with custom token...");
-                    await signInWithCustomToken(auth, initialAuthToken);
-                } else {
-                    console.log("No custom token, signing in anonymously...");
-                    await signInAnonymously(auth);
-                }
-
-            } catch (err) {
-                showError(`Fatal Error: Could not initialize Firebase. ${err.message}`);
-            }
-        }
-
         // Start the application on window load
-        window.onload = initialize;
+        window.onload = main;
 
     </script>
 </body>
 </html>
+
