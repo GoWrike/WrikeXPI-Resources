@@ -52,44 +52,44 @@
         
         /* Ensure inputs and selects are styled for dark mode */
         .form-input, .form-select {
-            @apply w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none;
+            /* @apply w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none; */
         }
         
         .form-label {
-            @apply block text-sm font-medium text-gray-300 mb-1;
+            /* @apply block text-sm font-medium text-gray-300 mb-1; */
         }
         
         .btn {
-            @apply px-4 py-2 rounded-md font-semibold text-white shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900;
+            /* @apply px-4 py-2 rounded-md font-semibold text-white shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900; */
         }
         
         .btn-primary {
-            @apply bg-blue-600 hover:bg-blue-700 focus:ring-blue-500;
+            /* @apply bg-blue-600 hover:bg-blue-700 focus:ring-blue-500; */
         }
 
         .btn-danger {
-            @apply bg-red-600 hover:bg-red-700 focus:ring-red-500;
+            /* @apply bg-red-600 hover:bg-red-700 focus:ring-red-500; */
         }
         
         .btn-secondary {
-            @apply bg-gray-600 hover:bg-gray-700 focus:ring-gray-500;
+            /* @apply bg-gray-600 hover:bg-gray-700 focus:ring-gray-500; */
         }
         
         /* Modal Backdrop */
         .modal-backdrop {
-            @apply fixed inset-0 bg-black/75 flex items-center justify-center z-40 transition-opacity;
+            /* @apply fixed inset-0 bg-black/75 flex items-center justify-center z-40 transition-opacity; */
         }
         
         .modal-content {
-            @apply bg-gray-800 rounded-lg shadow-xl p-6 relative;
+            /* @apply bg-gray-800 rounded-lg shadow-xl p-6 relative; */
         }
         
         .module {
-            @apply hidden w-full h-full;
+            /* @apply hidden w-full h-full; */
         }
         
         .module.active {
-            @apply block;
+            /* @apply block; */
         }
 
     </style>
@@ -158,14 +158,14 @@
             </div>
 
             <!-- Login Module (MOD.B) -->
-            <div id="login-module" class="module">
+            <div id="login-module" class="module w-full h-full hidden">
                 <div class="max-w-md mx-auto bg-gray-800 p-8 rounded-lg shadow-xl mt-10">
                     <h2 class="text-3xl font-bold text-white text-center mb-6">XPI Portal Login</h2>
                     
                     <!-- Login Button State -->
                     <div id="login-auth-mode">
                         <p class="text-center text-gray-300 mb-6">Please login to continue.</p>
-                        <button id="login-button" class="btn btn-primary w-full text-lg">
+                        <button id="login-button" class="btn btn-primary w-full text-lg px-4 py-2 rounded-md font-semibold text-white shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-blue-600 hover:bg-blue-700 focus:ring-blue-500">
                             Login & Authenticate
                         </button>
                     </div>
@@ -183,7 +183,7 @@
                         <h3 class="text-xl font-semibold text-red-400 mb-2">Login Failed</h3>
                         <p id="login-error-message" class="text-gray-300 mb-4"></p>
                         <pre id="login-error-response" class="w-full bg-gray-900 p-4 rounded-md text-xs text-red-300 overflow-auto max-h-60"></pre>
-                        <button id="login-start-over-button" class="btn btn-secondary w-full mt-6">
+                        <button id="login-start-over-button" class="btn btn-secondary w-full mt-6 px-4 py-2 rounded-md font-semibold text-white shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-gray-600 hover:bg-gray-700 focus:ring-gray-500">
                             Start Over
                         </button>
                     </div>
@@ -191,19 +191,19 @@
             </div>
 
             <!-- Admin Module (MOD.A) -->
-            <div id="admin-module" class="module">
+            <div id="admin-module" class="module w-full h-full hidden">
                 <div class="max-w-2xl mx-auto">
                     <h2 class="text-3xl font-bold text-white mb-6">Admin Configuration</h2>
                     <div class="bg-gray-800 p-8 rounded-lg shadow-xl">
                         <form id="admin-form">
                             <div class="space-y-4">
                                 <div>
-                                    <label for="xpiBaseUrl" class="form-label">XPI Base URL</label>
-                                    <input type="url" id="xpiBaseUrl" name="xpiBaseUrl" class="form-input">
+                                    <label for="xpiBaseUrl" class="form-label block text-sm font-medium text-gray-300 mb-1">XPI Base URL</label>
+                                    <input type="url" id="xpiBaseUrl" name="xpiBaseUrl" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none">
                                 </div>
                             </div>
                             <div class="mt-6 flex justify-end">
-                                <button type="submit" class="btn btn-primary">Save Configuration</button>
+                                <button type="submit" class="btn btn-primary px-4 py-2 rounded-md font-semibold text-white shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-blue-600 hover:bg-blue-700 focus:ring-blue-500">Save Configuration</button>
                             </div>
                             <p id="admin-save-feedback" class="text-green-400 text-sm mt-4 hidden"></p>
                         </form>
@@ -212,7 +212,7 @@
             </div>
 
             <!-- Campaign Submission Module (MOD.C) -->
-            <div id="campaign-module" class="module">
+            <div id="campaign-module" class="module w-full h-full hidden">
                 <div class="max-w-4xl mx-auto">
                     <h2 class="text-3xl font-bold text-white mb-6">Campaign Submission</h2>
                     
@@ -237,106 +237,106 @@
                             <!-- Column 1 -->
                             <div class="space-y-4">
                                 <div>
-                                    <label for="campaignname" class="form-label">Campaign Name</label>
-                                    <input type="text" id="campaignname" name="campaignname" class="form-input" required>
+                                    <label for="campaignname" class="form-label block text-sm font-medium text-gray-300 mb-1">Campaign Name</label>
+                                    <input type="text" id="campaignname" name="campaignname" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" required>
                                 </div>
                                 
                                 <div>
-                                    <label for="client" class="form-label">Client</label>
-                                    <select id="client" name="client" class="form-select" required>
+                                    <label for="client" class="form-label block text-sm font-medium text-gray-300 mb-1">Client</label>
+                                    <select id="client" name="client" class="form-select w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" required>
                                         <option value="">Loading clients...</option>
                                     </select>
                                 </div>
                                 
                                 <div>
-                                    <label for="debtor" class="form-label">Debtor</label>
-                                    <select id="debtor" name="debtor" class="form-select" required>
+                                    <label for="debtor" class="form-label block text-sm font-medium text-gray-300 mb-1">Debtor</label>
+                                    <select id="debtor" name="debtor" class="form-select w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" required>
                                         <option value="">Loading debtors...</option>
                                     </select>
                                 </div>
                                 
                                 <div>
-                                    <label for="agency" class="form-label">Agency</label>
-                                    <select id="agency" name="agency" class="form-select" required>
+                                    <label for="agency" class="form-label block text-sm font-medium text-gray-300 mb-1">Agency</label>
+                                    <select id="agency" name="agency" class="form-select w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" required>
                                         <option value="">Loading agencies...</option>
                                     </select>
                                 </div>
                                 
                                 <div>
-                                    <label for="brand" class="form-label">Brand</label>
-                                    <input type="text" id="brand" name="brand" class="form-input" value="World Pinball">
+                                    <label for="brand" class="form-label block text-sm font-medium text-gray-300 mb-1">Brand</label>
+                                    <input type="text" id="brand" name="brand" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="World Pinball">
                                 </div>
 
                                 <div>
-                                    <label for="pod" class="form-label">Pod</label>
-                                    <input type="text" id="pod" name="pod" class="form-input" value="Pod 1A">
+                                    <label for="pod" class="form-label block text-sm font-medium text-gray-300 mb-1">Pod</label>
+                                    <input type="text" id="pod" name="pod" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="Pod 1A">
                                 </div>
                                 
                                 <div>
-                                    <label for="campaignobjective" class="form-label">Campaign Objective</label>
-                                    <input type="text" id="campaignobjective" name="campaignobjective" class="form-input" value="Upper Funnel / Awareness">
+                                    <label for="campaignobjective" class="form-label block text-sm font-medium text-gray-300 mb-1">Campaign Objective</label>
+                                    <input type="text" id="campaignobjective" name="campaignobjective" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="Upper Funnel / Awareness">
                                 </div>
 
                                 <div>
-                                    <label for="requestormarket" class="form-label">Requestor Market</label>
-                                    <input type="text" id="requestormarket" name="requestormarket" class="form-input" value="Singapore">
+                                    <label for="requestormarket" class="form-label block text-sm font-medium text-gray-300 mb-1">Requestor Market</label>
+                                    <input type="text" id="requestormarket" name="requestormarket" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="Singapore">
                                 </div>
                             </div>
                             
                             <!-- Column 2 -->
                             <div class="space-y-4">
                                 <div>
-                                    <label for="requestedstartdate" class="form-label">Requested Start Date</label>
-                                    <input type="date" id="requestedstartdate" name="requestedstartdate" class="form-input" value="2026-07-01" required>
+                                    <label for="requestedstartdate" class="form-label block text-sm font-medium text-gray-300 mb-1">Requested Start Date</label>
+                                    <input type="date" id="requestedstartdate" name="requestedstartdate" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="2026-07-01" required>
                                 </div>
                                 
                                 <div>
-                                    <label for="campaignstartdate" class="form-label">Campaign Start Date</label>
-                                    <input type="date" id="campaignstartdate" name="campaignstartdate" class="form-input" value="2026-08-29" required>
+                                    <label for="campaignstartdate" class="form-label block text-sm font-medium text-gray-300 mb-1">Campaign Start Date</label>
+                                    <input type="date" id="campaignstartdate" name="campaignstartdate" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="2026-08-29" required>
                                 </div>
 
                                 <div>
-                                    <label for="campaignenddate" class="form-label">Campaign End Date</label>
-                                    <input type="date" id="campaignenddate" name="campaignenddate" class="form-input" value="2026-10-29" required>
+                                    <label for="campaignenddate" class="form-label block text-sm font-medium text-gray-300 mb-1">Campaign End Date</label>
+                                    <input type="date" id="campaignenddate" name="campaignenddate" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="2026-10-29" required>
                                 </div>
                                 
                                 <div>
-                                    <label for="overallbudget" class="form-label">Overall Budget</label>
-                                    <input type="number" id="overallbudget" name="overallbudget" class="form-input" value="100">
+                                    <label for="overallbudget" class="form-label block text-sm font-medium text-gray-300 mb-1">Overall Budget</label>
+                                    <input type="number" id="overallbudget" name="overallbudget" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="100">
                                 </div>
                                 
                                 <div>
-                                    <label for="currency" class="form-label">Currency</label>
-                                    <input type="text" id="currency" name="currency" class="form-input" value="SGD">
+                                    <label for="currency" class="form-label block text-sm font-medium text-gray-300 mb-1">Currency</label>
+                                    <input type="text" id="currency" name="currency" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="SGD">
                                 </div>
 
                                 <div>
-                                    <label for="optin" class="form-label">Opt-in</label>
-                                    <select id="optin" name="optin" class="form-select">
+                                    <label for="optin" class="form-label block text-sm font-medium text-gray-300 mb-1">Opt-in</label>
+                                    <select id="optin" name="optin" class="form-select w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none">
                                         <option value="No">No</option>
                                         <option value="Yes">Yes</option>
                                     </select>
                                 </div>
                                 
                                 <div>
-                                    <label for="porequired" class="form-label">PO Required</label>
-                                    <select id="porequired" name="porequired" class="form-select">
+                                    <label for="porequired" class="form-label block text-sm font-medium text-gray-300 mb-1">PO Required</label>
+                                    <select id="porequired" name="porequired" class="form-select w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none">
                                         <option value="No">No</option>
                                         <option value="Yes">Yes</option>
                                     </select>
                                 </div>
                                 
                                 <div>
-                                    <label for="selectedchannels" class="form-label">Selected Channels</label>
-                                    <input type="text" id="selectedchannels" name="selectedchannels" class="form-input" value="Twitter">
+                                    <label for="selectedchannels" class="form-label block text-sm font-medium text-gray-300 mb-1">Selected Channels</label>
+                                    <input type="text" id="selectedchannels" name="selectedchannels" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="Twitter">
                                     <p class="text-xs text-gray-400 mt-1">Comma-separated (e.g., Twitter, Facebook)</p>
-                                </div>
+                                 </div>
                             </div>
                         </div>
 
                         <!-- Submission Button -->
                         <div class="pt-6 border-t border-gray-700">
-                            <button type="submit" id="campaign-submit-button" class="btn btn-primary w-full md:w-auto">
+                            <button type="submit" id="campaign-submit-button" class="btn btn-primary w-full md:w-auto px-4 py-2 rounded-md font-semibold text-white shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-blue-600 hover:bg-blue-700 focus:ring-blue-500">
                                 Create Campaign
                             </button>
                         </div>
@@ -357,14 +357,14 @@
     <!-- Developer Tool -->
     <div id="dev-tool">
         <!-- Toggle Icon -->
-        <button id="dev-tool-toggle" class_="btn bg-purple-600 hover:bg-purple-700 fixed bottom-5 right-5 z-30 p-3 rounded-full shadow-lg">
+        <button id="dev-tool-toggle" class="btn bg-purple-600 hover:bg-purple-700 fixed bottom-5 right-5 z-30 p-3 rounded-full shadow-lg px-4 py-2 font-semibold text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900">
             <!-- Wizard Hat Icon -->
             <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M11.729,2.075A0.917,0.917,0,0,0,10.8,2.054L3.2,4.868A0.916,0.916,0,0,0,2.5,5.751v2.1A0.916,0.916,0,0,0,3.389,8.7L7.6,7.215V15.9a0.916,0.916,0,0,0,0.611,0.875,12.7,12.7,0,0,0,7.572,0A0.916,0.916,0,0,0,16.4,15.9V7.215l4.212,1.488A0.916,0.916,0,0,0,21.5,7.854v-2.1A0.916,0.916,0,0,0,20.8,4.868l-7.6-2.814A0.917,0.917,0,0,0,11.729,2.075Z" transform="translate(-2.5 -0.054)"></path><path d="M12,1.946A0.917,0.917,0,0,0,11.071,2L3.475,4.811A0.916,0.916,0,0,0,2.56,5.7v2.1A0.916,0.916,0,0,0,3.475,8.68l4.025-1.416v8.4a0.916,0.916,0,0,0,0.519,0.84,12.7,12.7,0,0,0,7.962,0A0.916,0.916,0,0,0,16.5,15.76V7.264L20.525,8.68A0.916,0.916,0,0,0,21.44,7.8V5.7A0.916,0.916,0,0,0,20.525,4.811L12.929,2A0.917,0.917,0,0,0,12,1.946ZM15.583,15.426a11.78,11.78,0,0,1-7.166,0V7.554l3.583-1.261,3.583,1.261Z" transform="translate(-2.5 1.054)"></path></svg>
         </button>
         
         <!-- Log Modal -->
-        <div id="dev-tool-modal" class="modal-backdrop hidden opacity-0">
-            <div class="modal-content w-11/12 h-5/6 max-w-7xl flex flex-col">
+        <div id="dev-tool-modal" class="modal-backdrop fixed inset-0 bg-black/75 flex items-center justify-center z-40 transition-opacity hidden opacity-0">
+            <div class="modal-content bg-gray-800 rounded-lg shadow-xl p-6 relative w-11/12 h-5/6 max-w-7xl flex flex-col">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-2xl font-bold text-white">API Call Log</h3>
                     <div>
@@ -402,8 +402,8 @@
         </div>
         
         <!-- Payload Modal -->
-        <div id="payload-modal" class="modal-backdrop hidden opacity-0 z-50">
-            <div class="modal-content w-11/12 max-w-2xl h-4/5 flex flex-col">
+        <div id="payload-modal" class="modal-backdrop fixed inset-0 bg-black/75 flex items-center justify-center z-40 transition-opacity hidden opacity-0 z-50">
+            <div class="modal-content bg-gray-800 rounded-lg shadow-xl p-6 relative w-11/12 max-w-2xl h-4/5 flex flex-col">
                 <div class="flex justify-between items-center mb-4">
                     <h3 class="text-xl font-bold text-white">Payload Viewer</h3>
                     <button id="payload-modal-close" class="text-gray-400 hover:text-white">
@@ -574,20 +574,20 @@
                 }
             }
 
-            /**
-             * Hides all modules and shows the specified one.
-             * @param {string} moduleId - The key from the `modules` object ('login', 'admin', 'campaign').
-             */
-            function showModule(moduleId) {
+                function showModule(moduleId) {
                 // Hide loader
                 initialLoader.classList.add('hidden');
                 
                 Object.values(modules).forEach(module => {
-                    if (module) module.classList.remove('active');
+                    if (module) {
+                        // module.classList.remove('active'); // OLD
+                        module.classList.add('hidden'); // NEW
+                    }
                 });
                 
                 if (modules[moduleId]) {
-                    modules[moduleId].classList.add('active');
+                    // modules[moduleId].classList.add('active'); // OLD
+                    modules[moduleId].classList.remove('hidden'); // NEW
                     
                     // Update active nav link
                     document.querySelectorAll('.nav-link').forEach(link => {
@@ -1217,3 +1217,4 @@
     </script>
 </body>
 </html>
+
