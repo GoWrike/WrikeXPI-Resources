@@ -529,7 +529,7 @@
                     
                     const basicAuth = 'Basic ' + btoa(`${username}:${password}`);
                     
-                    const profileUrl = 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me';
+                    const profileUrl = 'https://xpi-api.gowrike.space/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me';
                     const response2 = await fetch(profileUrl, {
                         headers: {
                             'Authorization': basicAuth // Use Basic Auth instead of Bearer
