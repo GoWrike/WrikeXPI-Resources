@@ -518,10 +518,21 @@
                 
                 // API Call 2: Verify user profile
                 try {
+                    // Retrieve credentials for Basic Auth
+                    const username = localStorage.getItem('username');
+                    const password = localStorage.getItem('password');
+                    
+                    if (!username || !password) {
+                        // This case should ideally not be hit if API 1 was successful, but good to check.
+                        throw new Error("Credentials not found in storage for verification.");
+                    }
+                    
+                    const basicAuth = 'Basic ' + btoa(`${username}:${password}`);
+                    
                     const profileUrl = 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me';
                     const response2 = await fetch(profileUrl, {
                         headers: {
-                            'Authorization': `Bearer ${token}`
+                            'Authorization': basicAuth // Use Basic Auth instead of Bearer
                         }
                     });
                     const data2 = await response2.json();
@@ -893,3 +904,4 @@
     </script>
 </body>
 </html>
+
