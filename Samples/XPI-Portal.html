@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XPI Portal</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Custom styles */
+        body {
+            font-family: 'Inter', sans-serif;
+            overscroll-behavior: none;
+        }
+
+        /* Custom scrollbar for webkit browsers (Chrome, Safari) */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #2d3748; /* gray-800 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4a5568; /* gray-600 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #718096; /* gray-500 */
+        }
+
+        /* Basic spinner */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-left-color: #ffffff;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Ensure inputs and selects are styled for dark mode */
+        .form-input, .form-select {
+            @apply w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none;
+        }
+        
+        .form-label {
+            @apply block text-sm font-medium text-gray-300 mb-1;
+        }
+        
+        .btn {
+            @apply px-4 py-2 rounded-md font-semibold text-white shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900;
+        }
+        
+        .btn-primary {
+            @apply bg-blue-600 hover:bg-blue-700 focus:ring-blue-500;
+        }
+
+        .btn-danger {
+            @apply bg-red-600 hover:bg-red-700 focus:ring-red-500;
+        }
+        
+        .btn-secondary {
+            @apply bg-gray-600 hover:bg-gray-700 focus:ring-gray-500;
+        }
+        
+        /* Modal Backdrop */
+        .modal-backdrop {
+            @apply fixed inset-0 bg-black/75 flex items-center justify-center z-40 transition-opacity;
+        }
+        
+        .modal-content {
+            @apply bg-gray-800 rounded-lg shadow-xl p-6 relative;
+        }
+        
+        .module {
+            @apply hidden w-full h-full;
+        }
+        
+        .module.active {
+            @apply block;
+        }
+
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-200 flex h-screen overflow-hidden">
+
+    <!-- Sidebar -->
+    <nav id="sidebar" class="bg-gray-800 w-64 h-full flex flex-col fixed md:relative z-20 shadow-lg
+                           transform -translate-x-full md:translate-x-0
+                           transition-transform duration-300 ease-in-out">
+        
+        <!-- Logo/Title -->
+        <div class="p-4 border-b border-gray-700">
+            <h1 class="text-2xl font-bold text-white text-center">XPI Portal</h1>
+        </div>
+
+        <!-- Module Navigation -->
+        <div class="flex-grow p-4 space-y-2 overflow-y-auto">
+            <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Modules</h2>
+            <!-- User-defined modules will be listed here -->
+            <a href="#campaign" data-module-id="campaign" class="nav-link flex items-center px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
+                <!-- SVG for Campaign -->
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                Campaign Submission
+            </a>
+            
+            <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mt-6 mb-2">System</h2>
+            <a href="#admin" data-module-id="admin" class="nav-link flex items-center px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
+                <!-- SVG for Admin/Settings -->
+                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                Admin
+            </a>
+        </div>
+
+        <!-- User Profile -->
+        <div id="user-profile" class="p-4 border-t border-gray-700">
+            <div class="flex items-center">
+                <img id="user-avatar" src="https://placehold.co/40x40/4a5568/E2E8F0?text=?" alt="User Avatar" class="w-10 h-10 rounded-full bg-gray-600 object-cover">
+                <div class="ml-3 overflow-hidden">
+                    <p id="user-name" class="text-sm font-medium text-white truncate">Not Logged In</p>
+                    <a href="#" id="logout-link" class="text-xs text-blue-400 hover:text-blue-300 hidden">Logout</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-hidden">
+        
+        <!-- Top Header -->
+        <header class="bg-gray-800 shadow-md p-4 flex items-center justify-between md:hidden">
+            <button id="sidebar-toggle" class="text-gray-300 hover:text-white focus:outline-none">
+                <!-- Menu Icon -->
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <h1 class="text-xl font-bold text-white">XPI Portal</h1>
+            <div></div> <!-- Spacer -->
+        </header>
+
+        <!-- Module Content Area -->
+        <div class="flex-1 p-6 lg:p-10 overflow-y-auto">
+            
+            <!-- Initial Loading Spinner -->
+            <div id="initial-loader" class="flex items-center justify-center h-full">
+                <div class="spinner"></div>
+            </div>
+
+            <!-- Login Module (MOD.B) -->
+            <div id="login-module" class="module">
+                <div class="max-w-md mx-auto bg-gray-800 p-8 rounded-lg shadow-xl mt-10">
+                    <h2 class="text-3xl font-bold text-white text-center mb-6">XPI Portal Login</h2>
+                    
+                    <!-- Login Button State -->
+                    <div id="login-auth-mode">
+                        <p class="text-center text-gray-300 mb-6">Please login to continue.</p>
+                        <button id="login-button" class="btn btn-primary w-full text-lg">
+                            Login & Authenticate
+                        </button>
+                    </div>
+
+                    <!-- Callback/Loading State -->
+                    <div id="login-callback-mode" class="hidden">
+                        <div class="flex flex-col items-center">
+                            <div class="spinner"></div>
+                            <p id="login-status-message" class="text-gray-300 mt-4 text-center">Authenticating, please wait...</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Error State -->
+                    <div id="login-error-mode" class="hidden mt-6">
+                        <h3 class="text-xl font-semibold text-red-400 mb-2">Login Failed</h3>
+                        <p id="login-error-message" class="text-gray-300 mb-4"></p>
+                        <pre id="login-error-response" class="w-full bg-gray-900 p-4 rounded-md text-xs text-red-300 overflow-auto max-h-60"></pre>
+                        <button id="login-start-over-button" class="btn btn-secondary w-full mt-6">
+                            Start Over
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Module (MOD.A) -->
+            <div id="admin-module" class="module">
+                <div class="max-w-2xl mx-auto">
+                    <h2 class="text-3xl font-bold text-white mb-6">Admin Configuration</h2>
+                    <div class="bg-gray-800 p-8 rounded-lg shadow-xl">
+                        <form id="admin-form">
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="xpiBaseUrl" class="form-label">XPI Base URL</label>
+                                    <input type="url" id="xpiBaseUrl" name="xpiBaseUrl" class="form-input">
+                                </div>
+                            </div>
+                            <div class="mt-6 flex justify-end">
+                                <button type="submit" class="btn btn-primary">Save Configuration</button>
+                            </div>
+                            <p id="admin-save-feedback" class="text-green-400 text-sm mt-4 hidden"></p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Campaign Submission Module (MOD.C) -->
+            <div id="campaign-module" class="module">
+                <div class="max-w-4xl mx-auto">
+                    <h2 class="text-3xl font-bold text-white mb-6">Campaign Submission</h2>
+                    
+                    <!-- Form Loading Error -->
+                    <div id="campaign-load-error" class="hidden bg-red-900 border border-red-700 text-red-300 p-4 rounded-md mb-6">
+                        <h4 class="font-bold">Error loading form data</h4>
+                        <p>Could not fetch required dropdown data. Please check your credentials or network and try again.</p>
+                        <pre id="campaign-load-error-details" class="text-xs mt-2 overflow-auto"></pre>
+                    </div>
+
+                    <!-- Campaign Form -->
+                    <form id="campaign-form" class="bg-gray-800 p-8 rounded-lg shadow-xl space-y-6">
+                        
+                        <!-- Hidden Fields -->
+                        <input type="hidden" name="type" value="Campaign Request">
+                        <input type="hidden" name="space" value="GRM-MYS-GMN">
+                        <input type="hidden" name="entity" value="Campaign">
+                        <input type="hidden" name="varientId" value="1">
+
+                        <!-- Form Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <!-- Column 1 -->
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="campaignname" class="form-label">Campaign Name</label>
+                                    <input type="text" id="campaignname" name="campaignname" class="form-input" required>
+                                </div>
+                                
+                                <div>
+                                    <label for="client" class="form-label">Client</label>
+                                    <select id="client" name="client" class="form-select" required>
+                                        <option value="">Loading clients...</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="debtor" class="form-label">Debtor</label>
+                                    <select id="debtor" name="debtor" class="form-select" required>
+                                        <option value="">Loading debtors...</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="agency" class="form-label">Agency</label>
+                                    <select id="agency" name="agency" class="form-select" required>
+                                        <option value="">Loading agencies...</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="brand" class="form-label">Brand</label>
+                                    <input type="text" id="brand" name="brand" class="form-input" value="World Pinball">
+                                </div>
+
+                                <div>
+                                    <label for="pod" class="form-label">Pod</label>
+                                    <input type="text" id="pod" name="pod" class="form-input" value="Pod 1A">
+                                </div>
+                                
+                                <div>
+                                    <label for="campaignobjective" class="form-label">Campaign Objective</label>
+                                    <input type="text" id="campaignobjective" name="campaignobjective" class="form-input" value="Upper Funnel / Awareness">
+                                </div>
+
+                                <div>
+                                    <label for="requestormarket" class="form-label">Requestor Market</label>
+                                    <input type="text" id="requestormarket" name="requestormarket" class="form-input" value="Singapore">
+                                </div>
+                            </div>
+                            
+                            <!-- Column 2 -->
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="requestedstartdate" class="form-label">Requested Start Date</label>
+                                    <input type="date" id="requestedstartdate" name="requestedstartdate" class="form-input" value="2026-07-01" required>
+                                </div>
+                                
+                                <div>
+                                    <label for="campaignstartdate" class="form-label">Campaign Start Date</label>
+                                    <input type="date" id="campaignstartdate" name="campaignstartdate" class="form-input" value="2026-08-29" required>
+                                </div>
+
+                                <div>
+                                    <label for="campaignenddate" class="form-label">Campaign End Date</label>
+                                    <input type="date" id="campaignenddate" name="campaignenddate" class="form-input" value="2026-10-29" required>
+                                </div>
+                                
+                                <div>
+                                    <label for="overallbudget" class="form-label">Overall Budget</label>
+                                    <input type="number" id="overallbudget" name="overallbudget" class="form-input" value="100">
+                                </div>
+                                
+                                <div>
+                                    <label for="currency" class="form-label">Currency</label>
+                                    <input type="text" id="currency" name="currency" class="form-input" value="SGD">
+                                </div>
+
+                                <div>
+                                    <label for="optin" class="form-label">Opt-in</label>
+                                    <select id="optin" name="optin" class="form-select">
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="porequired" class="form-label">PO Required</label>
+                                    <select id="porequired" name="porequired" class="form-select">
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </div>
+                                
+                                <div>
+                                    <label for="selectedchannels" class="form-label">Selected Channels</label>
+                                    <input type="text" id="selectedchannels" name="selectedchannels" class="form-input" value="Twitter">
+                                    <p class="text-xs text-gray-400 mt-1">Comma-separated (e.g., Twitter, Facebook)</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submission Button -->
+                        <div class="pt-6 border-t border-gray-700">
+                            <button type="submit" id="campaign-submit-button" class="btn btn-primary w-full md:w-auto">
+                                Create Campaign
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Submission Result -->
+                    <div id="campaign-result-container" class="hidden mt-6">
+                        <h3 class="text-xl font-semibold mb-2" id="campaign-result-title"></h3>
+                        <pre id="campaign-result" class="w-full bg-gray-800 p-4 rounded-md text-xs overflow-auto max-h-96"></pre>
+                    </div>
+
+                </div>
+            </div>
+
+        </div> <!-- /Module Content Area -->
+    </main>
+
+    <!-- Developer Tool -->
+    <div id="dev-tool">
+        <!-- Toggle Icon -->
+        <button id="dev-tool-toggle" class_="btn bg-purple-600 hover:bg-purple-700 fixed bottom-5 right-5 z-30 p-3 rounded-full shadow-lg">
+            <!-- Wizard Hat Icon -->
+            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M11.729,2.075A0.917,0.917,0,0,0,10.8,2.054L3.2,4.868A0.916,0.916,0,0,0,2.5,5.751v2.1A0.916,0.916,0,0,0,3.389,8.7L7.6,7.215V15.9a0.916,0.916,0,0,0,0.611,0.875,12.7,12.7,0,0,0,7.572,0A0.916,0.916,0,0,0,16.4,15.9V7.215l4.212,1.488A0.916,0.916,0,0,0,21.5,7.854v-2.1A0.916,0.916,0,0,0,20.8,4.868l-7.6-2.814A0.917,0.917,0,0,0,11.729,2.075Z" transform="translate(-2.5 -0.054)"></path><path d="M12,1.946A0.917,0.917,0,0,0,11.071,2L3.475,4.811A0.916,0.916,0,0,0,2.56,5.7v2.1A0.916,0.916,0,0,0,3.475,8.68l4.025-1.416v8.4a0.916,0.916,0,0,0,0.519,0.84,12.7,12.7,0,0,0,7.962,0A0.916,0.916,0,0,0,16.5,15.76V7.264L20.525,8.68A0.916,0.916,0,0,0,21.44,7.8V5.7A0.916,0.916,0,0,0,20.525,4.811L12.929,2A0.917,0.917,0,0,0,12,1.946ZM15.583,15.426a11.78,11.78,0,0,1-7.166,0V7.554l3.583-1.261,3.583,1.261Z" transform="translate(-2.5 1.054)"></path></svg>
+        </button>
+        
+        <!-- Log Modal -->
+        <div id="dev-tool-modal" class="modal-backdrop hidden opacity-0">
+            <div class="modal-content w-11/12 h-5/6 max-w-7xl flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-2xl font-bold text-white">API Call Log</h3>
+                    <div>
+                        <button id="dev-tool-purge" class="text-gray-400 hover:text-white mr-4">
+                            <!-- Rubbish Bin Icon -->
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        </button>
+                        <button id="dev-tool-close" class="text-gray-400 hover:text-white">
+                            <!-- Close Icon -->
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex-1 overflow-auto border border-gray-700 rounded-md">
+                    <table class="w-full text-sm text-left text-gray-300">
+                        <thead class="text-xs text-gray-400 uppercase bg-gray-700 sticky top-0">
+                            <tr>
+                                <th scope="col" class="px-4 py-3">Timestamp</th>
+                                <th scope="col" class="px-4 py-3">Status</th>
+                                <th scope="col" class="px-4 py-3">Method</th>
+                                <th scope="col" class="px-4 py-3">URL</th>
+                                <th scope="col" class="px-4 py-3">Request</th>
+                                <th scope="col" class="px-4 py-3">Response</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dev-log-table-body" class="divide-y divide-gray-700">
+                            <!-- Logs will be injected here -->
+                            <tr class="bg-gray-800">
+                                <td colspan="6" class="px-4 py-4 text-center">No API calls logged yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Payload Modal -->
+        <div id="payload-modal" class="modal-backdrop hidden opacity-0 z-50">
+            <div class="modal-content w-11/12 max-w-2xl h-4/5 flex flex-col">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-white">Payload Viewer</h3>
+                    <button id="payload-modal-close" class="text-gray-400 hover:text-white">
+                        <!-- Close Icon -->
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                <div class="flex-1 overflow-auto bg-gray-900 p-4 rounded-md">
+                    <pre id="payload-content" class="text-xs text-white"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+
+            // --- CONSTANTS & CONFIG ---
+            const CONFIG_KEY = 'xpiConfig';
+            const DEV_LOG_KEY = 'xpiDevLog';
+            const CREDENTIALS_KEYS = ['xpiToken', 'xpiUsername', 'xpiPassword', 'xpiFirstName', 'xpiLastName', 'xpiAvatarUrl', 'clientId'];
+            const DEFAULT_CONFIG = {
+                xpiBaseUrl: 'https://api.wrikexpi.groupm.com'
+            };
+
+            // --- DOM ELEMENTS ---
+            const initialLoader = document.getElementById('initial-loader');
+            const modules = {
+                login: document.getElementById('login-module'),
+                admin: document.getElementById('admin-module'),
+                campaign: document.getElementById('campaign-module'),
+            };
+            const sidebar = document.getElementById('sidebar');
+            const sidebarToggle = document.getElementById('sidebar-toggle');
+            
+            // User Profile
+            const userProfile = document.getElementById('user-profile');
+            const userAvatar = document.getElementById('user-avatar');
+            const userName = document.getElementById('user-name');
+            const logoutLink = document.getElementById('logout-link');
+
+            // Dev Tool
+            const devToolToggle = document.getElementById('dev-tool-toggle');
+            const devToolModal = document.getElementById('dev-tool-modal');
+            const devToolClose = document.getElementById('dev-tool-close');
+            const devToolPurge = document.getElementById('dev-tool-purge');
+            const devLogTableBody = document.getElementById('dev-log-table-body');
+            const payloadModal = document.getElementById('payload-modal');
+            const payloadModalClose = document.getElementById('payload-modal-close');
+            const payloadContent = document.getElementById('payload-content');
+            
+            // Login Module
+            const loginButton = document.getElementById('login-button');
+            const loginAuthMode = document.getElementById('login-auth-mode');
+            const loginCallbackMode = document.getElementById('login-callback-mode');
+            const loginErrorMode = document.getElementById('login-error-mode');
+            const loginStatusMessage = document.getElementById('login-status-message');
+            const loginErrorMessage = document.getElementById('login-error-message');
+            const loginErrorResponse = document.getElementById('login-error-response');
+            const loginStartOverButton = document.getElementById('login-start-over-button');
+
+            // Admin Module
+            const adminForm = document.getElementById('admin-form');
+            const adminSaveFeedback = document.getElementById('admin-save-feedback');
+            
+            // Campaign Module
+            const campaignForm = document.getElementById('campaign-form');
+            const campaignSubmitButton = document.getElementById('campaign-submit-button');
+            const campaignResultContainer = document.getElementById('campaign-result-container');
+            const campaignResultTitle = document.getElementById('campaign-result-title');
+            const campaignResult = document.getElementById('campaign-result');
+            const campaignLoadError = document.getElementById('campaign-load-error');
+            const campaignLoadErrorDetails = document.getElementById('campaign-load-error-details');
+
+
+            // --- STATE & HELPERS ---
+
+            /**
+             * Gets a value from localStorage.
+             * @param {string} key - The key to retrieve.
+             * @param {any} defaultValue - The default value if key not found.
+             * @returns {any}
+             */
+            function getLocalStorage(key, defaultValue = null) {
+                const value = localStorage.getItem(key);
+                if (value === null) return defaultValue;
+                try {
+                    return JSON.parse(value);
+                } catch (e) {
+                    return value; // Return as string if not JSON
+                }
+            }
+
+            /**
+             * Sets a value in localStorage.
+             * @param {string} key - The key to set.
+             * @param {any} value - The value to store (will be JSON.stringified).
+             */
+            function setLocalStorage(key, value) {
+                if (value === undefined || value === null) {
+                    localStorage.removeItem(key);
+                } else {
+                    localStorage.setItem(key, JSON.stringify(value));
+                }
+            }
+            
+            /**
+             * Gets the global app configuration.
+             * @returns {object}
+             */
+            function getConfig() {
+                const storedConfig = getLocalStorage(CONFIG_KEY, {});
+                return { ...DEFAULT_CONFIG, ...storedConfig };
+            }
+
+            /**
+             * Sets a specific config key.
+             * @param {string} key - The config key.
+             * @param {string} value - The config value.
+             */
+            function setConfig(key, value) {
+                const config = getConfig();
+                config[key] = value;
+                setLocalStorage(CONFIG_KEY, config);
+            }
+
+            /**
+             * Checks if the user is logged in.
+             * @returns {boolean}
+             */
+            function isLoggedIn() {
+                return !!getLocalStorage('xpiToken') && !!getLocalStorage('xpiUsername');
+            }
+            
+            /**
+             * Gets credentials for API calls.
+             * @returns {object|null}
+             */
+            function getCredentials() {
+                if (!isLoggedIn()) return null;
+                return {
+                    username: getLocalStorage('xpiUsername'),
+                    password: getLocalStorage('xpiPassword'),
+                    token: getLocalStorage('xpiToken')
+                };
+            }
+
+            /**
+             * Clears all user-related data from localStorage and redirects.
+             */
+            function logout() {
+                CREDENTIALS_KEYS.forEach(key => localStorage.removeItem(key));
+                window.location.href = window.location.pathname; // Redirect to base
+            }
+
+            /**
+             * Updates the user info in the sidebar.
+             */
+            function updateUserInfoUI() {
+                if (isLoggedIn()) {
+                    userName.textContent = `${getLocalStorage('xpiFirstName', '')} ${getLocalStorage('xpiLastName', '')}`;
+                    userAvatar.src = getLocalStorage('xpiAvatarUrl', `https://placehold.co/40x40/4a5568/E2E8F0?text=${getLocalStorage('xpiFirstName', 'U')[0]}`);
+                    logoutLink.classList.remove('hidden');
+                } else {
+                    userName.textContent = 'Not Logged In';
+                    userAvatar.src = 'https://placehold.co/40x40/4a5568/E2E8F0?text=?';
+                    logoutLink.classList.add('hidden');
+                }
+            }
+
+            /**
+             * Hides all modules and shows the specified one.
+             * @param {string} moduleId - The key from the `modules` object ('login', 'admin', 'campaign').
+             */
+            function showModule(moduleId) {
+                // Hide loader
+                initialLoader.classList.add('hidden');
+                
+                Object.values(modules).forEach(module => {
+                    if (module) module.classList.remove('active');
+                });
+                
+                if (modules[moduleId]) {
+                    modules[moduleId].classList.add('active');
+                    
+                    // Update active nav link
+                    document.querySelectorAll('.nav-link').forEach(link => {
+                        link.classList.remove('bg-gray-700', 'text-white');
+                        if (link.dataset.moduleId === moduleId) {
+                            link.classList.add('bg-gray-700', 'text-white');
+                        }
+                    });
+
+                    // Special init for campaign module (to load dropdowns)
+                    if (moduleId === 'campaign' && !modules.campaign.dataset.initialized) {
+                        loadCampaignDropdowns();
+                        modules.campaign.dataset.initialized = 'true';
+                    }
+                    
+                    // Special init for admin module
+                    if (moduleId === 'admin') {
+                        initAdminModule();
+                    }
+                    
+                } else {
+                    console.error(`Module "${moduleId}" not found.`);
+                    // Show a fallback or error
+                }
+            }
+            
+            /**
+             * Formats JSON string for display.
+             * @param {any} data - The data to format.
+             * @returns {string}
+             */
+            function formatJSON(data) {
+                if (typeof data === 'string') {
+                    try {
+                        data = JSON.parse(data);
+                    } catch (e) {
+                        return data; // Not JSON, return as is
+                    }
+                }
+                return JSON.stringify(data, null, 2);
+            }
+
+            /**
+             * A SHA-256 hash helper function.
+             * @param {string} message - The string to hash.
+             * @returns {Promise<string>} - The hex-encoded hash.
+             */
+            async function sha256(message) {
+                const msgBuffer = new TextEncoder().encode(message);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                return hashHex;
+            }
+
+            /**
+             * Redirects to the base URL (removes hash and query params).
+             */
+            function redirectToBase() {
+                window.location.href = window.location.pathname;
+            }
+
+
+            // --- DEV TOOL ---
+
+            /**
+             * Initializes the developer tool functionality.
+             */
+            function initDevTool() {
+                devToolToggle.addEventListener('click', () => {
+                    renderLogTable();
+                    devToolModal.classList.remove('hidden');
+                    setTimeout(() => devToolModal.classList.remove('opacity-0'), 10);
+                });
+                
+                devToolClose.addEventListener('click', () => {
+                    devToolModal.classList.add('opacity-0');
+                    setTimeout(() => devToolModal.classList.add('hidden'), 300);
+                });
+
+                devToolPurge.addEventListener('click', () => {
+                    if (window.confirm('Are you sure you want to purge all API logs?')) {
+                        setLocalStorage(DEV_LOG_KEY, []);
+                        renderLogTable();
+                    }
+                });
+                
+                payloadModalClose.addEventListener('click', () => {
+                    payloadModal.classList.add('opacity-0');
+                    setTimeout(() => payloadModal.classList.add('hidden'), 300);
+                });
+            }
+
+            /**
+             * Renders the log table from localStorage.
+             */
+            function renderLogTable() {
+                const logs = getLocalStorage(DEV_LOG_KEY, []);
+                devLogTableBody.innerHTML = ''; // Clear existing
+                
+                if (logs.length === 0) {
+                    devLogTableBody.innerHTML = `
+                        <tr class="bg-gray-800">
+                            <td colspan="6" class="px-4 py-4 text-center text-gray-400">No API calls logged yet.</td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                // Show in reverse chronological order
+                logs.slice().reverse().forEach((log, index) => {
+                    const statusColor = log.status >= 400 ? 'text-red-400' : (log.status >= 300 ? 'text-yellow-400' : 'text-green-400');
+                    const reqLogIndex = `req-${logs.length - 1 - index}`;
+                    const resLogIndex = `res-${logs.length - 1 - index}`;
+                    
+                    const tr = document.createElement('tr');
+                    tr.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-700';
+                    tr.innerHTML = `
+                        <td class="px-4 py-3 whitespace-nowrap">${new Date(log.timestamp).toLocaleTimeString()}</td>
+                        <td class="px-4 py-3 font-medium ${statusColor}">${log.status}</td>
+                        <td class="px-4 py-3">${log.method}</td>
+                        <td class="px-4 py-3 truncate" title="${log.url}">${log.url.replace(getConfig().xpiBaseUrl, '')}</td>
+                        <td class="px-4 py-3">
+                            <a href="#" class="text-blue-400 hover:underline" data-log-index="${reqLogIndex}">View</a>
+                        </td>
+                        <td class="px-4 py-3">
+                            <a href="#" class="text-blue-400 hover:underline" data-log-index="${resLogIndex}">View</a>
+                        </td>
+                    `;
+                    devLogTableBody.appendChild(tr);
+                });
+                
+                // Add event listeners to new links
+                devLogTableBody.querySelectorAll('a[data-log-index]').forEach(link => {
+                    link.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const [type, index] = e.target.dataset.logIndex.split('-');
+                        const log = getLocalStorage(DEV_LOG_KEY, [])[index];
+                        if (log) {
+                            const content = (type === 'req') ? log.request : log.response;
+                            showPayloadModal(content);
+                        }
+                    });
+                });
+            }
+
+            /**
+             * Logs an API call to localStorage.
+             * @param {string} method
+             * @param {string} url
+             * @param {number} status
+             * @param {any} request
+             * @param {any} response
+             */
+            function logApiCall(method, url, status, request, response) {
+                const logs = getLocalStorage(DEV_LOG_KEY, []);
+                logs.push({
+                    timestamp: new Date().toISOString(),
+                    method,
+                    url,
+                    status,
+                    request,
+                    response
+                });
+                setLocalStorage(DEV_LOG_KEY, logs);
+            }
+
+            /**
+             * Shows the payload modal with content.
+             * @param {any} content - The request/response data.
+             */
+            function showPayloadModal(content) {
+                payloadContent.textContent = formatJSON(content);
+                payloadModal.classList.remove('hidden');
+                setTimeout(() => payloadModal.classList.remove('opacity-0'), 10);
+            }
+            
+            /**
+             * A wrapper for the fetch API that logs requests and responses.
+             * @param {string} url - The URL to fetch.
+             * @param {object} options - The fetch options.
+             * @returns {Promise<Response>}
+             */
+            async function loggedFetch(url, options = {}) {
+                const method = options.method || 'GET';
+                const requestPayload = options.body ? (typeof options.body === 'string' ? options.body : 'Binary/FormData') : 'N/A';
+                
+                let status = 0;
+                let responsePayload = null;
+                
+                try {
+                    const response = await fetch(url, options);
+                    status = response.status;
+                    
+                    // Try to clone and parse JSON, fall back to text
+                    try {
+                        const clonedResponse = response.clone();
+                        responsePayload = await clonedResponse.json();
+                    } catch (e) {
+                        try {
+                            responsePayload = await response.clone().text();
+                        } catch (textError) {
+                            responsePayload = `[Could not read response body: ${textError.message}]`;
+                        }
+                    }
+                    
+                    logApiCall(method, url, status, requestPayload, responsePayload);
+                    return response;
+                    
+                } catch (error) {
+                    console.error('Fetch Error:', error);
+                    status = 0; // Network error
+                    responsePayload = { error: error.message, stack: error.stack };
+                    logApiCall(method, url, status, requestPayload, responsePayload);
+                    throw error; // Re-throw the error
+                }
+            }
+
+            
+            // --- ADMIN MODULE ---
+
+            /**
+             * Initializes the Admin module (populates form).
+             */
+            function initAdminModule() {
+                const config = getConfig();
+                adminForm.elements.xpiBaseUrl.value = config.xpiBaseUrl;
+                
+                adminForm.onsubmit = (e) => {
+                    e.preventDefault();
+                    const newBaseUrl = adminForm.elements.xpiBaseUrl.value;
+                    setConfig('xpiBaseUrl', newBaseUrl);
+                    
+                    adminSaveFeedback.textContent = 'Configuration saved successfully!';
+                    adminSaveFeedback.classList.remove('hidden');
+                    setTimeout(() => adminSaveFeedback.classList.add('hidden'), 3000);
+                };
+            }
+            
+
+            // --- LOGIN MODULE ---
+
+            /**
+             * Initializes the Login module event listeners.
+             */
+            function initLoginModule() {
+                loginButton.addEventListener('click', handleLoginAuthClick);
+                loginStartOverButton.addEventListener('click', redirectToBase);
+            }
+
+            /**
+             * Handles the "Login & Authenticate" button click.
+             */
+            async function handleLoginAuthClick() {
+                try {
+                    loginButton.disabled = true;
+                    loginButton.textContent = 'Generating client ID...';
+
+                    const timestamp = Date.now().toString();
+                    const random = Math.random().toString();
+                    const hash = await sha256(timestamp + random);
+                    const clientId = hash.slice(-7);
+                    
+                    setLocalStorage('clientId', clientId);
+                    
+                    const config = getConfig();
+                    const redirectUri = window.location.origin + window.location.pathname;
+                    const authUrl = `${config.xpiBaseUrl}/?accountId=3128883&redirectUri=${encodeURIComponent(redirectUri)}&client_id=${clientId}`;
+                    
+                    // Redirect to Wrike auth
+                    window.location.href = authUrl;
+
+                } catch (error) {
+                    console.error('Login Error:', error);
+                    loginButton.disabled = false;
+                    loginButton.textContent = 'Login & Authenticate';
+                    // Show an error message to the user
+                    loginAuthMode.insertAdjacentHTML('beforeend', '<p class="text-red-400 text-center mt-4">Could not generate Client ID. Please try again.</p>');
+                }
+            }
+
+            /**
+             * Handles the OAuth callback (when `?code=...` is present).
+             * @param {string} code - The authorization code from the URL.
+             */
+            async function handleLoginCallback(code) {
+                // Show loading state
+                loginAuthMode.classList.add('hidden');
+                loginCallbackMode.classList.remove('hidden');
+                
+                const clientId = getLocalStorage('clientId');
+                
+                // 1. Validation
+                if (!clientId || !code) {
+                    showLoginError(
+                        'Authentication error: Missing Client ID or Code.',
+                        'Please ensure you are not opening this link directly. You will be redirected.'
+                    );
+                    setTimeout(redirectToBase, 10000);
+                    return;
+                }
+                
+                const config = getConfig();
+                
+                try {
+                    // 2. API Call 1: Exchange code for token
+                    loginStatusMessage.textContent = 'Exchanging authorization code...';
+                    const tokenUrl = `${config.xpiBaseUrl}/api/v1/wrikexpi/token/exchange?code=${code}&client_id=${clientId}&grant_type=authorization_code`;
+                    
+                    const tokenResponse = await loggedFetch(tokenUrl, { method: 'GET' });
+                    const tokenData = await tokenResponse.json();
+
+                    if (!tokenResponse.ok || !tokenData.success || !tokenData.data) {
+                        throw new Error(JSON.stringify(tokenData || 'Failed to exchange token.', null, 2));
+                    }
+
+                    // 3. Store Credentials
+                    const { token, credentials } = tokenData.data;
+                    setLocalStorage('xpiToken', token);
+                    setLocalStorage('xpiUsername', credentials.username);
+                    setLocalStorage('xpiPassword', credentials.password);
+                    
+                    // 4. API Call 2: Verify credentials by getting user profile
+                    loginStatusMessage.textContent = 'Verifying credentials...';
+                    const profileUrl = `${config.xpiBaseUrl}/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me`;
+                    
+                    const profileResponse = await loggedFetch(profileUrl, {
+                        method: 'GET',
+                        headers: {
+                            'Authorization': 'Basic ' + btoa(`${credentials.username}:${credentials.password}`)
+                        }
+                    });
+                    
+                    const profileData = await profileResponse.json();
+                    
+                    if (!profileResponse.ok || !profileData.success || !profileData.data || profileData.data.length === 0) {
+                        throw new Error(JSON.stringify(profileData || 'Failed to verify user profile.', null, 2));
+                    }
+                    
+                    // 5. Success
+                    const user = profileData.data[0];
+                    setLocalStorage('xpiFirstName', user.firstName);
+                    setLocalStorage('xpiLastName', user.lastName);
+                    setLocalStorage('xpiAvatarUrl', user.avatarUrl);
+                    
+                    loginStatusMessage.textContent = `Welcome, ${user.firstName} ${user.lastName}! Login successful. Redirecting...`;
+                    updateUserInfoUI();
+                    
+                    // Redirect to campaign page (by removing query params)
+                    setTimeout(redirectToBase, 3000);
+
+                } catch (error) {
+                    // 6. Failure
+                    console.error('Callback Error:', error);
+                    showLoginError(
+                        'An unexpected technical error occurred.',
+                        error.message
+                    );
+                }
+            }
+            
+            /**
+             * Helper to show the login error state.
+             * @param {string} message - A user-friendly error message.
+             * @param {string} responseText - The technical details (e.g., API response).
+             */
+            function showLoginError(message, responseText) {
+                loginCallbackMode.classList.add('hidden');
+                loginErrorMode.classList.remove('hidden');
+                loginErrorMessage.textContent = message;
+                loginErrorResponse.textContent = formatJSON(responseText);
+            }
+
+
+            // --- CAMPAIGN MODULE ---
+
+            /**
+             * Fetches data for all dropdowns in the campaign form.
+             */
+            async function loadCampaignDropdowns() {
+                const creds = getCredentials();
+                if (!creds) {
+                    showCampaignLoadError('Not logged in. Cannot fetch form data.');
+                    return;
+                }
+                
+                const config = getConfig();
+                const headers = {
+                    'Authorization': 'Basic ' + btoa(`${creds.username}:${creds.password}`)
+                };
+
+                const endpoints = {
+                    client: `${config.xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/clients-grm-mys`,
+                    debtor: `${config.xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/debtors-grm-mys`,
+                    agency: `${config.xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/agencies`
+                };
+                
+                try {
+                    const [clientRes, debtorRes, agencyRes] = await Promise.all([
+                        loggedFetch(endpoints.client, { headers }),
+                        loggedFetch(endpoints.debtor, { headers }),
+                        loggedFetch(endpoints.agency, { headers })
+                    ]);
+
+                    const clientData = await clientRes.json();
+                    const debtorData = await debtorRes.json();
+                    const agencyData = await agencyRes.json();
+
+                    if (!clientRes.ok) throw new Error(`Clients: ${JSON.stringify(clientData)}`);
+                    if (!debtorRes.ok) throw new Error(`Debtors: ${JSON.stringify(debtorData)}`);
+                    if (!agencyRes.ok) throw new Error(`Agencies: ${JSON.stringify(agencyData)}`);
+                    
+                    populateSelect('client', clientData.value);
+                    populateSelect('debtor', debtorData.value);
+                    populateSelect('agency', agencyData.value);
+
+                } catch (error) {
+                    console.error('Failed to load campaign dropdowns:', error);
+                    showCampaignLoadError('One or more API calls failed.', error.message);
+                }
+            }
+
+            /**
+             * Populates a <select> element with options.
+             * @param {string} elementId - The ID of the select element.
+             * @param {Array<object>} items - The array of items (e.g., [{value: "3M"}, ...]).
+             */
+            function populateSelect(elementId, items) {
+                const select = document.getElementById(elementId);
+                if (!select) return;
+                
+                select.innerHTML = '<option value="">-- Select an option --</option>'; // Clear loading/default
+                if (items && Array.isArray(items)) {
+                    items.forEach(item => {
+                        const option = document.createElement('option');
+                        option.value = item.value;
+                        option.textContent = item.value;
+                        select.appendChild(option);
+                    });
+                }
+            }
+            
+            /**
+             * Shows an error message on the campaign form.
+             * @param {string} message
+             * @param {string} details
+             */
+            function showCampaignLoadError(message, details = '') {
+                campaignLoadError.classList.remove('hidden');
+                campaignLoadError.querySelector('p').textContent = message;
+                campaignLoadErrorDetails.textContent = formatJSON(details);
+            }
+            
+            /**
+             * Handles the submission of the campaign form.
+             * @param {Event} e - The form submit event.
+             */
+            async function handleCampaignSubmit(e) {
+                e.preventDefault();
+                const creds = getCredentials();
+                if (!creds) {
+                    showCampaignResult(false, 'Error: You are not logged in.');
+                    return;
+                }
+
+                campaignSubmitButton.disabled = true;
+                campaignSubmitButton.textContent = 'Submitting...';
+                
+                const formData = new FormData(campaignForm);
+                const payload = {
+                    fields: {}
+                };
+                
+                // Get all form data
+                formData.forEach((value, key) => {
+                    if (['type', 'space', 'entity', 'varientId'].includes(key)) {
+                        // Top-level fields
+                        payload[key] = (key === 'varientId') ? parseInt(value, 10) : value;
+                    } else {
+                        // `fields` object
+                        payload.fields[key] = value;
+                    }
+                });
+                
+                // Handle special case: selectedchannels
+                const channelsInput = payload.fields.selectedchannels || '';
+                payload.fields.selectedchannels = channelsInput
+                    .split(',')
+                    .map(s => s.trim())
+                    .filter(s => s.length > 0);
+                    
+                const config = getConfig();
+                const url = `${config.xpiBaseUrl}/api/v1/wrikexpi/campaign`;
+                
+                try {
+                    const response = await loggedFetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': 'Bearer ' + creds.token 
+                            // NOTE: Basic Auth was used for dropdowns, Bearer token is used for submission as per curl.
+                            // If Basic Auth is needed, change to:
+                            // 'Authorization': 'Basic ' + btoa(`${creds.username}:${creds.password}`)
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    
+                    const responseData = await response.json();
+                    
+                    if (response.ok) {
+                        showCampaignResult(true, responseData);
+                    } else {
+                        throw new Error(JSON.stringify(responseData || 'Submission failed.'));
+                    }
+                    
+                } catch (error) {
+                    console.error('Campaign Submit Error:', error);
+                    showCampaignResult(false, error.message);
+                } finally {
+                    campaignSubmitButton.disabled = false;
+                    campaignSubmitButton.textContent = 'Create Campaign';
+                }
+            }
+
+            /**
+             * Displays the result of the campaign submission.
+             * @param {boolean} success - Whether the submission was successful.
+             * @param {any} data - The response data or error message.
+             */
+            function showCampaignResult(success, data) {
+                campaignResultContainer.classList.remove('hidden');
+                
+                if (success) {
+                    campaignResultTitle.textContent = 'Submission Successful';
+                    campaignResultTitle.className = 'text-xl font-semibold mb-2 text-green-400';
+                    campaignResult.className = 'w-full bg-gray-900 p-4 rounded-md text-xs overflow-auto max-h-96 text-green-300';
+                    campaignForm.reset(); // Clear form on success
+                    // Re-populate dropdowns (or just set their value to default)
+                    populateSelect('client', []);
+                    populateSelect('debtor', []);
+                    populateSelect('agency', []);
+                    loadCampaignDropdowns();
+                } else {
+                    campaignResultTitle.textContent = 'Submission Failed';
+                    campaignResultTitle.className = 'text-xl font-semibold mb-2 text-red-400';
+                    campaignResult.className = 'w-full bg-gray-900 p-4 rounded-md text-xs overflow-auto max-h-96 text-red-300';
+                }
+                
+                campaignResult.textContent = formatJSON(data);
+            }
+            
+            // Add submit listener to campaign form
+            campaignForm.addEventListener('submit', handleCampaignSubmit);
+
+
+            // --- ROUTER & INITIALIZATION ---
+
+            /**
+             * Main application router. Decides which module to show.
+             */
+            function router() {
+                const hash = window.location.hash;
+                const params = new URLSearchParams(window.location.search);
+                const code = params.get('code');
+                
+                let currentModule = '';
+                
+                if (hash === '#admin') {
+                    currentModule = 'admin';
+                } else if (code) {
+                    currentModule = 'login';
+                    handleLoginCallback(code); // Special handling for callback
+                } else if (isLoggedIn()) {
+                    currentModule = 'campaign'; // Default for logged-in users
+                    // Allow hash navigation for logged-in users
+                    if (hash === '#campaign') currentModule = 'campaign';
+                } else {
+                    currentModule = 'login'; // Default for logged-out users
+                }
+                
+                // Set default hash if none
+                if (!hash && isLoggedIn()) {
+                    window.location.hash = '#campaign';
+                }
+
+                showModule(currentModule);
+                updateUserInfoUI();
+            }
+
+            /**
+             * Main App Initialization
+             */
+            function initApp() {
+                // Init sidebar toggle for mobile
+                sidebarToggle.addEventListener('click', () => {
+                    sidebar.classList.toggle('-translate-x-full');
+                });
+                
+                // Hide sidebar on nav link click (for mobile)
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', () => {
+                        if (window.innerWidth < 768) { // md breakpoint
+                            sidebar.classList.add('-translate-x-full');
+                        }
+                    });
+                });
+                
+                // Logout link
+                logoutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    logout();
+                });
+
+                // Init modules
+                initLoginModule();
+                initDevTool();
+                // Admin and Campaign modules are initialized when shown
+
+                // Handle routing on load and on hash change
+                router();
+                window.addEventListener('hashchange', router);
+            }
+
+            // Start the application
+            initApp();
+        });
+    </script>
+</body>
+</html>
