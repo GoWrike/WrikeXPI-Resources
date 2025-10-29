@@ -1,926 +1,1019 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-gray-900">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XPI Portal</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    <!-- Configure Tailwind to use Inter font -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'sans-serif'],
-                    },
-                },
-            },
-        }
-    </script>
-    
-    <!-- Custom Styles -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        /* Apply Inter font */
         body {
             font-family: 'Inter', sans-serif;
         }
+
+        /* Custom scrollbar for dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937; /* bg-gray-800 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; /* bg-gray-600 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* bg-gray-500 */
+        }
+
         /* Simple loading spinner */
         .spinner {
             border: 4px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top-color: #ffffff;
-            width: 3rem;
-            height: 3rem;
+            width: 40px;
+            height: 40px;
             animation: spin 1s ease-in-out infinite;
         }
         @keyframes spin {
             to { transform: rotate(360deg); }
         }
-        /* Hide scrollbar for main content, but allow scrolling */
-        #main-content::-webkit-scrollbar {
-            display: none;
+
+        /* Hide number input arrows */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
         }
-        #main-content {
-            -ms-overflow-style: none; /* IE and Edge */
-            scrollbar-width: none; /* Firefox */
+        input[type=number] {
+            -moz-appearance: textfield;
         }
     </style>
 </head>
-<body class="h-full text-gray-100">
-    <div class="flex h-screen overflow-hidden">
-        
+<body class="bg-gray-900 text-gray-200 h-full overflow-hidden">
+
+    <!-- 
+      App Layout: 
+      This layout is for when the user is logged in or visiting #admin.
+      It features the sidebar and the main content area.
+    -->
+    <div id="app-layout" class="hidden h-full">
         <!-- Sidebar -->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 bg-gray-800 p-6 shadow-lg transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 flex flex-col">
-            <h1 class="text-2xl font-bold text-white mb-6">XPI Portal</h1>
+        <aside id="sidebar" class="w-64 bg-gray-800 flex flex-col flex-shrink-0 transition-all duration-300">
+            <!-- Logo/Title -->
+            <div class="h-16 flex items-center justify-between px-6 flex-shrink-0">
+                <h1 class="text-2xl font-bold text-white">XPI Portal</h1>
+                <button id="sidebar-toggle-close" class="text-gray-400 hover:text-white lg:hidden">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
             
-            <nav class="flex flex-col space-y-2">
-                <a href="#" id="nav-campaign" class="nav-link hidden p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                    Campaign Form
+            <!-- Navigation -->
+            <nav class="flex-1 overflow-y-auto px-4 py-4 space-y-2">
+                <a href="#/login" class="module-nav-link flex items-center px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"></path></svg>
+                    Login
                 </a>
-                <a href="#admin" id="nav-admin" class="nav-link p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826 3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                <a href="#/campaign" class="module-nav-link flex items-center px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                    Campaign Submission
+                </a>
+                <a href="#admin" class="module-nav-link flex items-center px-4 py-2.5 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-colors">
+                    <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
                     Admin
                 </a>
-                <a href="#" id="nav-login" class="p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
-                    <span id="nav-login-text">Login</span>
-                </a>
             </nav>
-
-            <!-- User Profile Widget -->
-            <div id="user-profile-widget" class="hidden mt-auto pt-4 border-t border-gray-700">
+            
+            <!-- User Profile -->
+            <div class="p-4 border-t border-gray-700">
                 <div class="flex items-center">
-                    <img id="user-avatar" src="" alt="User Avatar" class="h-10 w-10 rounded-full object-cover bg-gray-600" onerror="this.src='https://placehold.co/40x40/4B5563/F3F4F6?text=U'; this.onerror=null;">
+                    <img id="user-avatar" src="https://placehold.co/40x40/374151/9ca3af?text=NA" alt="User Avatar" class="w-10 h-10 rounded-full object-cover bg-gray-700">
                     <div class="ml-3">
-                        <p id="user-name" class="text-sm font-medium text-white">User Name</p>
+                        <p id="user-name" class="text-sm font-medium text-white">Not Logged In</p>
+                        <p class="text-xs text-gray-400">User</p>
                     </div>
                 </div>
             </div>
         </aside>
-        
-        <!-- Mobile Sidebar Toggle -->
-        <button id="sidebar-toggle" class="fixed top-4 left-4 z-40 lg:hidden p-2 bg-gray-800 text-white rounded-md">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16m-7 6h7" />
-            </svg>
-        </button>
-        
+
         <!-- Main Content -->
-        <main id="main-content" class="flex-1 overflow-y-auto p-6 pt-20 lg:pt-8 lg:ml-64 transition-all duration-300 ease-in-out">
-            
-            <!-- Module: Login -->
-            <div id="login-view" class="max-w-md mx-auto">
-                <div class="bg-gray-800 p-8 rounded-lg shadow-xl">
-                    <h2 class="text-3xl font-bold text-center text-white mb-6">Wrike Authentication</h2>
-                    
-                    <div id="login-feedback" class="mb-4">
-                        <p id="login-message" class="text-center text-gray-300">Please log in to continue.</p>
-                        <pre id="login-error-details" class="hidden mt-4 p-4 bg-gray-900 text-red-300 rounded-md text-xs overflow-auto max-h-60"></pre>
+        <main class="flex-1 flex flex-col overflow-hidden">
+            <!-- Top bar with sidebar toggle -->
+            <div class="h-16 bg-gray-800 border-b border-gray-700 flex items-center justify-between px-6 lg:hidden flex-shrink-0">
+                <button id="sidebar-toggle-open" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <h1 class="text-xl font-semibold text-white">XPI Portal</h1>
+                <div class="w-6"></div> <!-- Spacer -->
+            </div>
+
+            <!-- Content Area -->
+            <div class="flex-1 overflow-y-auto p-6 md:p-10">
+                
+                <!-- Module: Admin (MOD.A) -->
+                <div id="module-admin" class="app-module hidden max-w-3xl mx-auto">
+                    <h2 class="text-3xl font-bold text-white mb-6">Admin Module</h2>
+                    <div class="bg-gray-800 shadow-xl rounded-lg p-8">
+                        <form id="admin-form">
+                            <h3 class="text-xl font-semibold text-white mb-4">Global Configuration</h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <label for="xpiBaseUrl" class="block text-sm font-medium text-gray-300 mb-1">XPI Base URL</label>
+                                    <input type="url" id="xpiBaseUrl" name="xpiBaseUrl" class="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:outline-none" placeholder="https://api.wrikexpi.groupm.com">
+                                </div>
+                            </div>
+                            <div class="mt-6 flex justify-end">
+                                <button type="submit" class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800">Save Changes</button>
+                            </div>
+                            <div id="admin-feedback" class="mt-4 text-sm"></div>
+                        </form>
                     </div>
+                </div>
 
-                    <div id="loading-spinner" class="hidden spinner mx-auto my-4"></div>
+                <!-- Module: Campaign Submission (MOD.C) -->
+                <div id="module-campaign" class="app-module hidden max-w-5xl mx-auto">
+                    <h2 class="text-3xl font-bold text-white mb-6">Campaign Submission</h2>
+                    <form id="campaign-form" class="bg-gray-800 shadow-xl rounded-lg p-8">
+                        <!-- Hidden fields -->
+                        <input type="hidden" name="type" value="Campaign Request">
+                        <input type="hidden" name="space" value="GRM-MYS-GMN">
+                        <input type="hidden" name="entity" value="Campaign">
+                        <input type="hidden" name="varientId" value="1">
+                        
+                        <!-- Visible fields grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                            <!-- Field: requestedstartdate -->
+                            <div>
+                                <label for="requestedstartdate" class="block text-sm font-medium text-gray-300 mb-1">Requested Start Date</label>
+                                <input type="date" id="requestedstartdate" name="requestedstartdate" value="2026-07-01" class="form-input">
+                            </div>
 
-                    <button id="login-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out">
+                            <!-- Field: campaignname -->
+                            <div>
+                                <label for="campaignname" class="block text-sm font-medium text-gray-300 mb-1">Campaign Name</label>
+                                <input type="text" id="campaignname" name="campaignname" value="World Pinball Day 7000" class="form-input">
+                            </div>
+
+                            <!-- Field: client -->
+                            <div>
+                                <label for="client" class="block text-sm font-medium text-gray-300 mb-1">Client</label>
+                                <select id="client" name="client" class="form-input">
+                                    <option value="">Loading clients...</option>
+                                </select>
+                            </div>
+
+                            <!-- Field: debtor -->
+                            <div>
+                                <label for="debtor" class="block text-sm font-medium text-gray-300 mb-1">Debtor</label>
+                                <select id="debtor" name="debtor" class="form-input">
+                                    <option value="">Loading debtors...</option>
+                                </select>
+                            </div>
+
+                            <!-- Field: agency -->
+                            <div>
+                                <label for="agency" class="block text-sm font-medium text-gray-300 mb-1">Agency</label>
+                                <select id="agency" name="agency" class="form-input">
+                                    <option value="">Loading agencies...</option>
+                                </select>
+                            </div>
+
+                            <!-- Field: brand -->
+                            <div>
+                                <label for="brand" class="block text-sm font-medium text-gray-300 mb-1">Brand</label>
+                                <input type="text" id="brand" name="brand" value="World Pinball" class="form-input">
+                            </div>
+                            
+                            <!-- Field: currency -->
+                            <div>
+                                <label for="currency" class="block text-sm font-medium text-gray-300 mb-1">Currency</label>
+                                <input type="text" id="currency" name="currency" value="SGD" class="form-input">
+                            </div>
+                            
+                            <!-- Field: pod -->
+                            <div>
+                                <label for="pod" class="block text-sm font-medium text-gray-300 mb-1">Pod</label>
+                                <input type="text" id="pod" name="pod" value="Pod 1A" class="form-input">
+                            </div>
+                            
+                            <!-- Field: campaignstartdate -->
+                            <div>
+                                <label for="campaignstartdate" class="block text-sm font-medium text-gray-300 mb-1">Campaign Start Date</label>
+                                <input type="date" id="campaignstartdate" name="campaignstartdate" value="2026-08-29" class="form-input">
+                            </div>
+                            
+                            <!-- Field: campaignenddate -->
+                            <div>
+                                <label for="campaignenddate" class="block text-sm font-medium text-gray-300 mb-1">Campaign End Date</label>
+                                <input type="date" id="campaignenddate" name="campaignenddate" value="2026-10-29" class="form-input">
+                            </div>
+                            
+                            <!-- Field: campaignobjective -->
+                            <div>
+                                <label for="campaignobjective" class="block text-sm font-medium text-gray-300 mb-1">Campaign Objective</label>
+                                <input type="text" id="campaignobjective" name="campaignobjective" value="Upper Funnel / Awareness" class="form-input">
+                            </div>
+                            
+                            <!-- Field: requestormarket -->
+                            <div>
+                                <label for="requestormarket" class="block text-sm font-medium text-gray-300 mb-1">Requestor Market</label>
+                                <input type="text" id="requestormarket" name="requestormarket" value="Singapore" class="form-input">
+                            </div>
+                            
+                            <!-- Field: optin -->
+                            <div>
+                                <label for="optin" class="block text-sm font-medium text-gray-300 mb-1">Opt-in</label>
+                                <select id="optin" name="optin" class="form-input">
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Field: porequired -->
+                            <div>
+                                <label for="porequired" class="block text-sm font-medium text-gray-300 mb-1">PO Required</label>
+                                <select id="porequired" name="porequired" class="form-input">
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
+                            
+                            <!-- Field: overallbudget -->
+                            <div>
+                                <label for="overallbudget" class="block text-sm font-medium text-gray-300 mb-1">Overall Budget</label>
+                                <input type="number" id="overallbudget" name="overallbudget" value="100" class="form-input">
+                            </div>
+                            
+                            <!-- Field: selectedchannels -->
+                            <div>
+                                <label for="selectedchannels" class="block text-sm font-medium text-gray-300 mb-1">Selected Channels (comma-separated)</label>
+                                <input type="text" id="selectedchannels" name="selectedchannels-text" value="Twitter" class="form-input">
+                            </div>
+                        </div>
+
+                        <!-- Submission -->
+                        <div class="mt-8 pt-6 border-t border-gray-700">
+                            <div class="flex justify-end">
+                                <button type="submit" id="campaign-submit-btn" class="w-full sm:w-auto px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-wait">
+                                    Submit Campaign
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <!-- Result Section -->
+                    <div id="campaign-result-wrapper" class="hidden mt-6">
+                        <h3 class="text-xl font-semibold text-white mb-2">Submission Result</h3>
+                        <pre id="campaign-result-output" class="bg-gray-800 p-4 rounded-lg text-sm overflow-x-auto"></pre>
+                    </div>
+                </div>
+
+            </div> <!-- /Content Area -->
+        </main>
+    </div>
+
+    <!-- 
+      Full-screen Layout:
+      This layout is for the login flow (initial login, callback, loading, errors).
+    -->
+    <div id="fullscreen-layout" class="hidden h-full flex items-center justify-center p-6">
+        <div class="w-full max-w-md">
+
+            <!-- Module: Login (MOD.B) -->
+            <div id="module-login" class="app-module hidden">
+                <div class="bg-gray-800 shadow-xl rounded-lg p-8">
+                    <div class="text-center mb-6">
+                        <h2 class="text-3xl font-bold text-white">XPI Portal</h2>
+                        <p class="text-gray-400 mt-2">Please login to continue</p>
+                    </div>
+                    
+                    <!-- Login Feedback/Message Area -->
+                    <div id="login-feedback" class="mb-4"></div>
+
+                    <!-- Login Button -->
+                    <button id="login-button" class="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-wait">
                         Login & Authenticate
                     </button>
-                    
-                    <button id="start-over-button" class="hidden w-full mt-4 bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out">
+
+                    <!-- "Start Over" Button (for errors) -->
+                    <button id="start-over-button" class="hidden w-full mt-4 px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 transition-colors focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800">
                         Start Over
                     </button>
                 </div>
             </div>
-            
-            <!-- Module: Campaign Submission -->
-            <div id="campaign-view" class="hidden max-w-4xl mx-auto">
-                <div class="bg-gray-800 p-8 rounded-lg shadow-xl">
-                    <h2 class="text-3xl font-bold text-white mb-6">Create Wrike Campaign</h2>
-                    
-                    <form id="campaign-form">
-                        <!-- Hidden Fields -->
-                        <input type="hidden" id="type" name="type" value="Campaign Request">
-                        <input type="hidden" id="space" name="space" value="GRM-MYS-GMN">
-                        <input type="hidden" id="entity" name="entity" value="Campaign">
-                        <input type="hidden" id="varientId" name="varientId" value="1">
-                        
-                        <!-- Form Grid -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            
-                            <!-- Form Column 1 -->
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="campaignname" class="block text-sm font-medium text-gray-300 mb-1">Campaign Name</label>
-                                    <input type="text" id="campaignname" name="campaignname" value="World Pinball Day 7000" required class="form-input">
-                                </div>
-                                
-                                <div>
-                                    <label for="client" class="block text-sm font-medium text-gray-300 mb-1">Client</label>
-                                    <select id="client" name="client" required class="form-input">
-                                        <option value="">Loading...</option>
-                                    </select>
-                                </div>
 
-                                <div>
-                                    <label for="debtor" class="block text-sm font-medium text-gray-300 mb-1">Debtor</label>
-                                    <select id="debtor" name="debtor" required class="form-input">
-                                        <option value="">Loading...</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label for="agency" class="block text-sm font-medium text-gray-300 mb-1">Agency</label>
-                                    <select id="agency" name="agency" required class="form-input">
-                                        <option value="">Loading...</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label for="brand" class="block text-sm font-medium text-gray-300 mb-1">Brand</label>
-                                    <input type="text" id="brand" name="brand" value="World Pinball" required class="form-input">
-                                </div>
-                                
-                                <div>
-                                    <label for="pod" class="block text-sm font-medium text-gray-300 mb-1">Pod</label>
-                                    <input type="text" id="pod" name="pod" value="Pod 1A" required class="form-input">
-                                </div>
-
-                                <div>
-                                    <label for="campaignobjective" class="block text-sm font-medium text-gray-300 mb-1">Campaign Objective</label>
-                                    <input type="text" id="campaignobjective" name="campaignobjective" value="Upper Funnel / Awareness" required class="form-input">
-                                </div>
-
-                                <div>
-                                    <label for="selectedchannels" class="block text-sm font-medium text-gray-300 mb-1">Selected Channels (comma-separated)</label>
-                                    <input type="text" id="selectedchannels" name="selectedchannels" value="Twitter" required class="form-input">
-                                </div>
-                            </div>
-                            
-                            <!-- Form Column 2 -->
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="requestedstartdate" class="block text-sm font-medium text-gray-300 mb-1">Requested Start Date</label>
-                                    <input type="date" id="requestedstartdate" name="requestedstartdate" value="2026-07-01" required class="form-input">
-                                </div>
-                                
-                                <div>
-                                    <label for="campaignstartdate" class="block text-sm font-medium text-gray-300 mb-1">Campaign Start Date</label>
-                                    <input type="date" id="campaignstartdate" name="campaignstartdate" value="2026-08-29" required class="form-input">
-                                </div>
-                                
-                                <div>
-                                    <label for="campaignenddate" class="block text-sm font-medium text-gray-300 mb-1">Campaign End Date</label>
-                                    <input type="date" id="campaignenddate" name="campaignenddate" value="2026-10-29" required class="form-input">
-                                </div>
-                                
-                                <div>
-                                    <label for="requestormarket" class="block text-sm font-medium text-gray-300 mb-1">Requestor Market</label>
-                                    <input type="text" id="requestormarket" name="requestormarket" value="Singapore" required class="form-input">
-                                </div>
-
-                                <div>
-                                    <label for="currency" class="block text-sm font-medium text-gray-300 mb-1">Currency</label>
-                                    <input type="text" id="currency" name="currency" value="SGD" required class="form-input">
-                                </div>
-
-                                <div>
-                                    <label for="overallbudget" class="block text-sm font-medium text-gray-300 mb-1">Overall Budget</label>
-                                    <input type="number" id="overallbudget" name="overallbudget" value="100" step="0.01" required class="form-input">
-                                </div>
-                                
-                                <div>
-                                    <label for="optin" class="block text-sm font-medium text-gray-300 mb-1">Opt-in</label>
-                                    <select id="optin" name="optin" required class="form-input">
-                                        <option value="No">No</option>
-                                        <option value="Yes">Yes</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label for="porequired" class="block text-sm font-medium text-gray-300 mb-1">PO Required</label>
-                                    <select id="porequired" name="porequired" required class="form-input">
-                                        <option value="No">No</option>
-                                        <option value="Yes">Yes</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <!-- Submission Button -->
-                        <div class="mt-8">
-                            <button type="submit" id="submit-campaign-button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out">
-                                Submit Campaign
-                            </button>
-                        </div>
-                    </form>
-                    
-                    <!-- Result Display -->
-                    <div id="campaign-result-container" class="hidden mt-6">
-                        <h3 class="text-lg font-semibold mb-2">Submission Result:</h3>
-                        <p id="campaign-message" class="mb-2"></p>
-                        <pre id="campaign-result" class="p-4 bg-gray-900 rounded-md text-xs overflow-auto max-h-96"></pre>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Module: Admin Settings -->
-            <div id="admin-view" class="hidden max-w-md mx-auto">
-                <div class="bg-gray-800 p-8 rounded-lg shadow-xl">
-                    <h2 class="text-3xl font-bold text-center text-white mb-6">Admin Settings</h2>
-                    
-                    <form id="admin-form">
-                        <div class="space-y-4">
-                            <div>
-                                <label for="xpiBaseUrlInput" class="block text-sm font-medium text-gray-300 mb-1">XPI Base URL</label>
-                                <input type="text" id="xpiBaseUrlInput" name="xpiBaseUrlInput" required class="form-input">
-                            </div>
-                        </div>
-                        
-                        <div class="mt-8">
-                            <button type="submit" id="save-settings-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out">
-                                Save Settings
-                            </button>
-                        </div>
-                    </form>
-                    
-                    <p id="admin-feedback" class="text-green-400 text-center mt-4 hidden"></p>
-                </div>
+            <!-- Module: Loader -->
+            <div id="module-loader" class="app-module hidden flex flex-col items-center">
+                <div class="spinner"></div>
+                <p class="text-white text-lg mt-4">Authenticating...</p>
+                <p class="text-gray-400">Please wait, we're verifying your credentials.</p>
             </div>
 
-        </main>
+        </div>
     </div>
 
-    <!-- Custom CSS for form inputs -->
-    <style>
-        .form-input {
-            width: 100%;
-            background-color: #374151; /* bg-gray-700 */
-            border: 1px solid #4B5563; /* border-gray-600 */
-            color: #F3F4F6; /* text-gray-100 */
-            border-radius: 0.375rem; /* rounded-md */
-            padding: 0.75rem 1rem; /* py-3 px-4 */
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-        .form-input:focus {
-            outline: none;
-            border-color: #3B82F6; /* border-blue-500 */
-            box-shadow: 0 0 0 2px #1E3A8A; /* ring-blue-500/50 */
-        }
-        /* Fix for date picker icon color in dark mode */
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            filter: invert(1);
-        }
-    </style>
 
-    <!-- Application JavaScript -->
-    <script type="text/javascript">
+    <!-- 
+      Developer Tool 
+    -->
+    <div id="dev-tool">
+        <!-- Toggle Icon -->
+        <button id="dev-tool-toggle" class="fixed bottom-6 right-6 z-50 bg-blue-600 p-3 rounded-full text-white shadow-lg hover:bg-blue-700 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-900" title="Open Developer Tool">
+            <!-- Hat Icon SVG -->
+            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 2a.75.75 0 01.75.75v1.5a.75.75 0 01-1.5 0v-1.5A.75.75 0 0110 2zM8.06 5.534a.75.75 0 001.06 0l1.06-1.06a.75.75 0 10-1.06-1.06l-1.06 1.06a.75.75 0 000 1.06zM6.25 7.75a.75.75 0 100-1.5.75.75 0 000 1.5zM4.466 8.06a.75.75 0 000 1.06l1.06 1.06a.75.75 0 101.06-1.06l-1.06-1.06a.75.75 0 00-1.06 0zM7.75 13.75a.75.75 0 10-1.5 0 .75.75 0 001.5 0zM8.06 15.534a.75.75 0 00-1.06 0l-1.06 1.06a.75.75 0 101.06 1.06l1.06-1.06a.75.75 0 000-1.06zM10 18a.75.75 0 01-.75-.75v-1.5a.75.75 0 011.5 0v1.5A.75.75 0 0110 18zM11.94 15.534a.75.75 0 000-1.06l-1.06-1.06a.75.75 0 10-1.06 1.06l1.06 1.06a.75.75 0 001.06 0zM13.75 12.25a.75.75 0 100 1.5.75.75 0 000-1.5zM15.534 11.94a.75.75 0 00-1.06 0l-1.06 1.06a.75.75 0 101.06 1.06l1.06-1.06a.75.75 0 000-1.06zM12.25 6.25a.75.75 0 101.5 0 .75.75 0 00-1.5 0zM11.94 4.466a.75.75 0 001.06 0l1.06-1.06a.75.75 0 10-1.06-1.06l-1.06 1.06a.75.75 0 000 1.06zM10 12a2 2 0 100-4 2 2 0 000 4z"/></svg>
+        </button>
+
+        <!-- Panel -->
+        <div id="dev-tool-panel" class="hidden fixed bottom-0 right-0 z-40 w-full md:w-3/4 lg:w-1/2 h-2/5 bg-gray-800 border-t-2 border-blue-500 shadow-2xl flex flex-col rounded-t-lg">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-3 bg-gray-700 rounded-t-lg flex-shrink-0">
+                <h3 class="text-lg font-semibold text-white">Developer Tool: API Log</h3>
+                <button id="dev-tool-close" class="text-gray-400 hover:text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <!-- Log Content -->
+            <div class="flex-1 overflow-auto p-4">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-gray-300">
+                        <thead class="bg-gray-700 sticky top-0">
+                            <tr>
+                                <th class="p-2">Time</th>
+                                <th class="p-2">Method</th>
+                                <th class="p-2">URL</th>
+                                <th class="p-2">Request</th>
+                                <th class="p-2">Response</th>
+                            </tr>
+                        </thead>
+                        <tbody id="api-log-table-body" class="divide-y divide-gray-700">
+                            <!-- Rows will be injected by JS -->
+                            <tr id="api-log-empty">
+                                <td colspan="5" class="p-4 text-center text-gray-500">No API calls logged yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 
+      JavaScript
+    -->
+    <script>
         document.addEventListener('DOMContentLoaded', () => {
+
+            // --- STATE & CONFIG ---
             
-            // --- CONFIGURATION ---
-            let appConfig = {};
-            const REDIRECT_URI = window.location.origin + window.location.pathname;
-            const ACCOUNT_ID = '3128883';
+            let apiLog = [];
+            const configKeys = {
+                xpiBaseUrl: 'xpiBaseUrl',
+                clientId: 'clientId',
+                token: 'token',
+                username: 'username',
+                password: 'password',
+                firstName: 'firstName',
+                lastName: 'lastName',
+                avatarUrl: 'avatarUrl'
+            };
+            const defaultConfig = {
+                xpiBaseUrl: 'https://api.wrikexpi.groupm.com'
+            };
             
-            // --- DOM ELEMENTS ---
+            // --- DOM SELECTORS ---
+            
+            const layouts = {
+                app: document.getElementById('app-layout'),
+                fullscreen: document.getElementById('fullscreen-layout')
+            };
+            
+            const modules = {
+                login: document.getElementById('module-login'),
+                loader: document.getElementById('module-loader'),
+                admin: document.getElementById('module-admin'),
+                campaign: document.getElementById('module-campaign')
+            };
+
+            const allModules = document.querySelectorAll('.app-module');
+
             const sidebar = document.getElementById('sidebar');
-            const sidebarToggle = document.getElementById('sidebar-toggle');
-            const mainContent = document.getElementById('main-content');
-            
-            const loginView = document.getElementById('login-view');
-            const loginButton = document.getElementById('login-button');
-            const loadingSpinner = document.getElementById('loading-spinner');
-            const loginMessage = document.getElementById('login-message');
-            const loginErrorDetails = document.getElementById('login-error-details');
-            const startOverButton = document.getElementById('start-over-button');
-            
-            const campaignView = document.getElementById('campaign-view');
-            const campaignForm = document.getElementById('campaign-form');
-            const submitCampaignButton = document.getElementById('submit-campaign-button');
-            const campaignResultContainer = document.getElementById('campaign-result-container');
-            const campaignMessage = document.getElementById('campaign-message');
-            const campaignResult = document.getElementById('campaign-result');
-            
-            const adminView = document.getElementById('admin-view');
-            const adminForm = document.getElementById('admin-form');
-            const xpiBaseUrlInput = document.getElementById('xpiBaseUrlInput');
-            const saveSettingsButton = document.getElementById('save-settings-button');
-            const adminFeedback = document.getElementById('admin-feedback');
+            const sidebarToggleOpen = document.getElementById('sidebar-toggle-open');
+            const sidebarToggleClose = document.getElementById('sidebar-toggle-close');
 
-            const userProfileWidget = document.getElementById('user-profile-widget');
-            const userAvatar = document.getElementById('user-avatar');
-            const userName = document.getElementById('user-name');
-            const navLogin = document.getElementById('nav-login');
-            const navLoginText = document.getElementById('nav-login-text');
-            const navCampaign = document.getElementById('nav-campaign');
-            const navAdmin = document.getElementById('nav-admin');
+            const user = {
+                avatar: document.getElementById('user-avatar'),
+                name: document.getElementById('user-name')
+            };
 
-            const allViews = [loginView, campaignView, adminView];
+            const devTool = {
+                toggle: document.getElementById('dev-tool-toggle'),
+                panel: document.getElementById('dev-tool-panel'),
+                close: document.getElementById('dev-tool-close'),
+                tableBody: document.getElementById('api-log-table-body'),
+                emptyRow: document.getElementById('api-log-empty')
+            };
 
-            // --- STATE & STORAGE ---
-            
+            // --- HELPER FUNCTIONS ---
+
             /**
-             * Retrieves config from localStorage or sets defaults.
+             * Gets a value from localStorage.
+             * @param {string} key - The key to retrieve.
+             * @param {*} [defaultValue] - The default value if key not found.
+             * @returns {*} The retrieved value or default.
+             */
+            function getStorage(key, defaultValue = null) {
+                const value = localStorage.getItem(key);
+                // Note: We are not parsing JSON here, as per spec all stored items are strings.
+                return value !== null ? value : defaultValue;
+            }
+
+            /**
+             * Sets a value in localStorage.
+             * @param {string} key - The key to set.
+             * @param {string} value - The value to store.
+             */
+            function setStorage(key, value) {
+                localStorage.setItem(key, value);
+            }
+
+            /**
+             * Removes a value from localStorage.
+             * @param {string} key - The key to remove.
+             */
+            function clearStorage(key) {
+                localStorage.removeItem(key);
+            }
+
+            /**
+             * Retrieves the current app configuration.
+             * @returns {object} The configuration object.
              */
             function getConfig() {
-                const defaults = {
-                    xpiBaseUrl: 'https://api.wrikexpi.groupm.com'
-                };
-                
-                let config = {
-                    xpiBaseUrl: localStorage.getItem('xpiBaseUrl') || defaults.xpiBaseUrl,
-                };
-                
-                // Ensure defaults are saved if not present
-                if (!localStorage.getItem('xpiBaseUrl')) {
-                    localStorage.setItem('xpiBaseUrl', defaults.xpiBaseUrl);
-                }
-                
-                return config;
-            }
-
-            /**
-             * Retrieves all auth data from localStorage.
-             */
-            function getAuthData() {
                 return {
-                    token: localStorage.getItem('wrikeToken'),
-                    username: localStorage.getItem('wrikeUsername'),
-                    password: localStorage.getItem('wrikePassword'),
-                    firstName: localStorage.getItem('wrikeFirstName'),
-                    lastName: localStorage.getItem('wrikeLastName'),
-                    avatarUrl: localStorage.getItem('wrikeAvatarUrl'),
+                    xpiBaseUrl: getStorage(configKeys.xpiBaseUrl, defaultConfig.xpiBaseUrl)
                 };
             }
-            
+
             /**
-             * Clears all auth data from localStorage.
+             * Checks if the user is logged in (has essential credentials).
+             * @returns {boolean} True if logged in, false otherwise.
              */
-            function clearAuthData() {
-                localStorage.removeItem('wrikeToken');
-                localStorage.removeItem('wrikeUsername');
-                localStorage.removeItem('wrikePassword');
-                localStorage.removeItem('wrikeFirstName');
-                localStorage.removeItem('wrikeLastName');
-                localStorage.removeItem('wrikeAvatarUrl');
-                localStorage.removeItem('wrikeClientId'); // Clear this too
+            function isLoggedIn() {
+                return !!(
+                    getStorage(configKeys.token) &&
+                    getStorage(configKeys.username) &&
+                    getStorage(configKeys.password)
+                );
             }
 
-            // --- UI HELPERS ---
+            /**
+             * Logs an API call to the dev tool.
+             * @param {object} request - Request details { method, url, body }.
+             * @param {object} response - Response details { status, data }.
+             */
+            function logApiCall(request, response) {
+                const logEntry = {
+                    time: new Date().toLocaleTimeString(),
+                    request: request,
+                    response: response
+                };
+                apiLog.unshift(logEntry); // Add to beginning
+
+                // Update UI
+                if (devTool.emptyRow) {
+                    devTool.emptyRow.style.display = 'none';
+                }
+
+                const row = devTool.tableBody.insertRow(0);
+                row.className = 'hover:bg-gray-700';
+                row.innerHTML = `
+                    <td class="p-2 align-top">${logEntry.time}</td>
+                    <td class="p-2 align-top font-mono">${logEntry.request.method}</td>
+                    <td class="p-2 align-top break-all">${logEntry.request.url}</td>
+                    <td class="p-2 align-top"><pre class="text-xs whitespace-pre-wrap break-all">${logEntry.request.body ? JSON.stringify(logEntry.request.body, null, 2) : 'N/A'}</pre></td>
+                    <td class="p-2 align-top"><pre class="text-xs whitespace-pre-wrap break-all">${logEntry.response.data ? JSON.stringify(logEntry.response.data, null, 2) : 'N/A'}</pre></td>
+                `;
+            }
 
             /**
-             * Hides all views and shows the specified view.
-             * @param {string} viewId - The ID of the view element to show.
+             * Shows a specific module and hides all others.
+             * @param {string} moduleId - The ID of the module to show (e.g., 'login', 'loader').
              */
-            function showView(viewId) {
-                allViews.forEach(view => view.classList.add('hidden'));
-                const viewToShow = document.getElementById(viewId);
-                if (viewToShow) {
-                    viewToShow.classList.remove('hidden');
+            function showModule(moduleId) {
+                allModules.forEach(module => module.classList.add('hidden'));
+                const moduleToShow = document.getElementById(`module-${moduleId}`);
+                if (moduleToShow) {
+                    moduleToShow.classList.remove('hidden');
                 }
             }
-            
+
             /**
-             * Sets the loading state for a specific view (login or campaign).
-             * @param {'login' | 'campaign'} view - The view to update.
-             * @param {boolean} isLoading - Whether to show the loading state.
+             * Updates the user avatar and name in the sidebar.
              */
-            function setLoading(view, isLoading) {
-                if (view === 'login') {
-                    if (isLoading) {
-                        loadingSpinner.classList.remove('hidden');
-                        loginButton.classList.add('hidden');
-                        startOverButton.classList.add('hidden');
+            function updateUserUI() {
+                if (isLoggedIn()) {
+                    const firstName = getStorage(configKeys.firstName, '');
+                    const lastName = getStorage(configKeys.lastName, '');
+                    const avatarUrl = getStorage(configKeys.avatarUrl);
+                    
+                    user.name.textContent = `${firstName} ${lastName}`.trim() || 'Logged In';
+                    if (avatarUrl && avatarUrl !== 'null') {
+                        user.avatar.src = avatarUrl;
+                        user.avatar.onerror = () => {
+                            user.avatar.src = 'https://placehold.co/40x40/374151/9ca3af?text=NA';
+                        };
                     } else {
-                        loadingSpinner.classList.add('hidden');
+                        const initials = `${firstName.charAt(0)}${lastName.charAt(0)}` || 'U';
+                        user.avatar.src = `https://placehold.co/40x40/374151/9ca3af?text=${initials}`;
                     }
-                } else if (view === 'campaign') {
-                    submitCampaignButton.disabled = isLoading;
-                    submitCampaignButton.textContent = isLoading ? 'Submitting...' : 'Submit Campaign';
-                }
-            }
-
-            /**
-             * Displays a message and optional error details in the login view.
-             * @param {string} message - The main message to display.
-             * @param {boolean} [isError=false] - Whether to style as an error.
-             * @param {string | null} [details=null] - JSON string or text for the <pre> tag.
-             */
-            function showLoginMessage(message, isError = false, details = null) {
-                loginMessage.textContent = message;
-                loginMessage.className = isError ? 'text-center text-red-400' : 'text-center text-green-400';
-                
-                if (details) {
-                    loginErrorDetails.textContent = details;
-                    loginErrorDetails.classList.remove('hidden');
                 } else {
-                    loginErrorDetails.classList.add('hidden');
+                    user.name.textContent = 'Not Logged In';
+                    user.avatar.src = 'https://placehold.co/40x40/374151/9ca3af?text=NA';
                 }
             }
 
             /**
-             * Displays a message and optional response details in the campaign view.
-             * @param {string} message - The main message to display.
-             * @param {boolean} [isError=false] - Whether to style as an error.
-             * @param {string | null} [details=null] - JSON string or text for the <pre> tag.
+             * Generates a unique client ID using SHA-256.
+             * @returns {Promise<string>} A 7-character client ID.
              */
-            function showCampaignMessage(message, isError = false, details = null) {
-                campaignResultContainer.classList.remove('hidden');
-                campaignMessage.textContent = message;
-                campaignMessage.className = isError ? 'mb-2 text-red-400' : 'mb-2 text-green-400';
-
-                if (details) {
-                    campaignResult.textContent = details;
-                    campaignResult.className = `p-4 bg-gray-900 rounded-md text-xs overflow-auto max-h-96 ${isError ? 'text-red-300' : 'text-green-300'}`;
-                    campaignResult.classList.remove('hidden');
-                } else {
-                    campaignResult.classList.add('hidden');
-                }
-            }
-
-            // --- AUTHENTICATION LOGIC ---
-
-            /**
-             * Generates a SHA-256 hash of a string.
-             * @param {string} message - The string to hash.
-             * @returns {Promise<string>} The hex-encoded hash.
-             */
-            async function sha256(message) {
-                const msgBuffer = new TextEncoder().encode(message);
-                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+            async function generateClientId() {
+                const timestamp = Date.now();
+                const random = Math.random();
+                const data = `${timestamp}${random}`;
+                const encoder = new TextEncoder();
+                const buffer = encoder.encode(data);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
                 const hashArray = Array.from(new Uint8Array(hashBuffer));
                 const hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-                return hexHash;
+                return hexHash.slice(-7);
             }
-            
+
             /**
-             * Handles the click on the "Login & Authenticate" button.
+             * Displays a formatted message in the login feedback area.
+             * @param {string} type - 'success', 'error', or 'info'.
+             * @param {string} title - The main message.
+             * @param {object | string} [details] - API response or extra text.
              */
-            async function handleLoginClick() {
-                try {
-                    setLoading('login', true);
-                    showLoginMessage('Generating client ID...', false);
+            function showLoginFeedback(type, title, details = null) {
+                const feedbackEl = document.getElementById('login-feedback');
+                let bgColor, textColor, borderColor;
 
-                    const data = `${Date.now()}${Math.random()}`;
-                    const hexHash = await sha256(data);
-                    const clientId = hexHash.slice(-7);
-                    
-                    localStorage.setItem('wrikeClientId', clientId);
-                    
-                    const redirectUrl = `${appConfig.xpiBaseUrl}/?accountId=${ACCOUNT_ID}&redirectUri=${encodeURIComponent(REDIRECT_URI)}&client_id=${clientId}`;
-                    
-                    showLoginMessage('Redirecting to Wrike...', false);
-                    window.location.href = redirectUrl;
-
-                } catch (error) {
-                    console.error('Login click failed:', error);
-                    showLoginMessage('Failed to generate security token. Please try again.', true, error.message);
-                    setLoading('login', false);
+                switch (type) {
+                    case 'success':
+                        bgColor = 'bg-green-900';
+                        textColor = 'text-green-300';
+                        borderColor = 'border-green-700';
+                        break;
+                    case 'error':
+                        bgColor = 'bg-red-900';
+                        textColor = 'text-red-300';
+                        borderColor = 'border-red-700';
+                        break;
+                    default:
+                        bgColor = 'bg-blue-900';
+                        textColor = 'text-blue-300';
+                        borderColor = 'border-blue-700';
                 }
-            }
-            
-            /**
-             * Handles the OAuth callback when the page loads with a "code" parameter.
-             * @param {string} code - The authorization code from the URL.
-             */
-            async function handleOAuthCallback(code) {
-                showView('login-view');
-                setLoading('login', true);
-                
-                const clientId = localStorage.getItem('wrikeClientId');
-                
-                // 1. Validation
-                if (!code || !clientId) {
-                    showLoginMessage('Error: Missing authentication code or client ID. Redirecting...', true);
-                    setLoading('login', false);
-                    setTimeout(() => { window.location.href = REDIRECT_URI; }, 10000);
-                    return;
+
+                let detailsHtml = '';
+                if (details) {
+                    const formattedDetails = (typeof details === 'object') 
+                        ? JSON.stringify(details, null, 2) 
+                        : details;
+                    detailsHtml = `<pre class="mt-2 text-xs text-gray-400 bg-gray-900 p-3 rounded-md overflow-auto">${formattedDetails}</pre>`;
                 }
                 
-                showLoginMessage('Exchanging code for token...', false);
-                
+                feedbackEl.innerHTML = `
+                    <div class="${bgColor} ${textColor} ${borderColor} border p-4 rounded-lg">
+                        <p class="font-semibold">${title}</p>
+                        ${detailsHtml}
+                    </div>
+                `;
+            }
+
+            /**
+             * Gets API headers for Basic or Bearer auth.
+             * @param {'basic' | 'bearer'} authType 
+             * @returns {Headers}
+             */
+            function getApiHeaders(authType) {
+                const headers = new Headers();
+                headers.append('Content-Type', 'application/json');
+
+                if (authType === 'basic') {
+                    const username = getStorage(configKeys.username);
+                    const password = getStorage(configKeys.password);
+                    if (username && password) {
+                        headers.append('Authorization', 'Basic ' + btoa(`${username}:${password}`));
+                    }
+                } else if (authType === 'bearer') {
+                    const token = getStorage(configKeys.token);
+                    if (token) {
+                        headers.append('Authorization', 'Bearer ' + token);
+                    }
+                }
+                return headers;
+            }
+
+            /**
+             * Generic fetch wrapper for dropdowns.
+             * @param {string} url - The API endpoint.
+             * @param {HTMLSelectElement} selectElement - The dropdown to populate.
+             * @param {string} defaultValue - The default value to select.
+             */
+            async function populateDropdown(url, selectElement, defaultValue) {
                 try {
-                    // 2. API Call 1: Exchange code for token
-                    const tokenUrl = `${appConfig.xpiBaseUrl}/api/v1/wrikexpi/token/exchange?code=${code}&client_id=${clientId}&grant_type=authorization_code`;
-                    const response = await fetch(tokenUrl);
+                    const headers = getApiHeaders('basic');
+                    const req = { method: 'GET', url: url };
+                    const response = await fetch(url, { headers });
                     const data = await response.json();
                     
-                    if (!response.ok || !data.success) {
-                        throw new Error(JSON.stringify(data, null, 2));
-                    }
-                    
-                    // 3. Store Credentials
-                    const { token, credentials } = data.data;
-                    const { username, password } = credentials;
-                    
-                    localStorage.setItem('wrikeToken', token);
-                    localStorage.setItem('wrikeUsername', username);
-                    localStorage.setItem('wrikePassword', password);
-                    
-                    showLoginMessage('Token received. Verifying user profile...', false);
-                    
-                    // 4. API Call 2: Verify user profile
-                    await verifyUserProfile();
+                    logApiCall(req, { status: response.status, data });
 
-                } catch (error) {
-                    console.error('OAuth callback error:', error);
-                    showLoginMessage('Login failed: Unexpected technical error.', true, error.message);
-                    startOverButton.classList.remove('hidden');
-                    setLoading('login', false);
-                    clearAuthData();
-                }
-            }
-
-            /**
-             * Verifies the user's profile using the obtained Basic Auth credentials.
-             */
-            async function verifyUserProfile() {
-                try {
-                    const { username, password } = getAuthData();
-                    if (!username || !password) {
-                        throw new Error("Missing credentials for profile verification.");
-                    }
-                    const basicAuthHeader = `Basic ${btoa(`${username}:${password}`)}`;
-
-                    const profileUrl = `${appConfig.xpiBaseUrl}/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me`;
-                    const response = await fetch(profileUrl, {
-                        headers: {
-                            'Authorization': basicAuthHeader
-                        }
-                    });
-                    const data = await response.json();
-
-                    if (!response.ok || !data.success || !data.data || data.data.length === 0) {
-                        throw new Error(JSON.stringify(data, null, 2));
-                    }
-
-                    // 5. Success
-                    const user = data.data[0];
-                    localStorage.setItem('wrikeFirstName', user.firstName);
-                    localStorage.setItem('wrikeLastName', user.lastName);
-                    localStorage.setItem('wrikeAvatarUrl', user.avatarUrl);
-                    
-                    localStorage.removeItem('wrikeClientId'); // Clean up
-                    
-                    showLoginMessage(`${user.firstName} ${user.lastName} login successfully. Redirecting...`, false);
-                    
-                    // Redirect to base URL to clear code and trigger initApp
-                    setTimeout(() => {
-                        window.location.href = REDIRECT_URI;
-                    }, 3000);
-
-                } catch (error) {
-                    console.error('Profile verification error:', error);
-                    showLoginMessage('Login failed: We are unable to verify your account. Please try again.', true, error.message);
-                    startOverButton.classList.remove('hidden');
-                    setLoading('login', false);
-                    clearAuthData(); // Clear partial auth
-                }
-            }
-
-            /**
-             * Handles user logout.
-             */
-            function handleLogout() {
-                clearAuthData();
-                setupLoggedOutState();
-            }
-
-            // --- CAMPAIGN FORM LOGIC ---
-
-            /**
-             * Fetches data and populates a dropdown select element.
-             * @param {string} url - The API endpoint to fetch.
-             * @param {string} selectId - The ID of the <select> element.
-             * @param {string} basicAuthHeader - The "Basic <credentials>" header value.
-             */
-            async function populateDropdown(url, selectId, basicAuthHeader) {
-                const select = document.getElementById(selectId);
-                try {
-                    const response = await fetch(url, {
-                        headers: { 'Authorization': basicAuthHeader }
-                    });
-                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-                    
-                    const data = await response.json();
-                    
-                    if (data && data.value && Array.isArray(data.value)) {
-                        select.innerHTML = '<option value="">Select an option</option>'; // Clear "Loading..."
+                    if (response.ok && data.value && Array.isArray(data.value)) {
+                        selectElement.innerHTML = ''; // Clear "Loading..."
                         data.value.forEach(item => {
                             const option = document.createElement('option');
                             option.value = item.value;
                             option.textContent = item.value;
-                            select.appendChild(option);
+                            if (item.value === defaultValue) {
+                                option.selected = true;
+                            }
+                            selectElement.appendChild(option);
                         });
-                        // Set default value from cURL if it exists in the list
-                        if (selectId === 'client') select.value = 'Adidas Group';
-                        if (selectId === 'debtor') select.value = 'Adidas Malaysia Sdn Bhd';
-                        if (selectId === 'agency') select.value = 'Eightbar';
-
                     } else {
-                        throw new Error('Invalid data structure');
+                        selectElement.innerHTML = '<option value="">Error loading data</option>';
                     }
                 } catch (error) {
-                    console.error(`Failed to load ${selectId}:`, error);
-                    select.innerHTML = '<option value="">Error loading data</option>';
+                    logApiCall({ method: 'GET', url: url }, { status: 'Network Error', data: { error: error.message } });
+                    selectElement.innerHTML = '<option value="">Error loading data</option>';
                 }
             }
 
-            /**
-             * Loads all dynamic dropdowns for the campaign form.
-             */
-            async function loadCampaignDropdowns() {
-                const { username, password } = getAuthData();
-                if (!username || !password) {
-                    showCampaignMessage('Error: Missing credentials to load form data. Please log out and log in again.', true);
-                    return;
-                }
 
-                const basicAuthHeader = `Basic ${btoa(`${username}:${password}`)}`;
-                
-                const clientUrl = `${appConfig.xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/clients-grm-mys`;
-                const debtorUrl = `${appConfig.xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/debtors-grm-mys`;
-                const agencyUrl = `${appConfig.xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/agencies`;
-                
-                // Fetch all dropdown data concurrently
-                await Promise.all([
-                    populateDropdown(clientUrl, 'client', basicAuthHeader),
-                    populateDropdown(debtorUrl, 'debtor', basicAuthHeader),
-                    populateDropdown(agencyUrl, 'agency', basicAuthHeader)
-                ]);
-            }
-            
-            /**
-             * Handles the submission of the campaign form.
-             * @param {Event} event - The form submission event.
-             */
-            async function handleCampaignSubmit(event) {
-                event.preventDefault();
-                setLoading('campaign', true);
-                campaignResultContainer.classList.add('hidden'); // Hide old results
-                
-                const { token } = getAuthData();
-                if (!token) {
-                    showCampaignMessage('Authentication error. Please log out and log in again.', true);
-                    setLoading('campaign', false);
-                    return;
-                }
-                
-                try {
-                    // Construct the payload
-                    const fields = {
-                        requestedstartdate: document.getElementById('requestedstartdate').value,
-                        agency: document.getElementById('agency').value,
-                        brand: document.getElementById('brand').value,
-                        client: document.getElementById('client').value,
-                        debtor: document.getElementById('debtor').value,
-                        currency: document.getElementById('currency').value,
-                        pod: document.getElementById('pod').value,
-                        campaignname: document.getElementById('campaignname').value,
-                        campaignstartdate: document.getElementById('campaignstartdate').value,
-                        campaignenddate: document.getElementById('campaignenddate').value,
-                        campaignobjective: document.getElementById('campaignobjective').value,
-                        requestormarket: document.getElementById('requestormarket').value,
-                        optin: document.getElementById('optin').value,
-                        porequired: document.getElementById('porequired').value,
-                        overallbudget: document.getElementById('overallbudget').value,
-                        selectedchannels: document.getElementById('selectedchannels').value
-                                                  .split(',')
-                                                  .map(s => s.trim())
-                                                  .filter(Boolean) // Remove empty strings
-                    };
-                    
-                    const payload = {
-                        type: document.getElementById('type').value,
-                        space: document.getElementById('space').value,
-                        entity: document.getElementById('entity').value,
-                        varientId: parseInt(document.getElementById('varientId').value, 10),
-                        fields: fields
-                    };
-
-                    // API Call
-                    const submitUrl = `${appConfig.xpiBaseUrl}/api/v1/wrikexpi/campaign`;
-                    const response = await fetch(submitUrl, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
-                        body: JSON.stringify(payload)
-                    });
-                    
-                    const responseData = await response.json();
-                    const responseText = JSON.stringify(responseData, null, 2);
-
-                    if (!response.ok) {
-                        throw new Error(`HTTP ${response.status} ${response.statusText}\n${responseText}`);
-                    }
-                    
-                    // Success
-                    showCampaignMessage('Campaign submitted successfully!', false, responseText);
-                    // Optionally reset the form: campaignForm.reset();
-                    
-                } catch (error) {
-                    console.error('Campaign submission error:', error);
-                    showCampaignMessage('Something went wrong, please try again.', true, error.message);
-                } finally {
-                    setLoading('campaign', false);
-                }
-            }
-
-            // --- ADMIN LOGIC ---
-            /**
-             * Handles saving the admin settings.
-             * @param {Event} event - The form submission event.
-             */
-            function handleSaveSettings(event) {
-                event.preventDefault();
-                const newBaseUrl = xpiBaseUrlInput.value.trim();
-                if (newBaseUrl) {
-                    localStorage.setItem('xpiBaseUrl', newBaseUrl);
-                    appConfig.xpiBaseUrl = newBaseUrl; // Update running config
-                    adminFeedback.textContent = 'Settings saved successfully!';
-                    adminFeedback.classList.remove('hidden');
-                    setTimeout(() => adminFeedback.classList.add('hidden'), 3000);
-                }
-            }
-
-            // --- APP INITIALIZATION ---
+            // --- MODULE INITIALIZATION ---
 
             /**
-             * Sets up the UI for a logged-out user.
+             * Initializes the Developer Tool listeners.
              */
-            function setupLoggedOutState() {
-                // sidebar.classList.add('-translate-x-full'); // This is the default mobile state
-                sidebar.classList.remove('hidden'); // Ensure sidebar is NOT hidden
-                mainContent.classList.add('lg:ml-64'); // Ensure content has margin for desktop sidebar
-                
-                userProfileWidget.classList.add('hidden');
-                userAvatar.src = '';
-                userName.textContent = '';
-                
-                navLoginText.textContent = 'Login';
-                navCampaign.classList.add('hidden');
-                
-                showView('login-view');
-                loginButton.classList.remove('hidden');
-                startOverButton.classList.add('hidden');
-                loadingSpinner.classList.add('hidden');
-                loginErrorDetails.classList.add('hidden');
-                showLoginMessage('Please log in to continue.', false);
-            }
-            
-            /**
-             * Sets up the UI for a logged-in user.
-             */
-            function setupLoggedInState() {
-                const { firstName, lastName, avatarUrl } = getAuthData();
-                sidebar.classList.remove('hidden'); // Show sidebar
-                mainContent.classList.add('lg:ml-64');
-                
-                userName.textContent = `${firstName} ${lastName}`;
-                userAvatar.src = avatarUrl;
-                userProfileWidget.classList.remove('hidden');
-
-                navLoginText.textContent = 'Logout';
-                navCampaign.classList.remove('hidden');
-                
-                showView('campaign-view');
-                loadCampaignDropdowns(); // Start loading form data
+            function initDevTool() {
+                devTool.toggle.addEventListener('click', () => {
+                    devTool.panel.classList.toggle('hidden');
+                });
+                devTool.close.addEventListener('click', () => {
+                    devTool.panel.classList.add('hidden');
+                });
             }
 
             /**
-             * Sets up the UI for the Admin view.
+             * Initializes the Admin Module (MOD.A).
              */
-            function setupAdminState() {
-                // Show sidebar regardless of login state for admin
-                sidebar.classList.remove('hidden');
-                mainContent.classList.add('lg:ml-64');
+            function initAdminModule() {
+                const form = document.getElementById('admin-form');
+                const urlInput = document.getElementById('xpiBaseUrl');
+                const feedbackEl = document.getElementById('admin-feedback');
                 
-                // Update user profile if logged in
-                const auth = getAuthData();
-                if (auth.token) {
-                    userName.textContent = `${auth.firstName} ${auth.lastName}`;
-                    userAvatar.src = auth.avatarUrl;
-                    userProfileWidget.classList.remove('hidden');
-                    navLoginText.textContent = 'Logout';
-                    navCampaign.classList.remove('hidden');
-                } else {
-                    userProfileWidget.classList.add('hidden');
-                    navLoginText.textContent = 'Login';
-                    navCampaign.classList.add('hidden');
-                }
+                // Load current config
+                urlInput.value = getConfig().xpiBaseUrl;
 
-                showView('admin-view');
-                xpiBaseUrlInput.value = appConfig.xpiBaseUrl; // Populate form
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    setStorage(configKeys.xpiBaseUrl, urlInput.value);
+                    feedbackEl.textContent = 'Configuration saved successfully.';
+                    feedbackEl.className = 'mt-4 text-sm text-green-400';
+                    setTimeout(() => feedbackEl.textContent = '', 3000);
+                });
             }
 
             /**
-             * Main application initialization function.
+             * Initializes the Login Module (MOD.B).
+             * @param {string | null} code - The OAuth code from URL, or null.
              */
-            function initApp() {
-                appConfig = getConfig(); // Load config at start
-
-                const urlParams = new URLSearchParams(window.location.search);
-                const code = urlParams.get('code');
-                const auth = getAuthData();
-                const hash = window.location.hash;
+            function initLoginModule(code) {
+                const loginButton = document.getElementById('login-button');
+                const startOverButton = document.getElementById('start-over-button');
+                document.getElementById('login-feedback').innerHTML = ''; // Clear feedback
                 
-                if (hash === '#admin') {
-                    // Scenario 0: Admin View
-                    setupAdminState();
-                } else if (code) {
-                    // Scenario 1: OAuth Callback
+                startOverButton.classList.add('hidden'); // Hide by default
+                startOverButton.onclick = () => {
+                    window.location.href = window.location.pathname; // Redirect to base URL
+                };
+
+                if (code) {
+                    // Mode 2: OAuth Callback
+                    loginButton.classList.add('hidden');
                     handleOAuthCallback(code);
-                } else if (auth.token) {
-                    // Scenario 2: Already Logged In
-                    setupLoggedInState();
                 } else {
-                    // Scenario 3: Logged Out
-                    setupLoggedOutState();
+                    // Mode 1: Authentication
+                    loginButton.classList.remove('hidden');
+                    loginButton.disabled = false;
+                    loginButton.textContent = 'Login & Authenticate';
+                    loginButton.onclick = async () => {
+                        loginButton.disabled = true;
+                        loginButton.textContent = 'Generating ID...';
+                        
+                        try {
+                            const clientId = await generateClientId();
+                            setStorage(configKeys.clientId, clientId);
+                            
+                            const config = getConfig();
+                            const currentPageBaseUrl = window.location.origin + window.location.pathname;
+                            const redirectUrl = `${config.xpiBaseUrl}/?accountId=3128883&redirectUri=${encodeURIComponent(currentPageBaseUrl)}&client_id=${clientId}`;
+                            
+                            logApiCall(
+                                { method: 'REDIRECT', url: 'OAuth Redirect' },
+                                { data: { redirectUrl } }
+                            );
+                            
+                            // Redirect
+                            window.location.href = redirectUrl;
+                        } catch (error) {
+                            showLoginFeedback('error', 'Failed to generate Client ID.', error.message);
+                            loginButton.disabled = false;
+                            loginButton.textContent = 'Login & Authenticate';
+                        }
+                    };
                 }
             }
-            
-            // --- EVENT LISTENERS ---
-            
-            // Login button
-            loginButton.addEventListener('click', handleLoginClick);
-            
-            // Start Over button
-            startOverButton.addEventListener('click', () => {
-                window.location.href = REDIRECT_URI;
-            });
-            
-            // Campaign form submission
-            campaignForm.addEventListener('submit', handleCampaignSubmit);
 
-            // Admin form submission
-            adminForm.addEventListener('submit', handleSaveSettings);
+            /**
+             * Handles the OAuth callback logic (Mode 2).
+             * @param {string} code - The OAuth code.
+             */
+            async function handleOAuthCallback(code) {
+                const clientId = getStorage(configKeys.clientId);
+                const config = getConfig();
+                const startOverButton = document.getElementById('start-over-button');
 
-            // Sidebar toggle
-            sidebarToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('-translate-x-full');
-            });
-
-            // Navigation Links
-            navLogin.addEventListener('click', (e) => {
-                e.preventDefault();
-                window.location.hash = ''; // Clear hash
-                if (getAuthData().token) {
-                    // It's a "Logout" button
-                    handleLogout();
-                } else {
-                    // It's a "Login" button
-                    showView('login-view');
-                    sidebar.classList.add('-translate-x-full'); // Hide sidebar on mobile
+                // Validation
+                if (!clientId || !code) {
+                    showModule('login'); // Show login module to display error
+                    showLoginFeedback('error', 'Authentication Error', 'Missing Client ID or Auth Code. Redirecting...');
+                    logApiCall(
+                        { method: 'CALLBACK', url: 'OAuth Callback' },
+                        { status: 'Validation Error', data: { error: 'Missing clientId or code' } }
+                    );
+                    setTimeout(() => {
+                        window.location.href = window.location.pathname;
+                    }, 10000);
+                    return;
                 }
-            });
 
-            navCampaign.addEventListener('click', (e) => {
-                e.preventDefault();
-                window.location.hash = ''; // Clear hash
-                if (getAuthData().token) {
-                    showView('campaign-view');
-                    sidebar.classList.add('-translate-x-full'); // Hide sidebar on mobile
-                } else {
-                    // User is not logged in, redirect to login
-                    showView('login-view');
+                // 1. API Call: Token Exchange
+                const tokenUrl = `${config.xpiBaseUrl}/api/v1/wrikexpi/token/exchange?code=${code}&client_id=${clientId}&grant_type=authorization_code`;
+                let tokenData;
+                try {
+                    const tokenRequest = { method: 'GET', url: tokenUrl };
+                    const response = await fetch(tokenUrl);
+                    tokenData = await response.json();
+                    logApiCall(tokenRequest, { status: response.status, data: tokenData });
+
+                    if (!response.ok || !tokenData.success) {
+                        throw new Error(tokenData.message || 'Failed to exchange token.');
+                    }
+
+                    // Store credentials
+                    setStorage(configKeys.token, tokenData.data.token);
+                    setStorage(configKeys.username, tokenData.data.credentials.username);
+                    setStorage(configKeys.password, tokenData.data.credentials.password);
+
+                } catch (error) {
+                    showModule('login');
+                    showLoginFeedback('error', 'Unexpected technical error in login.', tokenData || { error: error.message });
+                    startOverButton.classList.remove('hidden');
+                    return;
                 }
-            });
-            
-            navAdmin.addEventListener('click', (e) => {
-                e.preventDefault();
-                // Hash is set by the href, just need to show the view
-                setupAdminState();
-                sidebar.classList.add('-translate-x-full'); // Hide sidebar on mobile
-            });
 
-            // --- START APP ---
-            initApp();
+                // 2. API Call: Verify Login (Get Profile)
+                const profileUrl = `${config.xpiBaseUrl}/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me`;
+                let profileData;
+                try {
+                    const profileRequest = { method: 'GET', url: profileUrl };
+                    const headers = getApiHeaders('basic');
+                    const response = await fetch(profileUrl, { headers });
+                    profileData = await response.json();
+                    logApiCall(profileRequest, { status: response.status, data: profileData });
+
+                    if (!response.ok || !profileData.success || !profileData.data || profileData.data.length === 0) {
+                        throw new Error(profileData.message || 'Failed to verify account.');
+                    }
+
+                    // Success: Store profile data
+                    const profile = profileData.data[0];
+                    setStorage(configKeys.firstName, profile.firstName);
+                    setStorage(configKeys.lastName, profile.lastName);
+                    setStorage(configKeys.avatarUrl, profile.avatarUrl);
+
+                    // Update UI immediately
+                    updateUserUI();
+                    
+                    showModule('login');
+                    showLoginFeedback('success', `Login Successful!`, `Welcome, ${profile.firstName} ${profile.lastName}. Redirecting to app...`);
+                    
+                    // Redirect to app
+                    setTimeout(() => {
+                        window.location.href = window.location.pathname + '#/campaign';
+                    }, 3000);
+
+                } catch (error) {
+                    showModule('login');
+                    showLoginFeedback('error', 'Login failed, we are unable to verify your account. Please try again.', profileData || { error: error.message });
+                    startOverButton.classList.remove('hidden');
+                    // Clear bad credentials
+                    clearStorage(configKeys.token);
+                    clearStorage(configKeys.username);
+                    clearStorage(configKeys.password);
+                }
+            }
+
+            /**
+             * Initializes the Campaign Submission Module (MOD.C).
+             */
+            function initCampaignModule() {
+                const form = document.getElementById('campaign-form');
+                const submitBtn = document.getElementById('campaign-submit-btn');
+                const resultWrapper = document.getElementById('campaign-result-wrapper');
+                const resultOutput = document.getElementById('campaign-result-output');
+
+                const config = getConfig();
+
+                // Populate dropdowns
+                populateDropdown(
+                    `${config.xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/clients-grm-mys`,
+                    document.getElementById('client'),
+                    "Adidas Group"
+                );
+                populateDropdown(
+                    `${config.xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/debtors-grm-mys`,
+                    document.getElementById('debtor'),
+                    "Adidas Malaysia Sdn Bhd"
+                );
+                populateDropdown(
+                    `${config.xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/agencies`,
+                    document.getElementById('agency'),
+                    "Eightbar"
+                );
+
+                // Handle form submission
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    submitBtn.disabled = true;
+                    submitBtn.textContent = 'Submitting...';
+                    resultWrapper.classList.add('hidden');
+
+                    const formData = new FormData(form);
+                    const data = {};
+                    const fields = {};
+
+                    formData.forEach((value, key) => {
+                        if (['type', 'space', 'entity', 'varientId'].includes(key)) {
+                            data[key] = isNaN(value) ? value : Number(value); // Convert varientId to number
+                        } else if (key !== 'selectedchannels-text') {
+                            fields[key] = value;
+                        }
+                    });
+
+                    // Handle selectedchannels array
+                    const channelsText = formData.get('selectedchannels-text') || '';
+                    fields.selectedchannels = channelsText
+                        .split(',')
+                        .map(s => s.trim())
+                        .filter(s => s.length > 0);
+                    
+                    data.fields = fields;
+
+                    const url = `${config.xpiBaseUrl}/api/v1/wrikexpi/campaign`;
+                    const headers = getApiHeaders('bearer');
+                    const body = JSON.stringify(data);
+                    
+                    const request = { method: 'POST', url: url, body: data };
+                    let responseData;
+                    
+                    try {
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: headers,
+                            body: body
+                        });
+
+                        responseData = await response.json();
+                        logApiCall(request, { status: response.status, data: responseData });
+
+                        resultOutput.textContent = JSON.stringify(responseData, null, 2);
+                        if (response.ok) {
+                            resultOutput.className = 'bg-gray-800 p-4 rounded-lg text-sm overflow-x-auto text-green-400';
+                        } else {
+                            throw new Error(responseData.message || `HTTP Error: ${response.status}`);
+                        }
+                    } catch (error) {
+                        logApiCall(request, { status: 'Network Error', data: { error: error.message, response: responseData } });
+                        resultOutput.textContent = `Submission Failed:\n${error.message}\n\n${responseData ? JSON.stringify(responseData, null, 2) : ''}`;
+                        resultOutput.className = 'bg-gray-800 p-4 rounded-lg text-sm overflow-x-auto text-red-400';
+                    } finally {
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Submit Campaign';
+                        resultWrapper.classList.remove('hidden');
+                    }
+                });
+            }
+
+            /**
+             * Initializes sidebar toggle controls.
+             */
+            function initSidebarControls() {
+                sidebarToggleOpen.addEventListener('click', () => {
+                    sidebar.classList.remove('-translate-x-full');
+                });
+                sidebarToggleClose.addEventListener('click', () => {
+                    sidebar.classList.add('-translate-x-full');
+                });
+                
+                // Add class for mobile responsiveness
+                sidebar.classList.add('fixed', 'h-full', 'z-20', 'lg:static', 'lg:z-auto', 'lg:translate-x-0', '-translate-x-full');
+            }
+
+
+            // --- ROUTER & INITIALIZATION ---
+
+            /**
+             * Main application router.
+             */
+            function router() {
+                const hash = window.location.hash || '#/';
+                const params = new URLSearchParams(window.location.search);
+                const code = params.get('code');
+
+                updateUserUI(); // Update user info on every route change
+                
+                const loggedIn = isLoggedIn();
+
+                if (hash === '#admin') {
+                    layouts.app.style.display = 'flex';
+                    layouts.fullscreen.style.display = 'none';
+                    showModule('admin');
+                    initAdminModule();
+                } else if (code) {
+                    layouts.app.style.display = 'none';
+                    layouts.fullscreen.style.display = 'flex';
+                    showModule('loader'); // Show loader first
+                    initLoginModule(code); // This handles the rest
+                } else if (loggedIn) {
+                    layouts.app.style.display = 'flex';
+                    layouts.fullscreen.style.display = 'none';
+
+                    if (hash === '#/campaign') {
+                        showModule('campaign');
+                        initCampaignModule();
+                    } else if (hash === '#/login') {
+                        // Allow re-login (or just show a "you are logged in" page)
+                        // For now, redirect to default
+                        window.location.hash = '#/campaign';
+                    } else {
+                        // Default for logged-in
+                        window.location.hash = '#/campaign';
+                    }
+                } else {
+                    // Not logged in, no code, not admin
+                    layouts.app.style.display = 'none';
+                    layouts.fullscreen.style.display = 'flex';
+                    
+                    // Clear any query params
+                    if (window.location.search) {
+                        window.history.replaceState(null, '', window.location.pathname + '#/login');
+                    }
+                    
+                    showModule('login');
+                    initLoginModule(null);
+                }
+            }
+
+            // --- APP START ---
             
+            initDevTool();
+            initSidebarControls();
+            router(); // Call router on initial load
+            window.addEventListener('hashchange', router); // Call router on hash change
+
         });
     </script>
+
+    <!-- Custom form input styles for Tailwind -->
+    <style>
+        .form-input {
+            @apply w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-2 focus:ring-blue-500 focus:outline-none disabled:opacity-50;
+        }
+        /* Style date/time inputs for dark mode */
+        input[type="date"], input[type="number"] {
+            color-scheme: dark;
+        }
+    </style>
+
 </body>
 </html>
-
-
