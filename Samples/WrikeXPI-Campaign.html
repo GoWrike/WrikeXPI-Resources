@@ -771,9 +771,9 @@
              * Sets up the UI for a logged-out user.
              */
             function setupLoggedOutState() {
-                sidebar.classList.add('-translate-x-full');
-                sidebar.classList.add('hidden'); // Hide for good measure
-                mainContent.classList.remove('lg:ml-64');
+                // sidebar.classList.add('-translate-x-full'); // This is the default mobile state
+                sidebar.classList.remove('hidden'); // Ensure sidebar is NOT hidden
+                mainContent.classList.add('lg:ml-64'); // Ensure content has margin for desktop sidebar
                 
                 userProfileWidget.classList.add('hidden');
                 userAvatar.src = '';
@@ -922,4 +922,5 @@
     </script>
 </body>
 </html>
+
 
