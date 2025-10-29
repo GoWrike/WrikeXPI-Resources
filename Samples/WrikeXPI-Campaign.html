@@ -93,12 +93,17 @@
             
             <!-- User Profile -->
             <div class="p-4 border-t border-gray-700">
-                <div class="flex items-center">
-                    <img id="user-avatar" src="https://placehold.co/40x40/374151/9ca3af?text=NA" alt="User Avatar" class="w-10 h-10 rounded-full object-cover bg-gray-700">
-                    <div class="ml-3">
-                        <p id="user-name" class="text-sm font-medium text-white">Not Logged In</p>
-                        <p class="text-xs text-gray-400">User</p>
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center min-w-0"> <!-- Wrapper for truncation -->
+                        <img id="user-avatar" src="https://placehold.co/40x40/374151/9ca3af?text=NA" alt="User Avatar" class="w-10 h-10 rounded-full object-cover bg-gray-700 flex-shrink-0">
+                        <div class="ml-3 min-w-0">
+                            <p id="user-name" class="text-sm font-medium text-white truncate">Not Logged In</p>
+                            <p id="user-status" class="text-xs text-gray-400">User</p>
+                        </div>
                     </div>
+                    <button id="logout-button" class="hidden ml-2 text-gray-400 hover:text-white transition-colors flex-shrink-0" title="Logout">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                    </button>
                 </div>
             </div>
         </aside>
@@ -409,7 +414,9 @@
 
             const user = {
                 avatar: document.getElementById('user-avatar'),
-                name: document.getElementById('user-name')
+                name: document.getElementById('user-name'),
+                status: document.getElementById('user-status'), // Added
+                logoutButton: document.getElementById('logout-button') // Added
             };
 
             const devTool = {
@@ -524,6 +531,8 @@
                     const avatarUrl = getStorage(configKeys.avatarUrl);
                     
                     user.name.textContent = `${firstName} ${lastName}`.trim() || 'Logged In';
+                    user.status.textContent = 'Logged In';
+                    user.logoutButton.classList.remove('hidden');
                     if (avatarUrl && avatarUrl !== 'null') {
                         user.avatar.src = avatarUrl;
                         user.avatar.onerror = () => {
@@ -535,7 +544,9 @@
                     }
                 } else {
                     user.name.textContent = 'Not Logged In';
+                    user.status.textContent = 'User';
                     user.avatar.src = 'https://placehold.co/40x40/374151/9ca3af?text=NA';
+                    user.logoutButton.classList.add('hidden');
                 }
             }
 
@@ -940,6 +951,27 @@
             }
 
 
+            /**
+             * Initializes the logout button listener.
+             */
+            function initLogout() {
+                user.logoutButton.addEventListener('click', () => {
+                    // Clear all credentials
+                    clearStorage(configKeys.clientId);
+                    clearStorage(configKeys.token);
+                    clearStorage(configKeys.username);
+                    clearStorage(configKeys.password);
+                    clearStorage(configKeys.firstName);
+                    clearStorage(configKeys.lastName);
+                    clearStorage(configKeys.avatarUrl);
+                    
+                    // Redirect to login page
+                    window.location.hash = '#/login';
+                    router(); // Re-run router to force update
+                });
+            }
+
+
             // --- ROUTER & INITIALIZATION ---
 
             /**
@@ -998,6 +1030,7 @@
             
             initDevTool();
             initSidebarControls();
+            initLogout(); // Added
             router(); // Call router on initial load
             window.addEventListener('hashchange', router); // Call router on hash change
 
@@ -1017,3 +1050,4 @@
 
 </body>
 </html>
+
