@@ -1,780 +1,895 @@
 <!DOCTYPE html>
 <html lang="en" class="h-full">
 <head>
-    <meta charset="UTF-R-8">
+    <meta charset="UTF-g">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Campaign Submission Portal</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Custom scrollbar for a more modern look */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1f2937; /* gray-800 */
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #4b5563; /* gray-600 */
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #6b7280; /* gray-500 */
-        }
-        /* Force dark color scheme for date pickers */
-        input[type="date"] {
-            color-scheme: dark;
-        }
-    </style>
+    
+    <!-- Configure Tailwind -->
     <script>
-        // Tailwind dark mode configuration
         tailwind.config = {
-            darkMode: 'class', // This app is dark mode by default
             theme: {
                 extend: {
                     fontFamily: {
                         sans: ['Inter', 'sans-serif'],
                     },
+                    colors: {
+                        gray: {
+                            750: '#2d3748', // A slightly lighter dark
+                            850: '#1a202c', // A slightly darker dark
+                            950: '#111827', // Even darker
+                        }
+                    }
                 },
             },
+            darkMode: 'class', // We'll force dark mode
         }
     </script>
-    <!-- Simple SVG loader icon -->
-    <svg xmlns="http://www.w3.org/2000/svg" class="hidden" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <defs>
-        <symbol id="loader-icon">
-          <line x1="12" y1="2" x2="12" y2="6"></line>
-          <line x1="12" y1="18" x2="12" y2="22"></line>
-          <line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line>
-          <line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line>
-          <line x1="2" y1="12" x2="6" y2="12"></line>
-          <line x1="18" y1="12" x2="22" y2="12"></line>
-          <line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line>
-          <line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line>
-        </symbol>
-      </defs>
-    </svg>
+    
+    <!-- Custom Styles -->
+    <style>
+        /* Force dark mode */
+        html {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body {
+            /* Use a gradient for a more premium feel, like Netflix/Amazon */
+            background-color: #111827; /* bg-gray-950 */
+            color: #f3f4f6; /* text-gray-100 */
+        }
+        
+        /* Custom spinner */
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #3b82f6; /* blue-500 */
+            animation: spin 1s linear infinite;
+        }
+        
+        /* Custom styled form inputs for dark mode */
+        .form-input, .form-select {
+            @apply w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-lg shadow-inner text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200 ease-in-out;
+        }
+        
+        .form-select {
+            @apply appearance-none;
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+            background-position: right 0.5rem center;
+            background-repeat: no-repeat;
+            background-size: 1.5em 1.5em;
+            padding-right: 2.5rem;
+        }
+        
+        /* Primary button style */
+        .btn-primary {
+            @apply w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75 transition duration-200 ease-in-out disabled:opacity-50 disabled:cursor-not-allowed;
+        }
+        
+        /* Secondary/danger button style */
+        .btn-secondary {
+            @apply w-full px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-75 transition duration-200 ease-in-out;
+        }
+        
+        /* Hide scrollbar but allow scrolling */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+        
+        /* Transition classes for sidebar */
+        .sidebar-open {
+            transform: translateX(0);
+        }
+        .sidebar-closed {
+            transform: translateX(-100%);
+        }
+    </style>
 </head>
 
-<body class="h-full font-sans bg-gray-900 text-gray-200 dark">
-
-    <!-- A. Login Module -->
-    <div id="login-view" class="flex items-center justify-center min-h-full px-4 py-12">
-        <div class="w-full max-w-md p-8 space-y-6 bg-gray-800 rounded-2xl shadow-2xl">
-            <div>
-                <h2 class="text-3xl font-extrabold text-center text-white">
-                    Sign in to your account
-                </h2>
-            </div>
-            <form id="login-form" class="space-y-6">
-                <div>
-                    <label for="username" class="block text-sm font-medium text-gray-300">User Name</label>
-                    <div class="mt-1">
-                        <input id="username" name="username" type="text" required
-                            class="w-full px-3 py-2 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    </div>
-                </div>
-                <div>
-                    <label for="password" class="block text-sm font-medium text-gray-300">Password</label>
-                    <div class="mt-1">
-                        <input id="password" name="password" type="password" required
-                            class="w-full px-3 py-2 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
-                    </div>
-                </div>
-                <div>
-                    <button id="login-button" type="submit"
-                        class="flex justify-center w-full px-4 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <span class="button-text">Login</span>
-                        <svg class="w-5 h-5 ml-2 text-white animate-spin button-loader" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="display: none;">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </button>
-                </div>
-            </form>
-            <!-- Help text for credentials -->
-            <p class="text-xs text-center text-gray-400">
-                Don't know your username or password?
-                <a href="https://api.wrikexpi.groupm.com/?accountId=3128883" target="_blank" rel="noopener noreferrer"
-                   class="font-medium text-indigo-400 hover:text-indigo-300">
-                    Retrieve them here
-                </a>
-            </p>
-            <!-- Feedback area for login -->
-            <div id="login-feedback" class="p-4 text-sm text-center rounded-md" style="display: none;"></div>
-        </div>
+<body class="h-full font-sans antialiased">
+    <!-- Main App Container -->
+    <div id="app" class="flex h-screen overflow-hidden">
+        <!-- This will be dynamically rendered by JavaScript -->
     </div>
 
-    <!-- Main App Layout (Sidebar + Content) -->
-    <div id="main-app-view" class="flex h-full" style="display: none;">
-        
-        <!-- Sidebar -->
-        <div id="sidebar" class="flex flex-col w-64 bg-gray-800 shadow-xl transition-all duration-300">
-            <div class="flex items-center justify-between h-16 px-4 border-b border-gray-700">
-                <span class="text-xl font-bold text-white">Campaign Portal</span>
-                <button id="toggle-sidebar" class="p-1 text-gray-400 rounded-md md:hidden hover:text-white hover:bg-gray-700">
-                    <!-- Menu close icon -->
-                    <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-            <nav class="flex-1 px-2 py-4 space-y-1">
-                <a href="#" id="nav-home" data-module="module-list-view"
-                    class="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group module-nav-link">
-                    <svg class="w-6 h-6 mr-3 text-gray-400 group-hover:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6-4a1 1 0 001-1v-1a1 1 0 10-2 0v1a1 1 0 001 1z" />
-                    </svg>
-                    Home / Modules
-                </a>
-                <a href="#" id="nav-campaign-submission" data-module="campaign-submission-view"
-                    class="flex items-center px-2 py-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group module-nav-link">
-                    <svg class="w-6 h-6 mr-3 text-gray-400 group-hover:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    Campaign Submission
-                </a>
-            </nav>
-            <div class="px-2 py-4 border-t border-gray-700">
-                <div id="user-profile" class="flex items-center px-2 py-2">
-                    <!-- User avatar/info will be injected here -->
-                </div>
-                <a href="#" id="nav-logout"
-                    class="flex items-center w-full px-2 py-2 mt-2 text-sm font-medium text-gray-300 rounded-md hover:bg-gray-700 hover:text-white group">
-                    <svg class="w-6 h-6 mr-3 text-gray-400 group-hover:text-gray-300" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                    </svg>
-                    Logout
-                </a>
-            </div>
-        </div>
-
-        <!-- Sidebar toggle button (for mobile) -->
-        <button id="sidebar-open-btn" class="fixed z-10 p-2 text-gray-400 bg-gray-800 rounded-md top-4 left-4 md:hidden">
-            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-        </button>
-
-        <!-- Main Content Area -->
-        <main id="main-content" class="flex-1 overflow-y-auto">
-            
-            <!-- Module: List -->
-            <div id="module-list-view" class="p-4 md:p-8 module-content">
-                <h1 class="text-3xl font-bold text-white">Modules</h1>
-                <div class="grid grid-cols-1 gap-6 mt-6 md:grid-cols-2 lg:grid-cols-3">
-                    <div data-module="campaign-submission-view"
-                        class="p-6 overflow-hidden transition-all duration-300 bg-gray-800 rounded-lg shadow-lg cursor-pointer hover:bg-gray-700 hover:shadow-xl hover:-translate-y-1 module-card">
-                        <h3 class="text-xl font-semibold text-white">Campaign Submission</h3>
-                        <p class="mt-2 text-gray-400">Create a new Wrike Campaign by submitting the required form fields.</p>
-                    </div>
-                    <div class="p-6 bg-gray-800 rounded-lg shadow-lg opacity-50 cursor-not-allowed">
-                        <h3 class="text-xl font-semibold text-white">Reports (Coming Soon)</h3>
-                        <p class="mt-2 text-gray-400">View campaign performance and reports.</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- B. Campaign Submission Module -->
-            <div id="campaign-submission-view" class="p-4 md:p-8 module-content" style="display: none;">
-                <h1 class="text-3xl font-bold text-white">Campaign Submission Form</h1>
-                <p class="mt-2 text-gray-400">Fill in the details below to create a new campaign.</p>
-
-                <form id="campaign-form" class="max-w-4xl mt-8 space-y-8">
-                    <!-- Form content card -->
-                    <div class="p-6 bg-gray-800 rounded-lg shadow-xl md:p-8">
-                        <!-- Hidden fields -->
-                        <input type="hidden" name="type" value="Campaign Request">
-                        <input type="hidden" name="space" value="GRM-MYS-GMN">
-                        <input type="hidden" name="entity" value="Campaign">
-                        <input type="hidden" name="varientId" value="1">
-                        
-                        <!-- Visible fields grid -->
-                        <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
-                            
-                            <div class="md:col-span-2">
-                                <label for="campaignname" class="block text-sm font-medium text-gray-300">Campaign Name</label>
-                                <input type="text" name="campaignname" id="campaignname" value="World Pinball Day 7000" required
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            </div>
-
-                            <div>
-                                <label for="client" class="block text-sm font-medium text-gray-300">Client</label>
-                                <select id="client" name="client" required disabled
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50">
-                                    <option value="">Loading clients...</option>
-                                    <!-- Options will be populated by JS -->
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="brand" class="block text-sm font-medium text-gray-300">Brand</label>
-                                <input type="text" name="brand" id="brand" value="World Pinball"
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            </div>
-                            
-                            <div>
-                                <label for="agency" class="block text-sm font-medium text-gray-300">Agency</label>
-                                <select id="agency" name="agency" required disabled
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50">
-                                    <option value="">Loading agencies...</option>
-                                    <!-- Options will be populated by JS -->
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="debtor" class="block text-sm font-medium text-gray-300">Debtor</label>
-                                <select id="debtor" name="debtor" required disabled
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500 disabled:opacity-50">
-                                    <option value="">Loading debtors...</option>
-                                    <!-- Options will be populated by JS -->
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="currency" class="block text-sm font-medium text-gray-300">Currency</label>
-                                <input type="text" name="currency" id="currency" value="SGD"
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            </div>
-
-                            <div>
-                                <label for="pod" class="block text-sm font-medium text-gray-300">Pod</label>
-                                <input type="text" name="pod" id="pod" value="Pod 1A"
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            </div>
-
-                            <div>
-                                <label for="campaignstartdate" class="block text-sm font-medium text-gray-300">Campaign Start Date</label>
-                                <input type="date" name="campaignstartdate" id="campaignstartdate" value="2026-08-29"
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            </div>
-
-                            <div>
-                                <label for="campaignenddate" class="block text-sm font-medium text-gray-300">Campaign End Date</label>
-                                <input type="date" name="campaignenddate" id="campaignenddate" value="2026-10-29"
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            </div>
-                            
-                            <div>
-                                <label for="requestedstartdate" class="block text-sm font-medium text-gray-300">Requested Start Date</L-abel>
-                                <input type="date" name="requestedstartdate" id="requestedstartdate" value="2026-07-01"
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            </div>
-
-                            <div>
-                                <label for="campaignobjective" class="block text-sm font-medium text-gray-300">Campaign Objective</label>
-                                <input type="text" name="campaignobjective" id="campaignobjective" value="Upper Funnel / Awareness"
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            </div>
-
-                            <div>
-                                <label for="requestormarket" class="block text-sm font-medium text-gray-300">Requestor Market</label>
-                                <input type="text" name="requestormarket" id="requestormarket" value="Singapore"
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            </div>
-
-                            <div>
-                                <label for="overallbudget" class="block text-sm font-medium text-gray-300">Overall Budget</G-label>
-                                <input type="number" name="overallbudget" id="overallbudget" value="100" step="0.01"
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                            </div>
-                            
-                            <div>
-                                <label for="optin" class="block text-sm font-medium text-gray-300">Opt-in</label>
-                                <select id="optin" name="optin"
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                    <option value="No">No</option>
-                                    <option value="Yes">Yes</option>
-                                </select>
-                            </div>
-
-                            <div>
-                                <label for="porequired" class="block text-sm font-medium text-gray-300">PO Required</l-abel>
-                                <select id="porequired" name="porequired"
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                    <option value="No">No</option>
-                                    <option value="Yes">Yes</option>
-                                </select>
-                            </div>
-
-                            <div class="md:col-span-2">
-                                <label for="selectedchannels" class="block text-sm font-medium text-gray-300">Selected Channels</label>
-                                <input type="text" name="selectedchannels" id="selectedchannels" value="Twitter"
-                                    placeholder="e.g., Twitter, Facebook, Google"
-                                    class="w-full px-3 py-2 mt-1 text-white bg-gray-700 border border-gray-600 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
-                                <p class="mt-1 text-xs text-gray-400">Enter channels separated by a comma.</p>
-                            </div>
-                        </div>
-
-                        <!-- Form submission button -->
-                        <div class="pt-5 mt-8 border-t border-gray-700">
-                            <div class="flex justify-end">
-                                <button id="submit-campaign-button" type="submit"
-                                    class="flex justify-center px-6 py-2 text-sm font-medium text-white bg-indigo-600 border border-transparent rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed">
-                                    <span class="button-text">Submit Campaign</span>
-                                    <svg class="w-5 h-5 ml-2 text-white animate-spin button-loader" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" style="display: none;">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </form>
-
-                <!-- Result/Feedback Section -->
-                <div id="form-result" class="max-w-4xl mt-6" style="display: none;">
-                    <h3 class="text-lg font-medium text-white">Submission Result</h3>
-                    <pre id="result-pre" class="p-4 mt-2 overflow-x-auto text-sm bg-gray-800 rounded-md shadow-inner"></pre>
-                </div>
-
-            </div>
-        </main>
-    </div>
-
+    <!-- Main Application Logic -->
     <script type="module">
         // --- STATE ---
-        let isAuthenticated = false;
-        let currentUser = null; // Will hold { username, password, firstName, lastName, avatarUrl }
+        const appState = {
+            sidebarOpen: true,
+            user: null, // { firstName, lastName }
+            isAuthenticated: false,
+            currentModule: 'login', // 'login' or 'campaign'
+        };
 
-        // --- DOM Elements ---
-        const loginView = document.getElementById('login-view');
-        const mainAppView = document.getElementById('main-app-view');
-        const mainContent = document.getElementById('main-content');
-        const loginForm = document.getElementById('login-form');
-        const loginButton = document.getElementById('login-button');
-        const loginFeedback = document.getElementById('login-feedback');
-        
-        const campaignForm = document.getElementById('campaign-form');
-        const campaignButton = document.getElementById('submit-campaign-button');
-        const formResult = document.getElementById('form-result');
-        const resultPre = document.getElementById('result-pre');
-        const clientSelect = document.getElementById('client');
-        const agencySelect = document.getElementById('agency');
-        const debtorSelect = document.getElementById('debtor');
+        const appContainer = document.getElementById('app');
 
-        const sidebar = document.getElementById('sidebar');
-        const sidebarOpenBtn = document.getElementById('sidebar-open-btn');
-        const sidebarCloseBtn = document.getElementById('toggle-sidebar');
-        const userProfileDiv = document.getElementById('user-profile');
-
-        // --- COOKIE HELPERS ---
-        function setCookie(name, value, days) {
-            let expires = "";
-            if (days) {
-                const date = new Date();
-                date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-                expires = "; expires=" + date.toUTCString();
-            }
-            document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax; Secure";
-        }
-
-        function getCookie(name) {
-            const nameEQ = name + "=";
-            const ca = document.cookie.split(';');
-            for (let i = 0; i < ca.length; i++) {
-                let c = ca[i];
-                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
-            }
-            return null;
-        }
-
-        function deleteCookie(name) {
-            document.cookie = name + '=; Max-Age=-99999999; path=/; SameSite=Lax; Secure';
-        }
-
-        // --- UI / NAVIGATION ---
-        function showLoader(button) {
-            button.disabled = true;
-            button.querySelector('.button-text').style.display = 'none';
-            button.querySelector('.button-loader').style.display = 'block';
-        }
-
-        function hideLoader(button, buttonText) {
-            button.disabled = false;
-            button.querySelector('.button-text').style.display = 'block';
-            button.querySelector('.button-text').textContent = buttonText;
-            button.querySelector('.button-loader').style.display = 'none';
-        }
-
-        function showLoginFeedback(message, isError = false) {
-            loginFeedback.textContent = message;
-            loginFeedback.className = `p-4 text-sm rounded-md ${isError ? 'bg-red-900 text-red-200' : 'bg-green-900 text-green-200'}`;
-            loginFeedback.style.display = 'block';
-        }
-
-        function showFormFeedback(message, isError = false) {
-            formResult.style.display = 'block';
-            resultPre.textContent = message;
-            resultPre.className = `p-4 mt-2 overflow-x-auto text-sm bg-gray-800 rounded-md shadow-inner ${isError ? 'text-red-300' : 'text-green-300'}`;
-        }
-        
-        async function navigateTo(view) {
-            if (view === 'login') {
-                loginView.style.display = 'flex';
-                mainAppView.style.display = 'none';
-                sidebarOpenBtn.style.display = 'none';
-                isAuthenticated = false;
-                currentUser = null;
-            } else if (view === 'main-app' && isAuthenticated) {
-                loginView.style.display = 'none';
-                mainAppView.style.display = 'flex';
-                sidebarOpenBtn.style.display = 'block';
-                updateUserProfile();
-                await navigateToModule('module-list-view'); // Default to module list
-            }
-        }
-        
-        async function navigateToModule(moduleId) {
-            if (!isAuthenticated) {
-                navigateTo('login'); // This will redirect synchronously
-                return;
-            }
-            
-            // Hide all modules
-            document.querySelectorAll('.module-content').forEach(module => {
-                module.style.display = 'none';
-            });
-            
-            // Highlight active nav link
-            document.querySelectorAll('.module-nav-link').forEach(link => {
-                if (link.dataset.module === moduleId) {
-                    link.classList.add('bg-gray-900', 'text-white');
-                    link.classList.remove('text-gray-300');
-                } else {
-                    link.classList.remove('bg-gray-900', 'text-white');
-                    link.classList.add('text-gray-300');
-                }
-            });
-
-            // Show target module
-            const targetModule = document.getElementById(moduleId);
-            if (targetModule) {
-                targetModule.style.display = 'block';
-            }
-            
-            // Special logic for campaign module
-            if (moduleId === 'campaign-submission-view') {
-                // Load all dropdowns in parallel
-                await Promise.all([
-                    loadClientsDropdown(),
-                    loadAgenciesDropdown(),
-                    loadDebtorsDropdown()
-                ]);
-            }
-
-            // Close sidebar on mobile after navigation
-            if (window.innerWidth < 768) {
-                sidebar.classList.add('-translate-x-full');
-            }
-        }
-
-        function updateUserProfile() {
-            if (!currentUser) return;
-            userProfileDiv.innerHTML = `
-                <img class="w-10 h-10 rounded-full" src="${currentUser.avatarUrl || 'https://placehold.co/40x40/6b7280/FFFFFF?text=' + currentUser.firstName.charAt(0)}" alt="User Avatar">
-                <div class="ml-3">
-                    <p class="text-sm font-medium text-white">${currentUser.firstName} ${currentUser.lastName}</p>
-                    <p class="text-xs text-gray-400">${currentUser.username}</p>
-                </div>
-            `;
-        }
-        
-        // --- API & LOGIC ---
+        // --- UTILITY FUNCTIONS ---
 
         /**
-         * A wrapper for fetch that adds Basic Auth from currentUser
+         * Generates a SHA-256 hash of a string.
+         * @param {string} str - The input string.
+         * @returns {Promise<string>} The hex-encoded hash.
          */
-        async function apiFetch(url, options = {}) {
-            if (!currentUser || !currentUser.username || !currentUser.password) {
-                throw new Error('User not authenticated.');
-            }
+        async function sha256(str) {
+            const textAsBuffer = new TextEncoder().encode(str);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', textAsBuffer);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
 
-            const headers = new Headers(options.headers || {});
-            const authString = btoa(`${currentUser.username}:${currentUser.password}`);
-            headers.set('Authorization', `Basic ${authString}`);
+        /**
+         * Checks localStorage for auth data and updates app state.
+         */
+        function checkAuthState() {
+            const token = localStorage.getItem('token');
+            const firstName = localStorage.getItem('firstName');
+            const lastName = localStorage.getItem('lastName');
             
-            if (options.body) {
-                headers.set('Content-Type', 'application/json');
-            }
-            
-            const response = await fetch(url, { ...options, headers });
-            
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(`HTTP error! status: ${response.status} ${response.statusText} - ${errorText}`);
-            }
-            
-            const contentType = response.headers.get("content-type");
-            if (contentType && contentType.indexOf("application/json") !== -1) {
-                return response.json();
+            if (token && firstName && lastName) {
+                appState.isAuthenticated = true;
+                appState.user = { firstName, lastName };
             } else {
-                return response.text();
+                appState.isAuthenticated = false;
+                appState.user = null;
             }
         }
         
         /**
-         * A. Login Module Logic
+         * Clears all auth data from localStorage and resets state.
          */
-        async function handleLogin(e) {
-            e.preventDefault();
-            showLoader(loginButton);
-            loginFeedback.style.display = 'none';
-            
-            const username = loginForm.username.value;
-            const password = loginForm.password.value;
-            const authHeader = 'Basic ' + btoa(username + ':' + password);
-            const loginUrl = 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me';
-
-            try {
-                const response = await fetch(loginUrl, {
-                    method: 'GET',
-                    headers: { 'Authorization': authHeader }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`Login failed with status: ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                if (data.success && data.data && data.data.length > 0) {
-                    const user = data.data[0];
-                    isAuthenticated = true;
-                    currentUser = {
-                        username: username,
-                        password: password, // Note: Storing password in JS state is generally discouraged, but required for subsequent API calls as per prompt.
-                        firstName: user.firstName,
-                        lastName: user.lastName,
-                        avatarUrl: user.avatarUrl
-                    };
-                    
-                    // Store credentials in a cookie
-                    setCookie('auth', JSON.stringify(currentUser), 1); // Store for 1 day
-                    
-                    showLoginFeedback(`${user.firstName} ${user.lastName} login successfully.`);
-                    
-                    // Wait 1 sec to show success, then navigate
-                    setTimeout(() => navigateTo('main-app'), 1000);
-                    
-                } else {
-                    throw new Error('Login API returned success=false or no user data.');
-                }
-
-            } catch (error) {
-                console.error('Login Error:', error);
-                showLoginFeedback('Login failed, please try again.', true);
-                isAuthenticated = false;
-                currentUser = null;
-            } finally {
-                hideLoader(loginButton, 'Login');
-            }
-        }
-        
-        /**
-         * Generic helper to populate a dropdown from an API endpoint
-         */
-        async function loadDropdown(selectElement, url, defaultSelectedValue, defaultLabel = "Select") {
-            // Prevent re-loading if already populated
-            if (selectElement.options.length > 1 && !selectElement.innerHTML.includes("Failed")) return;
-
-            // Set loading state
-            selectElement.disabled = true;
-            selectElement.innerHTML = '<option value="">Loading...</option>';
-
-            try {
-                const data = await apiFetch(url, { method: 'GET' });
-
-                if (data && data.value) {
-                    selectElement.innerHTML = `<option value="">-- ${defaultLabel} --</option>`; // Clear "Loading..."
-                    
-                    let foundDefault = false;
-                    data.value.forEach(item => {
-                        const option = document.createElement('option');
-                        option.value = item.value;
-                        option.textContent = item.value;
-                        if (item.value === defaultSelectedValue) {
-                            option.selected = true;
-                            foundDefault = true;
-                        }
-                        selectElement.appendChild(option);
-                    });
-                    
-                    // If default value wasn't in the list, add it as the first option (if provided)
-                    // This handles cases where the default value might be old
-                    if (defaultSelectedValue && !foundDefault) {
-                         const defaultOption = document.createElement('option');
-                         defaultOption.value = defaultSelectedValue;
-                         defaultOption.textContent = defaultSelectedValue;
-                         defaultOption.selected = true;
-                         // Insert it after the placeholder
-                         selectElement.insertBefore(defaultOption, selectElement.children[1]);
-                    }
-                    
-                    selectElement.disabled = false;
-                } else {
-                    throw new Error(`Invalid data structure from ${url}`);
-                }
-                
-            } catch (error) {
-                console.error(`Failed to load dropdown for ${selectElement.id}:`, error);
-                selectElement.innerHTML = `<option value="">Failed to load ${selectElement.id}</option>`;
-                selectElement.disabled = true; // Keep it disabled on failure
-            }
-        }
-
-        /**
-         * B. Campaign Module: Load Clients Dropdown
-         */
-        async function loadClientsDropdown() {
-            const clientUrl = 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/v1.0/value/clients-grm-mys';
-            await loadDropdown(clientSelect, clientUrl, 'Adidas Group', 'Select a Client');
-        }
-
-        /**
-         * B. Campaign Module: Load Agencies Dropdown
-         */
-        async function loadAgenciesDropdown() {
-            const agencyUrl = 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/v1.0/value/agencies';
-            await loadDropdown(agencySelect, agencyUrl, 'Eightbar', 'Select an Agency');
-        }
-
-        /**
-         * B. Campaign Module: Load Debtors Dropdown
-         */
-        async function loadDebtorsDropdown() {
-            const debtorUrl = 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/v1.0/value/debtors-grm-mys';
-            await loadDropdown(debtorSelect, debtorUrl, 'Adidas Malaysia Sdn Bhd', 'Select a Debtor');
-        }
-        
-        /**
-         * B. Campaign Module: Handle Form Submission
-         */
-        async function handleCampaignSubmit(e) {
-            e.preventDefault();
-            showLoader(campaignButton);
-            formResult.style.display = 'none';
-            resultPre.className = 'p-4 mt-2 overflow-x-auto text-sm bg-gray-800 rounded-md shadow-inner'; // Reset colors
-
-            const formData = new FormData(campaignForm);
-            const formProps = Object.fromEntries(formData);
-            
-            // 1. Parse selectedchannels from comma-separated string to array
-            const channels = formProps.selectedchannels
-                .split(',')
-                .map(ch => ch.trim())
-                .filter(ch => ch.length > 0);
-
-            // 2. Construct the full payload
-            const payload = {
-                type: formProps.type,
-                space: formProps.space,
-                entity: formProps.entity,
-                varientId: parseInt(formProps.varientId, 10),
-                fields: {
-                    requestedstartdate: formProps.requestedstartdate,
-                    agency: formProps.agency,
-                    brand: formProps.brand,
-                    client: formProps.client,
-                    debtor: formProps.debtor,
-                    currency: formProps.currency,
-                    pod: formProps.pod,
-                    campaignname: formProps.campaignname,
-                    campaignstartdate: formProps.campaignstartdate,
-                    campaignenddate: formProps.campaignenddate,
-                    campaignobjective: formProps.campaignobjective,
-                    requestormarket: formProps.requestormarket,
-                    optin: formProps.optin,
-                    porequired: formProps.porequired,
-                    overallbudget: parseFloat(formProps.overallbudget),
-                    selectedchannels: channels
-                }
-            };
-
-            const campaignUrl = 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/campaign';
-            
-            try {
-                // 3. Make the API call
-                const data = await apiFetch(campaignUrl, {
-                    method: 'POST',
-                    body: JSON.stringify(payload)
-                });
-                
-                // 4. Show success feedback
-                showFormFeedback(JSON.stringify(data, null, 2), false);
-                
-            } catch (error) {
-                console.error('Campaign Submission Error:', error);
-                // 5. Show error feedback
-                const errorMessage = `Error: ${error.message}\n\n(Note: If this is a 'Failed to fetch' error, it may be a CORS issue. The API server 'api.wrikexpi.groupm.com' must be configured to allow requests from this page's origin.)`;
-                showFormFeedback(errorMessage, true);
-            } finally {
-                // 6. Reset button
-                hideLoader(campaignButton, 'Submit Campaign');
-            }
-        }
-
-        /**
-         * Logout Logic
-         */
-        function handleLogout() {
-            deleteCookie('auth');
-            currentUser = null;
-            isAuthenticated = false;
-            userProfileDiv.innerHTML = '';
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            localStorage.removeItem('password');
+            localStorage.removeItem('firstName');
+            localStorage.removeItem('lastName');
+            localStorage.removeItem('clientId');
+            appState.isAuthenticated = false;
+            appState.user = null;
             navigateTo('login');
         }
+        
+        /**
+         * Gets the current base URL (without query params or hash).
+         * @returns {string} The base URL.
+         */
+        function getBaseUrl() {
+            return window.location.origin + window.location.pathname;
+        }
 
         /**
-         * App Initialization
+         * Renders a message overlay.
+         * @param {string} title - The title of the message.
+         * @param {string} message - The message content (can be HTML).
+         * @param {'success' | 'error' | 'info'} type - The message type.
+         * @param {Function} [onClose] - Optional callback when closed.
          */
-        async function init() {
-            // Attach permanent event listeners
-            loginForm.addEventListener('submit', handleLogin);
-            campaignForm.addEventListener('submit', handleCampaignSubmit);
-            document.getElementById('nav-logout').addEventListener('click', handleLogout);
+        function showMessage(title, message, type = 'info', onClose) {
+            let bgColor, titleColor, buttonColor;
+            switch(type) {
+                case 'success':
+                    bgColor = 'bg-green-600';
+                    titleColor = 'text-green-100';
+                    buttonColor = 'bg-green-700 hover:bg-green-800';
+                    break;
+                case 'error':
+                    bgColor = 'bg-red-600';
+                    titleColor = 'text-red-100';
+                    buttonColor = 'bg-red-700 hover:bg-red-800';
+                    break;
+                default:
+                    bgColor = 'bg-blue-600';
+                    titleColor = 'text-blue-100';
+                    buttonColor = 'bg-blue-700 hover:bg-blue-800';
+                    break;
+            }
+
+            const overlay = document.createElement('div');
+            overlay.className = 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50 p-4';
+            overlay.innerHTML = `
+                <div class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden max-w-lg w-full transform transition-all scale-95 opacity-0" style="transition-duration: 200ms;">
+                    <div class="p-6 ${bgColor}">
+                        <h3 class="text-2xl font-bold ${titleColor}">${title}</h3>
+                    </div>
+                    <div class="p-6 text-gray-200 text-base overflow-y-auto max-h-96">
+                        ${message}
+                    </div>
+                    <div class="p-4 bg-gray-750 text-right">
+                        <button class="close-btn px-6 py-2 ${buttonColor} text-white font-semibold rounded-lg shadow-md transition-all">Close</button>
+                    </div>
+                </div>
+            `;
             
-            // Sidebar toggles
-            sidebarCloseBtn.addEventListener('click', () => sidebar.classList.add('-translate-x-full'));
-            sidebarOpenBtn.addEventListener('click', () => sidebar.classList.remove('-translate-x-full'));
+            document.body.appendChild(overlay);
+            
+            // For transition effect
+            setTimeout(() => {
+                overlay.firstElementChild.classList.remove('scale-95', 'opacity-0');
+                overlay.firstElementChild.classList.add('scale-100', 'opacity-100');
+            }, 10);
 
-            // Module navigation listeners
-            document.querySelectorAll('.module-nav-link, .module-card').forEach(link => {
-                link.addEventListener('click', async (e) => {
-                    e.preventDefault();
-                    const moduleId = e.currentTarget.dataset.module;
-                    await navigateToModule(moduleId);
-                });
-            });
+            overlay.querySelector('.close-btn').onclick = () => {
+                overlay.firstElementChild.classList.add('scale-95', 'opacity-0');
+                overlay.firstElementChild.classList.remove('scale-100', 'opacity-100');
+                setTimeout(() => {
+                    document.body.removeChild(overlay);
+                    if (onClose) onClose();
+                }, 200);
+            };
+        }
 
-            // Check for auth cookie
-            const authCookie = getCookie('auth');
-            if (authCookie) {
-                try {
-                    currentUser = JSON.parse(authCookie);
-                    if (currentUser.username && currentUser.password) {
-                        isAuthenticated = true;
-                        await navigateTo('main-app');
-                    } else {
-                        throw new Error('Invalid auth cookie');
-                    }
-                } catch (e) {
-                    console.error('Failed to parse auth cookie', e);
-                    deleteCookie('auth');
-                    navigateTo('login');
-                }
+        // --- NAVIGATION & ROUTING ---
+
+        /**
+         * Navigates to a specific module.
+         * @param {string} moduleName - 'login' or 'campaign'.
+         */
+        function navigateTo(moduleName) {
+            checkAuthState();
+            
+            if (moduleName !== 'login' && !appState.isAuthenticated) {
+                appState.currentModule = 'login';
+                window.location.hash = '#login';
             } else {
+                appState.currentModule = moduleName;
+                window.location.hash = `#${moduleName}`;
+            }
+            renderApp();
+        }
+
+        /**
+         * Handles hash changes to navigate.
+         */
+        function handleHashChange() {
+            const hash = window.location.hash.substring(1); // Remove '#'
+            const validModules = ['login', 'campaign'];
+            
+            if (validModules.includes(hash)) {
+                navigateTo(hash);
+            } else {
+                navigateTo('login'); // Default to login
+            }
+        }
+        
+        /**
+         * Initial router setup.
+         */
+        function initializeRouter() {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            const hash = window.location.hash.substring(1);
+
+            if (code) {
+                // If there's a code, force login module to handle it
+                appState.currentModule = 'login';
+                renderApp();
+            } else if (hash) {
+                handleHashChange();
+            } else {
+                // Default view
                 navigateTo('login');
             }
         }
 
-        // Start the app
-        document.addEventListener('DOMContentLoaded', async () => await init());
+        // --- RENDERING ---
+
+        /**
+         * Main application render function.
+         */
+        function renderApp() {
+            const { sidebarOpen, user, isAuthenticated, currentModule } = appState;
+            
+            // Sidebar links
+            const loginLinkClass = currentModule === 'login' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white';
+            const campaignLinkClass = currentModule === 'campaign' ? 'bg-blue-600 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white';
+
+            appContainer.innerHTML = `
+                <!-- Sidebar -->
+                <nav id="sidebar" class="absolute md:relative ${sidebarOpen ? 'sidebar-open' : 'sidebar-closed'} w-64 bg-gray-850 h-full flex-shrink-0 flex flex-col z-20 shadow-lg transition-transform duration-300 ease-in-out">
+                    <!-- Brand/Logo -->
+                    <div class="flex items-center justify-between h-16 px-4 bg-gray-950 shadow-md">
+                        <span class="text-2xl font-bold text-white">Portal</span>
+                        <!-- Close button for mobile -->
+                        <button id="sidebar-close-btn" class="md:hidden text-gray-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        </button>
+                    </div>
+                    
+                    <!-- Navigation -->
+                    <div class="flex-1 overflow-y-auto no-scrollbar p-4 space-y-2">
+                        <a href="#login" data-module="login" class="nav-link flex items-center px-4 py-3 rounded-lg ${loginLinkClass} transition-colors duration-200">
+                            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h5a3 3 0 013 3v1"></path></svg>
+                            <span>Login</span>
+                        </a>
+                        ${isAuthenticated ? `
+                        <a href="#campaign" data-module="campaign" class="nav-link flex items-center px-4 py-3 rounded-lg ${campaignLinkClass} transition-colors duration-200">
+                            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                            <span>Campaign Form</span>
+                        </a>
+                        ` : `
+                        <div class="flex items-center px-4 py-3 rounded-lg text-gray-500 cursor-not-allowed">
+                            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                            <span>Campaign Form</span>
+                        </div>
+                        `}
+                    </div>
+                    
+                    <!-- Footer / Logout -->
+                    ${isAuthenticated ? `
+                    <div class="p-4 border-t border-gray-700">
+                        <button id="logout-btn" class="w-full flex items-center justify-center px-4 py-3 rounded-lg text-red-400 hover:bg-red-800 hover:text-red-100 transition-colors duration-200">
+                            <svg class="w-6 h-6 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h5a3 3 0 013 3v1"></path></svg>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                    ` : ''}
+                </nav>
+                
+                <!-- Main Content -->
+                <div class="flex-1 flex flex-col overflow-hidden">
+                    <!-- Header -->
+                    <header class="bg-gray-900 h-16 flex-shrink-0 flex justify-between items-center px-6 shadow-md z-10">
+                        <button id="sidebar-toggle-btn" class="text-gray-400 hover:text-white">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                        </button>
+                        <div class="text-lg font-semibold text-gray-200">
+                            ${user ? `Welcome, ${user.firstName} ${user.lastName}` : 'Campaign Submission Portal'}
+                        </div>
+                        <div>
+                            <!-- Placeholder for other icons -->
+                        </div>
+                    </header>
+                    
+                    <!-- Content Area -->
+                    <main id="content-area" class="flex-1 overflow-y-auto no-scrollbar p-4 md:p-8 lg:p-12">
+                        <!-- Module content will be injected here -->
+                    </main>
+                </div>
+            `;
+            
+            // Render the specific module
+            const contentArea = document.getElementById('content-area');
+            switch(currentModule) {
+                case 'login':
+                    renderLoginModule(contentArea);
+                    break;
+                case 'campaign':
+                    renderCampaignModule(contentArea);
+                    break;
+                default:
+                    contentArea.innerHTML = `<h1 class="text-3xl font-bold">Module not found.</h1>`;
+            }
+
+            // Attach event listeners
+            attachGlobalListeners();
+        }
+        
+        /**
+         * Attaches event listeners for the main layout.
+         */
+        function attachGlobalListeners() {
+            document.getElementById('sidebar-toggle-btn').addEventListener('click', () => {
+                appState.sidebarOpen = !appState.sidebarOpen;
+                document.getElementById('sidebar').classList.toggle('sidebar-open', appState.sidebarOpen);
+                document.getElementById('sidebar').classList.toggle('sidebar-closed', !appState.sidebarOpen);
+            });
+            
+            const closeBtn = document.getElementById('sidebar-close-btn');
+            if (closeBtn) {
+                closeBtn.addEventListener('click', () => {
+                    appState.sidebarOpen = false;
+                    document.getElementById('sidebar').classList.remove('sidebar-open');
+                    document.getElementById('sidebar').classList.add('sidebar-closed');
+                });
+            }
+
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const module = e.currentTarget.dataset.module;
+                    if (module) navigateTo(module);
+                });
+            });
+            
+            const logoutBtn = document.getElementById('logout-btn');
+            if (logoutBtn) {
+                logoutBtn.addEventListener('click', logout);
+            }
+        }
+
+        // --- MODULE A: LOGIN ---
+
+        /**
+         * Renders the Login module content.
+         * @param {HTMLElement} container - The element to render into.
+         */
+        function renderLoginModule(container) {
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+
+            if (code) {
+                // Mode 2: OAuth Callback
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center min-h-full">
+                        <div class="spinner"></div>
+                        <h2 class="text-2xl font-semibold text-gray-300 mt-6">Authenticating...</h2>
+                        <p class="text-gray-400 mt-2">Please wait while we verify your credentials.</p>
+                    </div>
+                `;
+                handleLoginCallback(code);
+            } else {
+                // Mode 1: Authentication Button
+                container.innerHTML = `
+                    <div class="max-w-md mx-auto mt-10 md:mt-20 bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
+                        <div class="p-8 md:p-12">
+                            <h2 class="text-3xl font-bold text-center text-white mb-4">Welcome</h2>
+                            <p class="text-center text-gray-300 mb-8">Please log in with your Wrike account to continue.</p>
+                            <button id="login-btn" class="btn-primary text-lg">
+                                Login & Authenticate
+                            </button>
+                        </div>
+                    </div>
+                `;
+                document.getElementById('login-btn').addEventListener('click', handleLoginButton);
+            }
+        }
+
+        /**
+         * Mode 1: Generate clientId and redirect for OAuth.
+         */
+        async function handleLoginButton() {
+            try {
+                const timestamp = Date.now();
+                const random = Math.random();
+                const data = `${timestamp}${random}`;
+                const hash = await sha256(data);
+                const clientId = hash.slice(-7);
+                
+                localStorage.setItem('clientId', clientId);
+                
+                const redirectUri = getBaseUrl();
+                const authUrl = `https://xpi-api.gowrike.space/?accountId=3128883&redirectUri=${encodeURIComponent(redirectUri)}&client_id=${encodeURIComponent(clientId)}`;
+                
+                window.location.href = authUrl;
+            } catch (error) {
+                console.error('Failed to generate SHA-256 or redirect:', error);
+                showMessage('Login Error', `An unexpected error occurred: ${error.message}`, 'error');
+            }
+        }
+
+        /**
+         * Mode 2: Handle the OAuth callback, exchange code for token.
+         * @param {string} code - The authorization code from the URL.
+         */
+        async function handleLoginCallback(code) {
+            const clientId = localStorage.getItem('clientId');
+            const container = document.getElementById('content-area');
+            
+            // Clear the 'code' from URL
+            window.history.replaceState({}, document.title, getBaseUrl() + window.location.hash);
+
+            // Validation
+            if (!clientId || !code) {
+                const errorMsg = 'Authentication failed: Missing Client ID or Code. Please try logging in again.';
+                container.innerHTML = `<h2 class="text-2xl text-red-400">${errorMsg}</h2><p class="text-gray-400 mt-4">Redirecting to login page...</p>`;
+                setTimeout(() => {
+                    window.location.href = getBaseUrl(); // Full redirect to clear state
+                }, 10000);
+                return;
+            }
+
+            // API Call 1: Exchange code for token
+            try {
+                const tokenUrl = `https://xpi-api.gowrike.space/api/v1/wrikexpi/token/exchange?code=${code}&client_id=${clientId}&grant_type=authorization_code`;
+                const response1 = await fetch(tokenUrl);
+                const data1 = await response1.json();
+
+                if (!response1.ok || !data1.success) {
+                    throw new Error(JSON.stringify(data1, null, 2));
+                }
+
+                // API 1 Success: Store credentials
+                const { token, credentials } = data1.data;
+                localStorage.setItem('token', token);
+                localStorage.setItem('username', credentials.username);
+                localStorage.setItem('password', credentials.password);
+                
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center min-h-full">
+                        <div class="spinner"></div>
+                        <h2 class="text-2xl font-semibold text-gray-300 mt-6">Verifying Account...</h2>
+                        <p class="text-gray-400 mt-2">Credentials received, checking user profile.</p>
+                    </div>
+                `;
+                
+                // API Call 2: Verify user profile
+                try {
+                    const profileUrl = 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me';
+                    const response2 = await fetch(profileUrl, {
+                        headers: {
+                            'Authorization': `Bearer ${token}`
+                        }
+                    });
+                    const data2 = await response2.json();
+
+                    if (!response2.ok || !data2.success || !data2.data || data2.data.length === 0) {
+                        throw new Error(JSON.stringify(data2, null, 2));
+                    }
+                    
+                    // API 2 Success: Store user info and complete login
+                    const user = data2.data[0];
+                    localStorage.setItem('firstName', user.firstName);
+                    localStorage.setItem('lastName', user.lastName);
+                    
+                    showMessage(
+                        'Login Successful!',
+                        `<p class="text-lg">Welcome, <strong>${user.firstName} ${user.lastName}</strong>!</p><p>You will be redirected to the campaign form shortly.</p>`,
+                        'success',
+                        () => navigateTo('campaign') // Navigate after user closes modal
+                    );
+                    
+                    // Also auto-navigate after a delay
+                    setTimeout(() => navigateTo('campaign'), 2000);
+
+                } catch (verifyError) {
+                    // API 2 Failed
+                    logout(); // Clear partial login
+                    showApiError(
+                        container,
+                        "Login failed, we are unable to verify your account. Please try again.",
+                        verifyError.message
+                    );
+                }
+
+            } catch (tokenError) {
+                // API 1 Failed
+                showApiError(
+                    container,
+                    "An unexpected technical error occurred during login.",
+                    tokenError.message
+                );
+            }
+        }
+        
+        /**
+         * Helper to display API errors during login.
+         * @param {HTMLElement} container - The element to render into.
+         * @param {string} title - The error title.
+         * @param {string} responseText - The full API response text.
+         */
+        function showApiError(container, title, responseText) {
+            let formattedResponse = responseText;
+            try {
+                // Try to pretty-print if it's JSON
+                formattedResponse = JSON.stringify(JSON.parse(responseText), null, 2);
+            } catch (e) {
+                // Not JSON, just use the text
+            }
+            
+            container.innerHTML = `
+                <div class="max-w-2xl mx-auto mt-10 bg-gray-800 rounded-xl shadow-2xl p-8">
+                    <h2 class="text-3xl font-bold text-red-400 mb-4">${title}</h2>
+                    <p class="text-gray-300 mb-6">The API returned the following response:</p>
+                    <pre class="bg-gray-900 text-red-200 p-4 rounded-lg overflow-x-auto text-sm">${formattedResponse}</pre>
+                    <button id="start-over-btn" class="btn-secondary text-lg mt-8">
+                        Start Over
+                    </button>
+                </div>
+            `;
+            document.getElementById('start-over-btn').addEventListener('click', () => {
+                window.location.href = getBaseUrl();
+            });
+        }
+
+        // --- MODULE B: CAMPAIGN SUBMISSION ---
+
+        /**
+         * Renders the Campaign Submission module.
+         * @param {HTMLElement} container - The element to render into.
+         */
+        function renderCampaignModule(container) {
+            // Default values from cURL
+            const defaults = {
+                type: "Campaign Request",
+                space: "GRM-MYS-GMN",
+                entity: "Campaign",
+                varientId: 1,
+                fields: {
+                    requestedstartdate: "2026-07-01",
+                    agency: "Eightbar",
+                    brand: "World Pinball",
+                    client: "Adidas Group",
+                    debtor: "Adidas Malaysia Sdn Bhd",
+                    currency: "SGD",
+                    pod: "Pod 1A",
+                    campaignname: "World Pinball Day 7000",
+                    campaignstartdate: "2026-08-29",
+                    campaignenddate: "2026-10-29",
+                    campaignobjective: "Upper Funnel / Awareness",
+                    requestormarket: "Singapore",
+                    optin: "No",
+                    porequired: "No",
+                    overallbudget: "100",
+                    selectedchannels: "Twitter", // Will be parsed to array on submit
+                }
+            };
+
+            // Field labels
+            const labels = {
+                requestedstartdate: "Requested Start Date",
+                agency: "Agency",
+                brand: "Brand",
+                client: "Client",
+                debtor: "Debtor",
+                currency: "Currency",
+                pod: "Pod",
+                campaignname: "Campaign Name",
+                campaignstartdate: "Campaign Start Date",
+                campaignenddate: "Campaign End Date",
+                campaignobjective: "Campaign Objective",
+                requestormarket: "Requestor Market",
+                optin: "Opt-in",
+                porequired: "PO Required",
+                overallbudget: "Overall Budget",
+                selectedchannels: "Selected Channels (comma-separated)",
+            };
+            
+            // Helper to create form fields
+            const createField = (key, value) => {
+                const label = labels[key] || key.charAt(0).toUpperCase() + key.slice(1);
+                let inputHtml = '';
+                
+                if (key.includes('date')) {
+                    inputHtml = `<input type="date" id="${key}" name="fields.${key}" value="${value}" class="form-input">`;
+                } else if (key === 'overallbudget') {
+                    inputHtml = `<input type="number" id="${key}" name="fields.${key}" value="${value}" class="form-input">`;
+                } else if (key === 'optin' || key === 'porequired') {
+                    inputHtml = `
+                        <select id="${key}" name="fields.${key}" class="form-select">
+                            <option value="No" ${value === 'No' ? 'selected' : ''}>No</option>
+                            <option value="Yes" ${value === 'Yes' ? 'selected' : ''}>Yes</option>
+                        </select>
+                    `;
+                } else if (key === 'client' || key === 'debtor' || key === 'agency') {
+                    // Dropdowns will be populated by API
+                    inputHtml = `
+                        <select id="${key}" name="fields.${key}" class="form-select" disabled>
+                            <option value="">Loading...</option>
+                        </select>
+                    `;
+                } else {
+                    inputHtml = `<input type="text" id="${key}" name="fields.${key}" value="${value}" class="form-input">`;
+                }
+                
+                return `
+                    <div class="col-span-1">
+                        <label for="${key}" class="block text-sm font-medium text-gray-300 mb-2">${label}</label>
+                        ${inputHtml}
+                    </div>
+                `;
+            };
+            
+            // Build form fields
+            let fieldsHtml = '';
+            for (const [key, value] of Object.entries(defaults.fields)) {
+                fieldsHtml += createField(key, value);
+            }
+
+            container.innerHTML = `
+                <div class="max-w-6xl mx-auto">
+                    <h1 class="text-4xl font-bold text-white mb-8">New Campaign Request</h1>
+                    
+                    <form id="campaign-form" class="bg-gray-800 p-6 md:p-10 rounded-xl shadow-2xl space-y-8">
+                        <!-- Hidden Fields -->
+                        <input type="hidden" name="type" value="${defaults.type}">
+                        <input type="hidden" name="space" value="${defaults.space}">
+                        <input type="hidden" name="entity" value="${defaults.entity}">
+                        <input type="hidden" name="varientId" value="${defaults.varientId}">
+                        
+                        <!-- Visible Fields Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            ${fieldsHtml}
+                        </div>
+                        
+                        <!-- Submission & Result -->
+                        <div class="pt-6 border-t border-gray-700">
+                            <button type="submit" id="submit-btn" class="btn-primary text-lg w-full md:w-auto">
+                                Submit Campaign
+                            </button>
+                            
+                            <div id="form-result-wrapper" class="mt-6 hidden">
+                                <h3 id="form-result-title" class="text-xl font-semibold mb-2"></h3>
+                                <pre id="form-result" class="bg-gray-900 p-4 rounded-lg overflow-x-auto text-sm"></pre>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            `;
+            
+            // Attach form listener
+            document.getElementById('campaign-form').addEventListener('submit', handleCampaignSubmit);
+            
+            // Populate dynamic dropdowns
+            populateDropdowns();
+        }
+        
+        /**
+         * Fetches data and populates the dropdowns for the campaign form.
+         */
+        async function populateDropdowns() {
+            const username = localStorage.getItem('username');
+            const password = localStorage.getItem('password');
+            
+            if (!username || !password) {
+                showMessage('Error', 'Credentials not found. Please log in again.', 'error', () => navigateTo('login'));
+                return;
+            }
+
+            const basicAuth = 'Basic ' + btoa(`${username}:${password}`);
+            const headers = { 'Authorization': basicAuth };
+
+            const endpoints = {
+                client: 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/v1.0/value/clients-grm-mys',
+                debtor: 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/v1.0/value/debtors-grm-mys',
+                agency: 'https://api.wrikexpi.groupm.com/api/v1/wrikexpi/v1.0/value/agencies'
+            };
+            
+            const helper = async (id, url) => {
+                const select = document.getElementById(id);
+                try {
+                    const response = await fetch(url, { headers });
+                    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                    const data = await response.json();
+                    
+                    if (data && data.value && Array.isArray(data.value)) {
+                        select.innerHTML = '<option value="">Select an option</option>';
+                        data.value.forEach(item => {
+                            const option = document.createElement('option');
+                            option.value = item.value;
+                            option.textContent = item.value;
+                            select.appendChild(option);
+                        });
+                        select.disabled = false;
+                    } else {
+                        throw new Error('Invalid data structure');
+                    }
+                } catch (error) {
+                    console.error(`Failed to load ${id}:`, error);
+                    select.innerHTML = '<option value="">Error loading data</option>';
+                    select.disabled = true;
+                }
+            };
+            
+            // Fetch all dropdowns in parallel
+            await Promise.all([
+                helper('client', endpoints.client),
+                helper('debtor', endpoints.debtor),
+                helper('agency', endpoints.agency)
+            ]);
+        }
+        
+        /**
+         * Handles the submission of the campaign form.
+         * @param {Event} event - The form submit event.
+         */
+        async function handleCampaignSubmit(event) {
+            event.preventDefault();
+            
+            const form = event.target;
+            const submitBtn = document.getElementById('submit-btn');
+            const resultWrapper = document.getElementById('form-result-wrapper');
+            const resultTitle = document.getElementById('form-result-title');
+            const resultEl = document.getElementById('form-result');
+            
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Submitting...';
+            resultWrapper.classList.add('hidden');
+            
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showMessage('Error', 'Authentication token missing. Please log in again.', 'error', () => navigateTo('login'));
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Campaign';
+                return;
+            }
+
+            // Construct payload
+            try {
+                const formData = new FormData(form);
+                const payload = {
+                    type: formData.get('type'),
+                    space: formData.get('space'),
+                    entity: formData.get('entity'),
+                    varientId: parseInt(formData.get('varientId'), 10),
+                    fields: {}
+                };
+                
+                // Populate the 'fields' object
+                for (let [key, value] of formData.entries()) {
+                    if (key.startsWith('fields.')) {
+                        const fieldName = key.replace('fields.', '');
+                        
+                        if (fieldName === 'selectedchannels') {
+                            // Parse comma-separated string into array
+                            payload.fields[fieldName] = value.split(',')
+                                .map(s => s.trim())
+                                .filter(Boolean); // Filter out empty strings
+                        } else {
+                            payload.fields[fieldName] = value;
+                        }
+                    }
+                }
+                
+                // API Call
+                const response = await fetch('https://api.wrikexpi.groupm.com/api/v1/wrikexpi/campaign', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(payload)
+                });
+                
+                const responseData = await response.json();
+                const responseText = JSON.stringify(responseData, null, 2);
+
+                if (response.ok) {
+                    // Success
+                    resultTitle.textContent = 'Campaign Submitted Successfully';
+                    resultTitle.className = 'text-2xl font-semibold mb-2 text-green-400';
+                    resultEl.className = 'bg-gray-900 p-4 rounded-lg overflow-x-auto text-sm text-green-200';
+                    resultEl.textContent = responseText;
+                    showMessage('Success', 'Your campaign request has been submitted successfully.', 'success');
+                    form.reset(); // Clear the form
+                    populateDropdowns(); // Repopulate and set defaults
+                } else {
+                    // HTTP Error
+                    resultTitle.textContent = `Error: ${response.status} ${response.statusText}`;
+                    resultTitle.className = 'text-2xl font-semibold mb-2 text-red-400';
+                    resultEl.className = 'bg-gray-900 p-4 rounded-lg overflow-x-auto text-sm text-red-200';
+                    resultEl.textContent = responseText;
+                }
+                resultWrapper.classList.remove('hidden');
+
+            } catch (error) {
+                // Network/CORS Error
+                console.error('Submission error:', error);
+                resultTitle.textContent = 'Submission Failed';
+                resultTitle.className = 'text-2xl font-semibold mb-2 text-red-400';
+                resultEl.className = 'bg-gray-900 p-4 rounded-lg overflow-x-auto text-sm text-red-200';
+                resultEl.textContent = `Something went wrong, please try again.\n${error.message}`;
+                resultWrapper.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Submit Campaign';
+            }
+        }
+
+        // --- INITIALIZATION ---
+        
+        // Listen for hash changes to navigate
+        window.addEventListener('hashchange', handleHashChange);
+        
+        // Initial load
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuthState();
+            initializeRouter();
+        });
 
     </script>
 </body>
 </html>
-
-
