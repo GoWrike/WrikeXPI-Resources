@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wrike Campaign Submitter</title>
+    <title>XPI Portal</title>
     <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -52,20 +52,33 @@
     <div class="flex h-screen overflow-hidden">
         
         <!-- Sidebar -->
-        <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 bg-gray-800 p-6 shadow-lg transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0">
-            <h1 class="text-2xl font-bold text-white mb-2">Modules</h1>
-            <p id="user-greeting" class="text-sm text-gray-400 mb-6">Welcome, Guest</p>
+        <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-64 bg-gray-800 p-6 shadow-lg transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0 flex flex-col">
+            <h1 class="text-2xl font-bold text-white mb-6">XPI Portal</h1>
             
             <nav class="flex flex-col space-y-2">
                 <a href="#" id="nav-campaign" class="nav-link hidden p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
                     Campaign Form
                 </a>
+                <a href="#admin" id="nav-admin" class="nav-link p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826 3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                    Admin
+                </a>
                 <a href="#" id="nav-login" class="p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 inline-block mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
                     <span id="nav-login-text">Login</span>
                 </a>
             </nav>
+
+            <!-- User Profile Widget -->
+            <div id="user-profile-widget" class="hidden mt-auto pt-4 border-t border-gray-700">
+                <div class="flex items-center">
+                    <img id="user-avatar" src="" alt="User Avatar" class="h-10 w-10 rounded-full object-cover bg-gray-600" onerror="this.src='https://placehold.co/40x40/4B5563/F3F4F6?text=U'; this.onerror=null;">
+                    <div class="ml-3">
+                        <p id="user-name" class="text-sm font-medium text-white">User Name</p>
+                    </div>
+                </div>
+            </div>
         </aside>
         
         <!-- Mobile Sidebar Toggle -->
@@ -231,6 +244,30 @@
                 </div>
             </div>
             
+            <!-- Module: Admin Settings -->
+            <div id="admin-view" class="hidden max-w-md mx-auto">
+                <div class="bg-gray-800 p-8 rounded-lg shadow-xl">
+                    <h2 class="text-3xl font-bold text-center text-white mb-6">Admin Settings</h2>
+                    
+                    <form id="admin-form">
+                        <div class="space-y-4">
+                            <div>
+                                <label for="xpiBaseUrlInput" class="block text-sm font-medium text-gray-300 mb-1">XPI Base URL</label>
+                                <input type="text" id="xpiBaseUrlInput" name="xpiBaseUrlInput" required class="form-input">
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8">
+                            <button type="submit" id="save-settings-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition duration-300 ease-in-out">
+                                Save Settings
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <p id="admin-feedback" class="text-green-400 text-center mt-4 hidden"></p>
+                </div>
+            </div>
+
         </main>
     </div>
 
@@ -260,8 +297,8 @@
     <script type="text/javascript">
         document.addEventListener('DOMContentLoaded', () => {
             
-            // --- CONSTANTS ---
-            const API_BASE = 'https://xpi-api.gowrike.space';
+            // --- CONFIGURATION ---
+            let appConfig = {};
             const REDIRECT_URI = window.location.origin + window.location.pathname;
             const ACCOUNT_ID = '3128883';
             
@@ -284,15 +321,44 @@
             const campaignMessage = document.getElementById('campaign-message');
             const campaignResult = document.getElementById('campaign-result');
             
-            const userGreeting = document.getElementById('user-greeting');
+            const adminView = document.getElementById('admin-view');
+            const adminForm = document.getElementById('admin-form');
+            const xpiBaseUrlInput = document.getElementById('xpiBaseUrlInput');
+            const saveSettingsButton = document.getElementById('save-settings-button');
+            const adminFeedback = document.getElementById('admin-feedback');
+
+            const userProfileWidget = document.getElementById('user-profile-widget');
+            const userAvatar = document.getElementById('user-avatar');
+            const userName = document.getElementById('user-name');
             const navLogin = document.getElementById('nav-login');
             const navLoginText = document.getElementById('nav-login-text');
             const navCampaign = document.getElementById('nav-campaign');
+            const navAdmin = document.getElementById('nav-admin');
 
-            const allViews = [loginView, campaignView];
+            const allViews = [loginView, campaignView, adminView];
 
             // --- STATE & STORAGE ---
             
+            /**
+             * Retrieves config from localStorage or sets defaults.
+             */
+            function getConfig() {
+                const defaults = {
+                    xpiBaseUrl: 'https://api.wrikexpi.groupm.com'
+                };
+                
+                let config = {
+                    xpiBaseUrl: localStorage.getItem('xpiBaseUrl') || defaults.xpiBaseUrl,
+                };
+                
+                // Ensure defaults are saved if not present
+                if (!localStorage.getItem('xpiBaseUrl')) {
+                    localStorage.setItem('xpiBaseUrl', defaults.xpiBaseUrl);
+                }
+                
+                return config;
+            }
+
             /**
              * Retrieves all auth data from localStorage.
              */
@@ -303,6 +369,7 @@
                     password: localStorage.getItem('wrikePassword'),
                     firstName: localStorage.getItem('wrikeFirstName'),
                     lastName: localStorage.getItem('wrikeLastName'),
+                    avatarUrl: localStorage.getItem('wrikeAvatarUrl'),
                 };
             }
             
@@ -315,6 +382,7 @@
                 localStorage.removeItem('wrikePassword');
                 localStorage.removeItem('wrikeFirstName');
                 localStorage.removeItem('wrikeLastName');
+                localStorage.removeItem('wrikeAvatarUrl');
                 localStorage.removeItem('wrikeClientId'); // Clear this too
             }
 
@@ -419,7 +487,7 @@
                     
                     localStorage.setItem('wrikeClientId', clientId);
                     
-                    const redirectUrl = `${API_BASE}/?accountId=${ACCOUNT_ID}&redirectUri=${encodeURIComponent(REDIRECT_URI)}&client_id=${clientId}`;
+                    const redirectUrl = `${appConfig.xpiBaseUrl}/?accountId=${ACCOUNT_ID}&redirectUri=${encodeURIComponent(REDIRECT_URI)}&client_id=${clientId}`;
                     
                     showLoginMessage('Redirecting to Wrike...', false);
                     window.location.href = redirectUrl;
@@ -453,7 +521,7 @@
                 
                 try {
                     // 2. API Call 1: Exchange code for token
-                    const tokenUrl = `${API_BASE}/api/v1/wrikexpi/token/exchange?code=${code}&client_id=${clientId}&grant_type=authorization_code`;
+                    const tokenUrl = `${appConfig.xpiBaseUrl}/api/v1/wrikexpi/token/exchange?code=${code}&client_id=${clientId}&grant_type=authorization_code`;
                     const response = await fetch(tokenUrl);
                     const data = await response.json();
                     
@@ -472,7 +540,7 @@
                     showLoginMessage('Token received. Verifying user profile...', false);
                     
                     // 4. API Call 2: Verify user profile
-                    await verifyUserProfile(token);
+                    await verifyUserProfile();
 
                 } catch (error) {
                     console.error('OAuth callback error:', error);
@@ -484,15 +552,20 @@
             }
 
             /**
-             * Verifies the user's profile using the obtained Bearer token.
-             * @param {string} token - The Bearer token.
+             * Verifies the user's profile using the obtained Basic Auth credentials.
              */
-            async function verifyUserProfile(token) {
+            async function verifyUserProfile() {
                 try {
-                    const profileUrl = `${API_BASE}/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me`;
+                    const { username, password } = getAuthData();
+                    if (!username || !password) {
+                        throw new Error("Missing credentials for profile verification.");
+                    }
+                    const basicAuthHeader = `Basic ${btoa(`${username}:${password}`)}`;
+
+                    const profileUrl = `${appConfig.xpiBaseUrl}/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me`;
                     const response = await fetch(profileUrl, {
                         headers: {
-                            'Authorization': `Bearer ${token}`
+                            'Authorization': basicAuthHeader
                         }
                     });
                     const data = await response.json();
@@ -505,6 +578,7 @@
                     const user = data.data[0];
                     localStorage.setItem('wrikeFirstName', user.firstName);
                     localStorage.setItem('wrikeLastName', user.lastName);
+                    localStorage.setItem('wrikeAvatarUrl', user.avatarUrl);
                     
                     localStorage.removeItem('wrikeClientId'); // Clean up
                     
@@ -584,9 +658,9 @@
 
                 const basicAuthHeader = `Basic ${btoa(`${username}:${password}`)}`;
                 
-                const clientUrl = `${API_BASE}/api/v1/wrikexpi/v1.0/value/clients-grm-mys`;
-                const debtorUrl = `${API_BASE}/api/v1/wrikexpi/v1.0/value/debtors-grm-mys`;
-                const agencyUrl = `${API_BASE}/api/v1/wrikexpi/v1.0/value/agencies`;
+                const clientUrl = `${appConfig.xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/clients-grm-mys`;
+                const debtorUrl = `${appConfig.xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/debtors-grm-mys`;
+                const agencyUrl = `${appConfig.xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/agencies`;
                 
                 // Fetch all dropdown data concurrently
                 await Promise.all([
@@ -645,7 +719,7 @@
                     };
 
                     // API Call
-                    const submitUrl = `${API_BASE}/api/v1/wrikexpi/campaign`;
+                    const submitUrl = `${appConfig.xpiBaseUrl}/api/v1/wrikexpi/campaign`;
                     const response = await fetch(submitUrl, {
                         method: 'POST',
                         headers: {
@@ -674,6 +748,23 @@
                 }
             }
 
+            // --- ADMIN LOGIC ---
+            /**
+             * Handles saving the admin settings.
+             * @param {Event} event - The form submission event.
+             */
+            function handleSaveSettings(event) {
+                event.preventDefault();
+                const newBaseUrl = xpiBaseUrlInput.value.trim();
+                if (newBaseUrl) {
+                    localStorage.setItem('xpiBaseUrl', newBaseUrl);
+                    appConfig.xpiBaseUrl = newBaseUrl; // Update running config
+                    adminFeedback.textContent = 'Settings saved successfully!';
+                    adminFeedback.classList.remove('hidden');
+                    setTimeout(() => adminFeedback.classList.add('hidden'), 3000);
+                }
+            }
+
             // --- APP INITIALIZATION ---
 
             /**
@@ -683,7 +774,11 @@
                 sidebar.classList.add('-translate-x-full');
                 sidebar.classList.add('hidden'); // Hide for good measure
                 mainContent.classList.remove('lg:ml-64');
-                userGreeting.textContent = 'Welcome, Guest';
+                
+                userProfileWidget.classList.add('hidden');
+                userAvatar.src = '';
+                userName.textContent = '';
+                
                 navLoginText.textContent = 'Login';
                 navCampaign.classList.add('hidden');
                 
@@ -699,10 +794,14 @@
              * Sets up the UI for a logged-in user.
              */
             function setupLoggedInState() {
-                const { firstName } = getAuthData();
+                const { firstName, lastName, avatarUrl } = getAuthData();
                 sidebar.classList.remove('hidden'); // Show sidebar
                 mainContent.classList.add('lg:ml-64');
-                userGreeting.textContent = `Welcome, ${firstName}`;
+                
+                userName.textContent = `${firstName} ${lastName}`;
+                userAvatar.src = avatarUrl;
+                userProfileWidget.classList.remove('hidden');
+
                 navLoginText.textContent = 'Logout';
                 navCampaign.classList.remove('hidden');
                 
@@ -711,14 +810,46 @@
             }
 
             /**
+             * Sets up the UI for the Admin view.
+             */
+            function setupAdminState() {
+                // Show sidebar regardless of login state for admin
+                sidebar.classList.remove('hidden');
+                mainContent.classList.add('lg:ml-64');
+                
+                // Update user profile if logged in
+                const auth = getAuthData();
+                if (auth.token) {
+                    userName.textContent = `${auth.firstName} ${auth.lastName}`;
+                    userAvatar.src = auth.avatarUrl;
+                    userProfileWidget.classList.remove('hidden');
+                    navLoginText.textContent = 'Logout';
+                    navCampaign.classList.remove('hidden');
+                } else {
+                    userProfileWidget.classList.add('hidden');
+                    navLoginText.textContent = 'Login';
+                    navCampaign.classList.add('hidden');
+                }
+
+                showView('admin-view');
+                xpiBaseUrlInput.value = appConfig.xpiBaseUrl; // Populate form
+            }
+
+            /**
              * Main application initialization function.
              */
             function initApp() {
+                appConfig = getConfig(); // Load config at start
+
                 const urlParams = new URLSearchParams(window.location.search);
                 const code = urlParams.get('code');
                 const auth = getAuthData();
+                const hash = window.location.hash;
                 
-                if (code) {
+                if (hash === '#admin') {
+                    // Scenario 0: Admin View
+                    setupAdminState();
+                } else if (code) {
                     // Scenario 1: OAuth Callback
                     handleOAuthCallback(code);
                 } else if (auth.token) {
@@ -743,6 +874,9 @@
             // Campaign form submission
             campaignForm.addEventListener('submit', handleCampaignSubmit);
 
+            // Admin form submission
+            adminForm.addEventListener('submit', handleSaveSettings);
+
             // Sidebar toggle
             sidebarToggle.addEventListener('click', () => {
                 sidebar.classList.toggle('-translate-x-full');
@@ -751,6 +885,7 @@
             // Navigation Links
             navLogin.addEventListener('click', (e) => {
                 e.preventDefault();
+                window.location.hash = ''; // Clear hash
                 if (getAuthData().token) {
                     // It's a "Logout" button
                     handleLogout();
@@ -763,6 +898,7 @@
 
             navCampaign.addEventListener('click', (e) => {
                 e.preventDefault();
+                window.location.hash = ''; // Clear hash
                 if (getAuthData().token) {
                     showView('campaign-view');
                     sidebar.classList.add('-translate-x-full'); // Hide sidebar on mobile
@@ -772,6 +908,13 @@
                 }
             });
             
+            navAdmin.addEventListener('click', (e) => {
+                e.preventDefault();
+                // Hash is set by the href, just need to show the view
+                setupAdminState();
+                sidebar.classList.add('-translate-x-full'); // Hide sidebar on mobile
+            });
+
             // --- START APP ---
             initApp();
             
@@ -779,3 +922,4 @@
     </script>
 </body>
 </html>
+
