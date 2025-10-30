@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XPI Portal for Master Data</title>
+    
+    <!-- 1. Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 2. Load Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 3. Custom Styles (Dark Theme, Modal, Toasts, Spinners) -->
+    <style>
+        :root {
+            --color-primary: #4f46e5; /* Indigo 600 */
+            --color-primary-hover: #4338ca; /* Indigo 700 */
+            --color-primary-focus: #6366f1; /* Indigo 500 */
+            --color-danger: #dc2626; /* Red 600 */
+            --color-success: #16a34a; /* Green 600 */
+        }
+        
+        /* Set base font and theme */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #111827; /* gray-900 */
+            color: #f3f4f6; /* gray-100 */
+        }
+
+        /* Custom scrollbar for dark mode */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1f2937; /* gray-800 */
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563; /* gray-600 */
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280; /* gray-500 */
+        }
+
+        /* Loading Spinner Animation */
+        .spinner {
+            border: 2px solid #f3f4f6; /* gray-100 */
+            border-top-color: var(--color-primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        .btn-spinner {
+            border: 2px solid #ffffff;
+            border-top-color: transparent;
+            width: 1rem;
+            height: 1rem;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Modal Styles */
+        .modal {
+            transition: opacity 0.2s ease-in-out, visibility 0.2s ease-in-out;
+        }
+        .modal-content {
+            transition: transform 0.2s ease-in-out;
+            transform: translateY(-20px);
+        }
+        .modal.open {
+            opacity: 1;
+            visibility: visible;
+        }
+        .modal.open .modal-content {
+            transform: translateY(0);
+        }
+
+        /* Toast Notification Styles */
+        .toast {
+            animation: slideIn 0.3s ease-out, fadeOut 0.3s ease-in 2.7s forwards;
+        }
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        @keyframes fadeOut {
+            from {
+                opacity: 1;
+                transform: translateX(0);
+            }
+            to {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+        }
+    </style>
+</head>
+<body class="h-full antialiased">
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-4 right-4 z-[100] w-full max-w-xs space-y-3"></div>
+
+    <!-- Main Application Wrapper -->
+    <div class="flex flex-col h-full min-h-screen">
+
+        <!-- Header -->
+        <header class="bg-gray-800 shadow-md sticky top-0 z-40">
+            <nav class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex justify-between items-center h-16">
+                    <h1 class="text-xl sm:text-2xl font-bold text-white">
+                        XPI Portal for Master Data
+                    </h1>
+                    <button id="create-btn" class="flex items-center justify-center px-4 py-2 bg-indigo-600 text-white rounded-md shadow-sm font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-500 transition-colors duration-150">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                        </svg>
+                        Create New Record
+                    </button>
+                </div>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            
+            <!-- Loading State -->
+            <div id="loader" class="flex justify-center items-center h-64">
+                <div class="spinner w-12 h-12"></div>
+            </div>
+
+            <!-- Error State -->
+            <div id="error-message" class="hidden bg-red-800 border border-red-700 text-red-100 px-4 py-3 rounded-md text-center">
+                <p class="font-bold">Failed to load data</p>
+                <p id="error-text" class="text-sm">Could not retrieve records from the server.</p>
+            </div>
+
+            <!-- Data Table Container -->
+            <div id="table-container" class="hidden bg-gray-800 shadow-xl rounded-lg overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead class="bg-gray-700">
+                            <tr>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Record ID</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Value</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">FinCode</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Code</th>
+                                <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Note</th>
+                                <th scope="col" class="relative px-6 py-3">
+                                    <span class="sr-only">Actions</span>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="data-table-body" class="divide-y divide-gray-700">
+                            <!-- Rows will be injected by JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-gray-800 text-center text-sm text-gray-500 py-4 mt-8">
+            &copy; 2025 XPI Portal
+        </footer>
+    </div>
+
+    <!-- Create/Edit Modal -->
+    <div id="modal" class="modal fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 p-4 opacity-0 visibility-hidden">
+        <div class="modal-content bg-gray-800 rounded-lg shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center px-6 py-4 border-b border-gray-700">
+                <h2 id="modal-title" class="text-xl font-semibold text-white">Modal Title</h2>
+                <button id="modal-close-x" class="text-gray-400 hover:text-white transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Modal Body (Form) -->
+            <form id="modal-form" class="overflow-y-auto p-6 space-y-4">
+                <input type="hidden" id="record-id">
+                
+                <div>
+                    <label for="value" class="block text-sm font-medium text-gray-300">Value</label>
+                    <input type="text" id="value" name="value" required class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label for="fincode" class="block text-sm font-medium text-gray-300">FinCode</label>
+                        <input type="text" id="fincode" name="fincode" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                    <div>
+                        <label for="code" class="block text-sm font-medium text-gray-300">Code</label>
+                        <input type="text" id="code" name="code" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label for="guid" class="block text-sm font-medium text-gray-300">GUID</label>
+                    <input type="text" id="guid" name="guid" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+
+                <div>
+                    <label for="note" class="block text-sm font-medium text-gray-300">Note</label>
+                    <textarea id="note" name="note" rows="3" class="mt-1 block w-full bg-gray-700 border border-gray-600 rounded-md shadow-sm py-2 px-3 text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                </div>
+            </form>
+            
+            <!-- Modal Footer -->
+            <div class="flex justify-end items-center px-6 py-4 border-t border-gray-700 bg-gray-800 rounded-b-lg">
+                <button id="modal-cancel" type="button" class="px-4 py-2 bg-gray-600 text-white rounded-md font-medium hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-gray-500 transition-colors duration-150 mr-3">
+                    Cancel
+                </button>
+                <button id="modal-save" type="submit" form="modal-form" class="px-4 py-2 bg-indigo-600 text-white rounded-md font-medium hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-indigo-500 transition-colors duration-150 flex items-center justify-center min-w-[120px]">
+                    <span class="btn-spinner mr-2 hidden"></span>
+                    <span class="btn-text">Save</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script type="module">
+        // --- CONSTANTS ---
+        const API_URL = 'https://xpi-api.gowrike.space/api/v1/wrikexpi/v1.0/record/demoxpiclients';
+        // WARNING: Hardcoding tokens is insecure for production. This is per the request.
+        const AUTH_TOKEN = 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aWQiOiIyNGE3N2Q3Yy1jNzdiLTRmZDktOGI0Zi00ZWZkNmM1YjM3NWYiLCJlbmMiOiJleUpoYkdjaU9pSklVekkxTmlJc0luUjVjQ0k2SWtwWFZDSjkuZXlKa1pXc2lPaUp5UTJ0VlptMW1TMUZ5VldKSE55OVlTako1TlZKRlNDOTJjMUJyZG5oMFVVcHdWR2hFWWtweUwwRnJQU0lzSW1saGRDSTZNVGMyTVRneU9UZzVOaXdpWlhod0lqb3hOell4T1RFMk1qazJmUS5SZGU2dzlOMXIyS0dnRjZuWjlzSHBUOWJwdWpGb29PcFF1TTVPaXhxZFpBIiwiaWF0IjoxNzYxODI5ODk2LCJleHAiOjE3NjE5MTYyOTZ9.jiwoWMErKXf8P8AnKXHIDFa_hYhbQ7UhYP5vf6RvilM';
+        const ODATA_CONTEXT = 'https://api.wrikexpi.groupm.com/api/v1/v1.0/demoxpiclients';
+
+        // --- DOM ELEMENTS ---
+        const loader = document.getElementById('loader');
+        const errorMessage = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        const tableContainer = document.getElementById('table-container');
+        const tableBody = document.getElementById('data-table-body');
+        const createBtn = document.getElementById('create-btn');
+        
+        // Modal Elements
+        const modal = document.getElementById('modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalForm = document.getElementById('modal-form');
+        const modalSaveBtn = document.getElementById('modal-save');
+        const modalCancelBtn = document.getElementById('modal-cancel');
+        const modalCloseXBtn = document.getElementById('modal-close-x');
+        
+        // Form Fields
+        const recordIdField = document.getElementById('record-id');
+        const valueField = document.getElementById('value');
+        const fincodeField = document.getElementById('fincode');
+        const codeField = document.getElementById('code');
+        const guidField = document.getElementById('guid');
+        const noteField = document.getElementById('note');
+
+        // Store records in memory to easily find data for editing
+        let localRecordsStore = [];
+
+        // --- API FUNCTIONS ---
+
+        /**
+         * Fetches all records from the API and renders them.
+         */
+        async function fetchRecords() {
+            showMainLoader(true);
+            showError(false);
+            
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': AUTH_TOKEN
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                localRecordsStore = data.value || [];
+                renderTable(localRecordsStore);
+                showMainLoader(false);
+
+            } catch (error) {
+                console.error('Error fetching records:', error);
+                showError(true, `Error fetching records: ${error.message}`);
+                showMainLoader(false);
+                showToast('Failed to fetch data. Please try again.', true);
+            }
+        }
+
+        /**
+         * Handles the form submission for creating or updating a record.
+         */
+        async function handleFormSubmit(event) {
+            event.preventDefault();
+            showButtonLoader(true);
+
+            const id = recordIdField.value;
+            const isUpdate = !!id;
+
+            // Construct payload based on prompt's examples
+            const payload = {
+                "@odata.context": ODATA_CONTEXT,
+                "value": valueField.value,
+                "guid": guidField.value,
+                "code": codeField.value,
+                "fincode": fincodeField.value,
+                "note": noteField.value // Include 'note' as it's in the GET response
+            };
+
+            // Add 'id' only if it's an update
+            if (isUpdate) {
+                payload.id = id;
+            }
+
+            try {
+                const response = await fetch(API_URL, {
+                    method: 'POST', // Per prompt, POST is used for both create and update
+                    headers: {
+                        'Authorization': AUTH_TOKEN,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+                    throw new Error(`HTTP ${response.status}: ${errorData.message || 'Failed to save record'}`);
+                }
+
+                // Success
+                const successMessage = isUpdate ? 'Record updated successfully' : 'Record created successfully';
+                showToast(successMessage, false);
+                closeModal();
+                await fetchRecords(); // Refresh data
+
+            } catch (error) {
+                console.error('Error saving record:', error);
+                showToast(error.message, true);
+            } finally {
+                showButtonLoader(false);
+            }
+        }
+
+
+        // --- UI / HELPER FUNCTIONS ---
+
+        /**
+         * Renders the records into the HTML table.
+         * @param {Array} records - The array of record objects.
+         */
+        function renderTable(records) {
+            tableBody.innerHTML = ''; // Clear existing rows
+
+            if (records.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="px-6 py-12 text-center text-gray-400">
+                            No records found.
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            records.forEach(record => {
+                const tr = document.createElement('tr');
+                tr.className = 'hover:bg-gray-700 transition-colors duration-150';
+                
+                tr.innerHTML = `
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-200">${record.id}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${record.value || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${record.fincode || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-300">${record.code || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400 max-w-xs truncate" title="${record.note || ''}">${record.note || ''}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                        <button data-id="${record.id}" class="edit-btn text-indigo-400 hover:text-indigo-300 transition-colors">
+                            Edit
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+            
+            // Add event listeners to the new edit buttons
+            document.querySelectorAll('.edit-btn').forEach(button => {
+                button.addEventListener('click', handleEditClick);
+            });
+        }
+        
+        /**
+         * Opens the modal to create a new record or edit an existing one.
+         * @param {Object | null} record - The record object to edit, or null to create.
+         */
+        function openModal(record = null) {
+            modalForm.reset(); // Clear form fields
+            
+            if (record) {
+                // Edit Mode
+                modalTitle.textContent = 'Edit Record';
+                modalSaveBtn.querySelector('.btn-text').textContent = 'Save Changes';
+                
+                recordIdField.value = record.id;
+                valueField.value = record.value || '';
+                fincodeField.value = record.fincode || '';
+                codeField.value = record.code || '';
+                noteField.value = record.note || '';
+                // 'guid' is not in the GET response, so we can't pre-fill it
+                // We'll leave it blank or you could fetch full record details if needed
+                guidField.value = record.guid || ''; // Assuming it might be on the object
+                
+            } else {
+                // Create Mode
+                modalTitle.textContent = 'Create New Record';
+                modalSaveBtn.querySelector('.btn-text').textContent = 'Create Record';
+                recordIdField.value = ''; // Ensure ID is empty
+            }
+            
+            modal.classList.add('open');
+        }
+
+        /**
+         * Closes the create/edit modal.
+         */
+        function closeModal() {
+            modal.classList.remove('open');
+        }
+
+        /**
+         * Finds the record data and opens the modal for editing.
+         */
+        function handleEditClick(event) {
+            const id = event.target.dataset.id;
+            const recordToEdit = localRecordsStore.find(r => r.id === id);
+            if (recordToEdit) {
+                openModal(recordToEdit);
+            } else {
+                showToast('Could not find record data to edit.', true);
+            }
+        }
+
+        /**
+         * Shows or hides the main content loader.
+         * @param {boolean} show - True to show, false to hide.
+         */
+        function showMainLoader(show) {
+            if (show) {
+                loader.classList.remove('hidden');
+                tableContainer.classList.add('hidden');
+            } else {
+                loader.classList.add('hidden');
+                tableContainer.classList.remove('hidden');
+            }
+        }
+        
+        /**
+         * Shows or hides the form submission button loader.
+         * @param {boolean} show - True to show, false to hide.
+         */
+        function showButtonLoader(show) {
+            const spinner = modalSaveBtn.querySelector('.btn-spinner');
+            const text = modalSaveBtn.querySelector('.btn-text');
+            
+            if (show) {
+                spinner.classList.remove('hidden');
+                text.classList.add('opacity-0');
+                modalSaveBtn.disabled = true;
+            } else {
+                spinner.classList.add('hidden');
+                text.classList.remove('opacity-0');
+                modalSaveBtn.disabled = false;
+            }
+        }
+
+        /**
+         * Shows or hides the main error message panel.
+         * @param {boolean} show - True to show, false to hide.
+         * @param {string} [message] - Optional message to display.
+         */
+        function showError(show, message = '') {
+            if (show) {
+                errorText.textContent = message;
+                errorMessage.classList.remove('hidden');
+            } else {
+                errorMessage.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Displays a toast notification.
+         * @param {string} message - The text to display.
+         * @param {boolean} [isError=false] - True for red (error), false for green (success).
+         */
+        function showToast(message, isError = false) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgColor = isError ? 'bg-red-600' : 'bg-green-600';
+            const icon = isError ? 
+                `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>` :
+                `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+
+            toast.className = `toast ${bgColor} text-white p-4 rounded-lg shadow-lg flex items-center space-x-3`;
+            toast.innerHTML = `
+                <span>${icon}</span>
+                <span class="flex-1">${message}</span>
+            `;
+            
+            container.appendChild(toast);
+
+            // Remove toast after animation
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // --- EVENT LISTENERS ---
+        
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', fetchRecords);
+
+        // Modal triggers
+        createBtn.addEventListener('click', () => openModal(null));
+        modalCancelBtn.addEventListener('click', closeModal);
+        modalCloseXBtn.addEventListener('click', closeModal);
+        
+        // Close modal on outside click
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeModal();
+            }
+        });
+        
+        // Form submission
+        modalForm.addEventListener('submit', handleFormSubmit);
+
+    </script>
+</body>
+</html>
