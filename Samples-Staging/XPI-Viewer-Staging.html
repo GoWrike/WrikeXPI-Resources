@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full bg-gray-900">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XPI Portal</title>
+    
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Load Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        // Configure Tailwind to use the Inter font
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        /* Custom styles for the app */
+        body {
+            font-family: 'Inter', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Custom loading spinner */
+        .loader {
+            width: 48px;
+            height: 48px;
+            border: 3px solid #FFF;
+            border-radius: 50%;
+            display: inline-block;
+            position: relative;
+            box-sizing: border-box;
+            animation: rotation 1s linear infinite;
+        }
+        .loader::after {
+            content: '';  
+            box-sizing: border-box;
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: 3px solid;
+            border-color: #6366f1 transparent; /* Indigo color */
+        }
+        @keyframes rotation {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Styles for Wrike's description HTML content */
+        .prose-custom ul.checklist {
+            list-style-type: none;
+            padding-left: 0;
+        }
+        .prose-custom ul.checklist li {
+            display: flex;
+            align-items: flex-start;
+            margin-top: 0.75em;
+        }
+        .prose-custom ul.checklist li input[type="checkbox"] {
+            margin-right: 0.75em;
+            margin-top: 0.25em; /* Align checkbox with text */
+            flex-shrink: 0;
+            height: 1.25em;
+            width: 1.25em;
+            cursor: not-allowed; /* Disable clicking */
+            accent-color: #6366f1;
+            background-color: #374151; /* gray-700 */
+            border-color: #4b5563; /* gray-600 */
+            border-radius: 0.25rem;
+        }
+        .prose-custom ul.checklist li label {
+            margin-top: 0;
+        }
+    </style>
+</head>
+<body class="h-full text-gray-200">
+
+    <div id="app" class="container mx-auto p-4 py-8 md:p-12 max-w-4xl">
+        <!-- Header -->
+        <header class="mb-8">
+            <h1 class="text-3xl font-bold text-white flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-indigo-400 mr-3"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+                XPI Portal
+            </h1>
+        </header>
+
+        <!-- Main content area where data, loaders, or errors will be injected -->
+        <main id="content-area" class="bg-gray-800 rounded-xl shadow-2xl overflow-hidden min-h-[300px] flex items-center justify-center">
+            <!-- Content will be dynamically inserted here -->
+        </main>
+    </div>
+
+    <script type="module">
+        // --- CONFIGURATION ---
+        
+        // IMPORTANT: This token is hardcoded as requested.
+        // In a real-world application, this should be handled via a secure auth flow (e.g., OAuth2).
+        // This token is valid until: Saturday, November 1, 2025 5:12:26 AM GMT
+        const API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aWQiOiIyNGE3N2Q3Yy1jNzdiLTRmZDktOGI0Zi00ZWZkNmM1YjM3NWYiLCJlbmMiOiJleUpoYkdjaU9pSklVekkxTmlJc0luUjVjQ0k2SWtwWFZDSjkuZXlKa1pXc2lPaUpoZDJaNFUyeG1jV3RLVlhKb2JsVTRSVGx0VDNGNVRIUnFhRVJvTWxKMFoydFJSSEJ3YUVoeWRVeG5QU0lzSW1saGRDSTZNVGMyTVRnME9URTBOaXdpWlhod0lqb3hOell4T1RNMU5UUTJmUS5UTkQwNncwQnVuU2oxdlV0ZVotdzFMQU1lT1lBTk5IXy1ncVA4eDZtQ00wIiwiaWF0IjoxNzYxODQ5MTQ2LCJleHAiOjE3NjE5MzU1NDZ9.EVAb_MGrpO9vJUCeYhxwBMIb6BRfnmRRVnrnNPTBweY';
+        const API_BASE_URL = 'https://xpi-api.gowrike.space/api/v1/wrikexpi/amoeba/wrikeapi';
+
+        // --- UI HELPER FUNCTIONS ---
+
+        /**
+         * Displays a loading spinner in the content area.
+         */
+        function showLoading() {
+            const contentArea = document.getElementById('content-area');
+            contentArea.innerHTML = `
+                <div class="p-12 flex flex-col items-center justify-center text-gray-400">
+                    <span class="loader"></span>
+                    <span class="mt-4 text-lg font-medium">Loading Details...</span>
+                </div>
+            `;
+        }
+
+        /**
+         * Displays an error message in the content area.
+         * @param {string} title - The title of the error.
+         * @param {string} message - The error message to display.
+         */
+        function displayError(title, message) {
+            const contentArea = document.getElementById('content-area');
+            contentArea.innerHTML = `
+                <div class="p-8 md:p-12 bg-red-900/50 border border-red-700 m-8 rounded-lg shadow-lg">
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-300 mr-3 flex-shrink-0"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        <h2 class="text-2xl font-semibold text-white">${title}</h2>
+                    </div>
+                    <p class="mt-4 text-red-200 text-lg">${message}</p>
+                </div>
+            `;
+        }
+
+        /**
+         * Renders the fetched content into the content area.
+         * @param {string} title - The task title.
+         * @param {string} descriptionHtml - The HTML description of the task.
+         */
+        function displayContent(title, descriptionHtml) {
+            const contentArea = document.getElementById('content-area');
+            
+            // Render the main content
+            contentArea.innerHTML = `
+                <div class="p-8 md:p-12 w-full">
+                    <h2 class="text-3xl font-bold text-white mb-6 pb-6 border-b border-gray-700">${title}</h2>
+                    
+                    <!-- 
+                      Rendering descriptionHtml using innerHTML.
+                      This is necessary to process the HTML tags from the API.
+                      We are trusting the API source not to include malicious XSS payloads.
+                    -->
+                    <div id="description-content" 
+                         class="prose prose-lg prose-invert max-w-none prose-custom">
+                        ${descriptionHtml}
+                    </div>
+                </div>
+            `;
+            
+            // Post-process: Disable all checkboxes in the rendered content
+            const checkboxes = contentArea.querySelectorAll('#description-content input[type="checkbox"]');
+            checkboxes.forEach(cb => {
+                cb.disabled = true;
+            });
+        }
+
+        // --- API CALL ---
+
+        /**
+         * Fetches task data from the API based on the Task ID.
+         * @param {string} taskId - The ID of the task to fetch.
+         */
+        async function fetchTask(taskId) {
+            const permalink = `https://app-eu.wrike.com/open.htm?id=${taskId}`;
+            const url = `${API_BASE_URL}/tasks?permalink=${encodeURIComponent(permalink)}`;
+
+            try {
+                const response = await fetch(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${API_TOKEN}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => null);
+                    const errorMsg = errorData?.message || `API request failed with status ${response.status}`;
+                    throw new Error(errorMsg);
+                }
+
+                const result = await response.json();
+
+                if (result.success && result.data && result.data.length > 0) {
+                    const task = result.data[0];
+                    const description = task.description || "No description provided.";
+                    const title = task.title || "Untitled Task";
+                    displayContent(title, description);
+                } else {
+                    throw new Error('API response was successful, but no task data was found.');
+                }
+
+            } catch (error) {
+                console.error('Fetch error:', error);
+                displayError('Failed to Load Task', `There was a problem retrieving the task details. Please check the link or try again later. (Error: ${error.message})`);
+            }
+        }
+
+        // --- APP INITIALIZATION ---
+
+        /**
+         * Main function to parse the URL hash and route the app.
+         */
+        function initializeApp() {
+            showLoading(); // Show loader by default
+            
+            const hash = window.location.hash;
+            
+            // Regex to match #Task#### or #Project####
+            const taskRegex = /^#Task(\d+)$/;
+            const projectRegex = /^#Project(\d+)$/;
+
+            const taskMatch = hash.match(taskRegex);
+            const projectMatch = hash.match(projectRegex);
+
+            if (taskMatch) {
+                // Matched #Task####
+                const taskId = taskMatch[1];
+                fetchTask(taskId);
+            
+            } else if (projectMatch) {
+                // Matched #Project####
+                const projectId = projectMatch[1];
+                // Project fetching logic is not defined in the requirements
+                displayError('Feature Not Available', `Loading details for projects (ID: ${projectId}) is not yet supported.`);
+            
+            } else {
+                // No valid hash found
+                displayError('Invalid Link', 'Sorry! You have probably gotten the wrong link. Please check the URL and try again.');
+            }
+        }
+
+        // --- EVENT LISTENERS ---
+
+        // Run the app on initial page load
+        window.addEventListener('load', initializeApp);
+        
+        // Re-run the app if the hash value changes (e.g., user navigates history)
+        window.addEventListener('hashchange', initializeApp);
+
+    </script>
+</body>
+</html>
