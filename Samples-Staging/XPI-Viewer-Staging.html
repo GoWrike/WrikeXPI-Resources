@@ -188,8 +188,8 @@
          * @param {string} taskId - The ID of the task to fetch.
          */
         async function fetchTask(taskId) {
-            const permalink = `https://app-eu.wrike.com/open.htm?id=${taskId}&fields=[description]`;
-            const url = `${API_BASE_URL}/tasks?permalink=${encodeURIComponent(permalink)}`;
+            const permalink = `https://app-eu.wrike.com/open.htm?id=${taskId}`;
+            const url = `${API_BASE_URL}/tasks?permalink=${encodeURIComponent(permalink)}&fields=[description]`;
 
             try {
                 const response = await fetch(url, {
