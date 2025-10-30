@@ -395,9 +395,10 @@
             });
             
             // Add event listeners to the new edit buttons
-            document.querySelectorAll('.edit-btn').forEach(button => {
-                button.addEventListener('click', handleEditClick);
-            });
+            // document.querySelectorAll('.edit-btn').forEach(button => {
+            //     button.addEventListener('click', handleEditClick);
+            // });
+            // ^^^ We will remove this loop and use event delegation instead.
         }
         
         /**
@@ -441,8 +442,8 @@
         /**
          * Finds the record data and opens the modal for editing.
          */
-        function handleEditClick(event) {
-            const id = event.target.dataset.id;
+        function handleEditClick(id) { // <-- Changed to accept 'id' directly
+            // const id = event.target.dataset.id; // <-- No longer get from event
             const recordToEdit = localRecordsStore.find(r => r.id === id);
             if (recordToEdit) {
                 openModal(recordToEdit);
@@ -546,6 +547,20 @@
         // Form submission
         modalForm.addEventListener('submit', handleFormSubmit);
 
+        // --- ADDED: Event delegation for table body ---
+        // This single listener handles all clicks inside the table body
+        tableBody.addEventListener('click', (event) => {
+            // Find the closest '.edit-btn' that was clicked
+            const editButton = event.target.closest('.edit-btn');
+            
+            // If an edit button (or its child) was clicked
+            if (editButton) {
+                const id = editButton.dataset.id;
+                handleEditClick(id); // Pass the ID to our handler function
+            }
+        });
+
     </script>
 </body>
 </html>
+
