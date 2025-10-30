@@ -4,1217 +4,963 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XPI Portal</title>
-    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Load Inter font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <style>
-        /* Custom styles */
-        body {
-            font-family: 'Inter', sans-serif;
-            overscroll-behavior: none;
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
         }
-
-        /* Custom scrollbar for webkit browsers (Chrome, Safari) */
+    </script>
+    <style>
+        /* Base styles */
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        /* Custom scrollbar for dark mode */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #2d3748; /* gray-800 */
+            background: #1f2937; /* bg-gray-800 */
         }
         ::-webkit-scrollbar-thumb {
-            background: #4a5568; /* gray-600 */
+            background: #4b5563; /* bg-gray-600 */
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #718096; /* gray-500 */
+            background: #6b7280; /* bg-gray-500 */
         }
-
-        /* Basic spinner */
+        /* Simple spinner */
         .spinner {
-            border: 4px solid rgba(255, 255, 255, 0.2);
-            border-left-color: #ffffff;
+            border: 4px solid #4b5563; /* bg-gray-600 */
+            border-top: 4px solid #3b82f6; /* border-blue-500 */
             border-radius: 50%;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
         }
-
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        
-        /* Ensure inputs and selects are styled for dark mode */
-        .form-input, .form-select {
-            /* @apply w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none; */
-        }
-        
-        .form-label {
-            /* @apply block text-sm font-medium text-gray-300 mb-1; */
-        }
-        
-        .btn {
-            /* @apply px-4 py-2 rounded-md font-semibold text-white shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900; */
-        }
-        
-        .btn-primary {
-            /* @apply bg-blue-600 hover:bg-blue-700 focus:ring-blue-500; */
-        }
-
-        .btn-danger {
-            /* @apply bg-red-600 hover:bg-red-700 focus:ring-red-500; */
-        }
-        
-        .btn-secondary {
-            /* @apply bg-gray-600 hover:bg-gray-700 focus:ring-gray-500; */
-        }
-        
-        /* Modal Backdrop */
-        .modal-backdrop {
-            /* @apply fixed inset-0 bg-black/75 flex items-center justify-center z-40 transition-opacity; */
-        }
-        
-        .modal-content {
-            /* @apply bg-gray-800 rounded-lg shadow-xl p-6 relative; */
-        }
-        
-        .module {
-            /* @apply hidden w-full h-full; */
-        }
-        
-        .module.active {
-            /* @apply block; */
-        }
-
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200 flex h-screen overflow-hidden">
+<body class="bg-gray-900 text-gray-200 font-sans">
 
-    <!-- Sidebar -->
-    <nav id="sidebar" class="bg-gray-800 w-64 h-full flex flex-col fixed md:relative z-20 shadow-lg
-                           transform -translate-x-full md:translate-x-0
-                           transition-transform duration-300 ease-in-out">
-        
-        <!-- Logo/Title -->
-        <div class="p-4 border-b border-gray-700">
-            <h1 class="text-2xl font-bold text-white text-center">XPI Portal</h1>
-        </div>
+    <div id="app" class="relative min-h-screen flex">
 
-        <!-- Module Navigation -->
-        <div class="flex-grow p-4 space-y-2 overflow-y-auto">
-            <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Modules</h2>
-            <!-- User-defined modules will be listed here -->
-            <a href="#campaign" data-module-id="campaign" class="nav-link flex items-center px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
-                <!-- SVG for Campaign -->
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                Campaign Submission
-            </a>
-            
-            <h2 class="text-xs font-semibold text-gray-400 uppercase tracking-wider mt-6 mb-2">System</h2>
-            <a href="#admin" data-module-id="admin" class="nav-link flex items-center px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
-                <!-- SVG for Admin/Settings -->
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                Admin
-            </a>
-        </div>
+        <nav id="navbar" class="bg-gray-800 text-gray-300 w-64 flex-shrink-0 flex-col fixed inset-y-0 left-0 z-30
+                           transform -translate-x-full transition-transform duration-300 ease-in-out hidden">
+            <div class="flex items-center justify-between p-4 h-16 border-b border-gray-700">
+                <span class="text-xl font-bold text-white">XPI Portal</span>
+                <button id="nav-toggle-btn-close" class="p-1 rounded-md text-gray-400 hover:text-white hover:bg-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
 
-        <!-- User Profile -->
-        <div id="user-profile" class="p-4 border-t border-gray-700">
-            <div class="flex items-center">
-                <img id="user-avatar" src="https://placehold.co/40x40/4a5568/E2E8F0?text=?" alt="User Avatar" class="w-10 h-10 rounded-full bg-gray-600 object-cover">
-                <div class="ml-3 overflow-hidden">
-                    <p id="user-name" class="text-sm font-medium text-white truncate">Not Logged In</p>
-                    <a href="#" id="logout-link" class="text-xs text-blue-400 hover:text-blue-300 hidden">Logout</a>
+            <div id="nav-links" class="flex-grow overflow-y-auto">
+                </div>
+
+            <div id="profile-area" class="p-4 border-t border-gray-700">
+                <div class="flex items-center">
+                    <img id="profile-avatar" src="" alt="Avatar" class="w-10 h-10 rounded-full object-cover">
+                    <div class="ml-3">
+                        <p id="profile-name" class="font-semibold text-sm text-white">Loading...</p>
+                        <a id="logout-link" href="#" class="text-xs text-blue-400 hover:text-blue-300">Logout</a>
+                    </div>
                 </div>
             </div>
-        </div>
-    </nav>
+        </nav>
 
-    <!-- Main Content -->
-    <main class="flex-1 flex flex-col h-screen overflow-hidden">
-        
-        <!-- Top Header -->
-        <header class="bg-gray-800 shadow-md p-4 flex items-center justify-between md:hidden">
-            <button id="sidebar-toggle" class="text-gray-300 hover:text-white focus:outline-none">
-                <!-- Menu Icon -->
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        <main id="main-content" class="flex-1 transition-all duration-300 ease-in-out">
+            <button id="nav-toggle-btn-open" class="fixed top-4 left-4 z-20 p-2 bg-gray-800 text-gray-300 rounded-md shadow-lg hidden
+                                                    hover:bg-gray-700 hover:text-white transition-all">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path></svg>
             </button>
-            <h1 class="text-xl font-bold text-white">XPI Portal</h1>
-            <div></div> <!-- Spacer -->
-        </header>
 
-        <!-- Module Content Area -->
-        <div class="flex-1 p-6 lg:p-10 overflow-y-auto">
-            
-            <!-- Initial Loading Spinner -->
-            <div id="initial-loader" class="flex items-center justify-center h-full">
-                <div class="spinner"></div>
-            </div>
-
-            <!-- Login Module (MOD.B) -->
-            <div id="login-module" class="module w-full h-full hidden">
-                <div class="max-w-md mx-auto bg-gray-800 p-8 rounded-lg shadow-xl mt-10">
-                    <h2 class="text-3xl font-bold text-white text-center mb-6">XPI Portal Login</h2>
-                    
-                    <!-- Login Button State -->
-                    <div id="login-auth-mode">
-                        <p class="text-center text-gray-300 mb-6">Please login to continue.</p>
-                        <button id="login-button" class="btn btn-primary w-full text-lg px-4 py-2 rounded-md font-semibold text-white shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-blue-600 hover:bg-blue-700 focus:ring-blue-500">
-                            Login & Authenticate
-                        </button>
-                    </div>
-
-                    <!-- Callback/Loading State -->
-                    <div id="login-callback-mode" class="hidden">
-                        <div class="flex flex-col items-center">
-                            <div class="spinner"></div>
-                            <p id="login-status-message" class="text-gray-300 mt-4 text-center">Authenticating, please wait...</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Error State -->
-                    <div id="login-error-mode" class="hidden mt-6">
-                        <h3 class="text-xl font-semibold text-red-400 mb-2">Login Failed</h3>
-                        <p id="login-error-message" class="text-gray-300 mb-4"></p>
-                        <pre id="login-error-response" class="w-full bg-gray-900 p-4 rounded-md text-xs text-red-300 overflow-auto max-h-60"></pre>
-                        <button id="login-start-over-button" class="btn btn-secondary w-full mt-6 px-4 py-2 rounded-md font-semibold text-white shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-gray-600 hover:bg-gray-700 focus:ring-gray-500">
-                            Start Over
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Admin Module (MOD.A) -->
-            <div id="admin-module" class="module w-full h-full hidden">
-                <div class="max-w-2xl mx-auto">
-                    <h2 class="text-3xl font-bold text-white mb-6">Admin Configuration</h2>
-                    <div class="bg-gray-800 p-8 rounded-lg shadow-xl">
+            <div class="p-4 sm:p-8">
+                <div id="module-admin" class="module hidden max-w-2xl mx-auto">
+                    <h1 class="text-3xl font-bold text-white mb-6">Admin Configuration</h1>
+                    <div class="bg-gray-800 shadow-xl rounded-lg p-6">
                         <form id="admin-form">
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="xpiBaseUrl" class="form-label block text-sm font-medium text-gray-300 mb-1">XPI Base URL</label>
-                                    <input type="url" id="xpiBaseUrl" name="xpiBaseUrl" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none">
-                                </div>
-                            </div>
-                            <div class="mt-6 flex justify-end">
-                                <button type="submit" class="btn btn-primary px-4 py-2 rounded-md font-semibold text-white shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-blue-600 hover:bg-blue-700 focus:ring-blue-500">Save Configuration</button>
-                            </div>
-                            <p id="admin-save-feedback" class="text-green-400 text-sm mt-4 hidden"></p>
+                            <label for="xpiBaseUrl" class="block text-sm font-medium text-gray-300 mb-2">XPI Base URL</label>
+                            <input type="url" id="xpiBaseUrl-input" name="xpiBaseUrl" required
+                                   class="w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 
+                                          focus:ring-blue-500 focus:border-blue-500 focus:outline-none">
+                            <p class="text-xs text-gray-400 mt-2">The Base URL for all XPI API calls.</p>
+                            <button type="submit" class="mt-4 px-4 py-2 bg-blue-600 text-white font-semibold rounded-md hover:bg-blue-700
+                                                        disabled:bg-gray-500 transition">
+                                Save Configuration
+                            </button>
+                            <p id="admin-save-feedback" class="text-green-400 text-sm mt-3"></p>
                         </form>
                     </div>
                 </div>
-            </div>
 
-            <!-- Campaign Submission Module (MOD.C) -->
-            <div id="campaign-module" class="module w-full h-full hidden">
-                <div class="max-w-4xl mx-auto">
-                    <h2 class="text-3xl font-bold text-white mb-6">Campaign Submission</h2>
-                    
-                    <!-- Form Loading Error -->
-                    <div id="campaign-load-error" class="hidden bg-red-900 border border-red-700 text-red-300 p-4 rounded-md mb-6">
-                        <h4 class="font-bold">Error loading form data</h4>
-                        <p>Could not fetch required dropdown data. Please check your credentials or network and try again.</p>
-                        <pre id="campaign-load-error-details" class="text-xs mt-2 overflow-auto"></pre>
+                <div id="module-login" class="module hidden">
+                    <div class="min-h-[80vh] flex items-center justify-center">
+                        <div id="login-container" class="bg-gray-800 shadow-xl rounded-lg p-8 w-full max-w-md text-center">
+                            </div>
                     </div>
+                </div>
 
-                    <!-- Campaign Form -->
-                    <form id="campaign-form" class="bg-gray-800 p-8 rounded-lg shadow-xl space-y-6">
-                        
-                        <!-- Hidden Fields -->
+                <div id="module-campaign" class="module hidden max-w-4xl mx-auto">
+                    <h1 class="text-3xl font-bold text-white mb-6">Create New Campaign</h1>
+                    <form id="campaign-form" class="bg-gray-800 shadow-xl rounded-lg p-6 sm:p-8">
                         <input type="hidden" name="type" value="Campaign Request">
                         <input type="hidden" name="space" value="GRM-MYS-GMN">
                         <input type="hidden" name="entity" value="Campaign">
                         <input type="hidden" name="varientId" value="1">
 
-                        <!-- Form Grid -->
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Column 1 -->
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="campaignname" class="form-label block text-sm font-medium text-gray-300 mb-1">Campaign Name</label>
-                                    <input type="text" id="campaignname" name="campaignname" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" required>
-                                </div>
-                                
-                                <div>
-                                    <label for="client" class="form-label block text-sm font-medium text-gray-300 mb-1">Client</label>
-                                    <select id="client" name="client" class="form-select w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" required>
-                                        <option value="">Loading clients...</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label for="debtor" class="form-label block text-sm font-medium text-gray-300 mb-1">Debtor</label>
-                                    <select id="debtor" name="debtor" class="form-select w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" required>
-                                        <option value="">Loading debtors...</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label for="agency" class="form-label block text-sm font-medium text-gray-300 mb-1">Agency</label>
-                                    <select id="agency" name="agency" class="form-select w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" required>
-                                        <option value="">Loading agencies...</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label for="brand" class="form-label block text-sm font-medium text-gray-300 mb-1">Brand</label>
-                                    <input type="text" id="brand" name="brand" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="World Pinball">
-                                </div>
+                            <div class="md:col-span-2">
+                                <label for="campaignname" class="block text-sm font-medium text-gray-300 mb-2">Campaign Name</label>
+                                <input type="text" id="campaignname" name="campaignname" value="World Pinball Day 7000" required
+                                       class="form-input">
+                            </div>
 
-                                <div>
-                                    <label for="pod" class="form-label block text-sm font-medium text-gray-300 mb-1">Pod</label>
-                                    <input type="text" id="pod" name="pod" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="Pod 1A">
-                                </div>
-                                
-                                <div>
-                                    <label for="campaignobjective" class="form-label block text-sm font-medium text-gray-300 mb-1">Campaign Objective</label>
-                                    <input type="text" id="campaignobjective" name="campaignobjective" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="Upper Funnel / Awareness">
-                                </div>
+                            <div>
+                                <label for="client" class="block text-sm font-medium text-gray-300 mb-2">Client</label>
+                                <select id="client" name="client" required class="form-input">
+                                    <option value="">Loading clients...</option>
+                                </select>
+                            </div>
 
-                                <div>
-                                    <label for="requestormarket" class="form-label block text-sm font-medium text-gray-300 mb-1">Requestor Market</label>
-                                    <input type="text" id="requestormarket" name="requestormarket" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="Singapore">
-                                </div>
+                            <div>
+                                <label for="debtor" class="block text-sm font-medium text-gray-300 mb-2">Debtor</label>
+                                <select id="debtor" name="debtor" required class="form-input">
+                                    <option value="">Loading debtors...</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="agency" class="block text-sm font-medium text-gray-300 mb-2">Agency</label>
+                                <select id="agency" name="agency" required class="form-input">
+                                    <option value="">Loading agencies...</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="brand" class="block text-sm font-medium text-gray-300 mb-2">Brand</label>
+                                <input type="text" id="brand" name="brand" value="World Pinball" required
+                                       class="form-input">
+                            </div>
+
+                            <div>
+                                <label for="pod" class="block text-sm font-medium text-gray-300 mb-2">Pod</label>
+                                <input type="text" id="pod" name="pod" value="Pod 1A" required
+                                       class="form-input">
+                            </div>
+
+                            <div>
+                                <label for="currency" class="block text-sm font-medium text-gray-300 mb-2">Currency</label>
+                                <input type="text" id="currency" name="currency" value="SGD" required
+                                       class="form-input">
+                            </div>
+
+                            <div>
+                                <label for="requestedstartdate" class="block text-sm font-medium text-gray-300 mb-2">Requested Start Date</label>
+                                <input type="date" id="requestedstartdate" name="requestedstartdate" value="2026-07-01" required
+                                       class="form-input" style="color-scheme: dark;">
                             </div>
                             
-                            <!-- Column 2 -->
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="requestedstartdate" class="form-label block text-sm font-medium text-gray-300 mb-1">Requested Start Date</label>
-                                    <input type="date" id="requestedstartdate" name="requestedstartdate" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="2026-07-01" required>
-                                </div>
-                                
-                                <div>
-                                    <label for="campaignstartdate" class="form-label block text-sm font-medium text-gray-300 mb-1">Campaign Start Date</label>
-                                    <input type="date" id="campaignstartdate" name="campaignstartdate" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="2026-08-29" required>
-                                </div>
+                            <div>
+                                <label for="campaignstartdate" class="block text-sm font-medium text-gray-300 mb-2">Campaign Start Date</label>
+                                <input type="date" id="campaignstartdate" name="campaignstartdate" value="2026-08-29" required
+                                       class="form-input" style="color-scheme: dark;">
+                            </div>
 
-                                <div>
-                                    <label for="campaignenddate" class="form-label block text-sm font-medium text-gray-300 mb-1">Campaign End Date</label>
-                                    <input type="date" id="campaignenddate" name="campaignenddate" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="2026-10-29" required>
-                                </div>
-                                
-                                <div>
-                                    <label for="overallbudget" class="form-label block text-sm font-medium text-gray-300 mb-1">Overall Budget</label>
-                                    <input type="number" id="overallbudget" name="overallbudget" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="100">
-                                </div>
-                                
-                                <div>
-                                    <label for="currency" class="form-label block text-sm font-medium text-gray-300 mb-1">Currency</label>
-                                    <input type="text" id="currency" name="currency" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="SGD">
-                                </div>
+                            <div>
+                                <label for="campaignenddate" class="block text-sm font-medium text-gray-300 mb-2">Campaign End Date</label>
+                                <input type="date" id="campaignenddate" name="campaignenddate" value="2026-10-29" required
+                                       class="form-input" style="color-scheme: dark;">
+                            </div>
 
-                                <div>
-                                    <label for="optin" class="form-label block text-sm font-medium text-gray-300 mb-1">Opt-in</label>
-                                    <select id="optin" name="optin" class="form-select w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none">
-                                        <option value="No">No</option>
-                                        <option value="Yes">Yes</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label for="porequired" class="form-label block text-sm font-medium text-gray-300 mb-1">PO Required</label>
-                                    <select id="porequired" name="porequired" class="form-select w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none">
-                                        <option value="No">No</option>
-                                        <option value="Yes">Yes</option>
-                                    </select>
-                                </div>
-                                
-                                <div>
-                                    <label for="selectedchannels" class="form-label block text-sm font-medium text-gray-300 mb-1">Selected Channels</label>
-                                    <input type="text" id="selectedchannels" name="selectedchannels" class="form-input w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500 focus:outline-none" value="Twitter">
-                                    <p class="text-xs text-gray-400 mt-1">Comma-separated (e.g., Twitter, Facebook)</p>
-                                 </div>
+                            <div>
+                                <label for="campaignobjective" class="block text-sm font-medium text-gray-300 mb-2">Campaign Objective</label>
+                                <input type="text" id="campaignobjective" name="campaignobjective" value="Upper Funnel / Awareness" required
+                                       class="form-input">
+                            </div>
+
+                            <div>
+                                <label for="requestormarket" class="block text-sm font-medium text-gray-300 mb-2">Requestor Market</label>
+                                <input type="text" id="requestormarket" name="requestormarket" value="Singapore" required
+                                       class="form-input">
+                            </div>
+
+                            <div>
+                                <label for="overallbudget" class="block text-sm font-medium text-gray-300 mb-2">Overall Budget</label>
+                                <input type="number" id="overallbudget" name="overallbudget" value="100" required
+                                       class="form-input">
+                            </div>
+
+                            <div>
+                                <label for="optin" class="block text-sm font-medium text-gray-300 mb-2">Opt-in</label>
+                                <select id="optin" name="optin" required class="form-input">
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label for="porequired" class="block text-sm font-medium text-gray-300 mb-2">PO Required</label>
+                                <select id="porequired" name="porequired" required class="form-input">
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
+
+                            <div class="md:col-span-2">
+                                <label for="selectedchannels" class="block text-sm font-medium text-gray-300 mb-2">Selected Channels (comma-separated)</label>
+                                <input type="text" id="selectedchannels" name="selectedchannels" value="Twitter" required
+                                       class="form-input" placeholder="e.g. Twitter, Facebook, Google">
                             </div>
                         </div>
 
-                        <!-- Submission Button -->
-                        <div class="pt-6 border-t border-gray-700">
-                            <button type="submit" id="campaign-submit-button" class="btn btn-primary w-full md:w-auto px-4 py-2 rounded-md font-semibold text-white shadow-md transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 bg-blue-600 hover:bg-blue-700 focus:ring-blue-500">
-                                Create Campaign
+                        <div class="mt-8 text-right">
+                            <button type="submit" id="campaign-submit-btn" class="px-6 py-2 bg-blue-600 text-white font-semibold rounded-md 
+                                                       hover:bg-blue-700 disabled:bg-gray-500 transition-all">
+                                Submit Campaign
                             </button>
                         </div>
                     </form>
-                    
-                    <!-- Submission Result -->
-                    <div id="campaign-result-container" class="hidden mt-6">
-                        <h3 class="text-xl font-semibold mb-2" id="campaign-result-title"></h3>
-                        <pre id="campaign-result" class="w-full bg-gray-800 p-4 rounded-md text-xs overflow-auto max-h-96"></pre>
+
+                    <div id="campaign-result-container" class="mt-6 hidden">
+                        <h3 class="text-lg font-semibold text-white mb-2">Submission Result</h3>
+                        <pre id="campaign-result-pre" class="bg-gray-800 p-4 rounded-md overflow-x-auto text-sm"></pre>
                     </div>
 
                 </div>
             </div>
+        </main>
 
-        </div> <!-- /Module Content Area -->
-    </main>
-
-    <!-- Developer Tool -->
-    <div id="dev-tool">
-        <!-- Toggle Icon -->
-        <button id="dev-tool-toggle" class="btn bg-purple-600 hover:bg-purple-700 fixed bottom-5 right-5 z-30 p-3 rounded-full shadow-lg px-4 py-2 font-semibold text-white transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900">
-            <!-- Wizard Hat Icon -->
-            <svg class="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M11.729,2.075A0.917,0.917,0,0,0,10.8,2.054L3.2,4.868A0.916,0.916,0,0,0,2.5,5.751v2.1A0.916,0.916,0,0,0,3.389,8.7L7.6,7.215V15.9a0.916,0.916,0,0,0,0.611,0.875,12.7,12.7,0,0,0,7.572,0A0.916,0.916,0,0,0,16.4,15.9V7.215l4.212,1.488A0.916,0.916,0,0,0,21.5,7.854v-2.1A0.916,0.916,0,0,0,20.8,4.868l-7.6-2.814A0.917,0.917,0,0,0,11.729,2.075Z" transform="translate(-2.5 -0.054)"></path><path d="M12,1.946A0.917,0.917,0,0,0,11.071,2L3.475,4.811A0.916,0.916,0,0,0,2.56,5.7v2.1A0.916,0.916,0,0,0,3.475,8.68l4.025-1.416v8.4a0.916,0.916,0,0,0,0.519,0.84,12.7,12.7,0,0,0,7.962,0A0.916,0.916,0,0,0,16.5,15.76V7.264L20.525,8.68A0.916,0.916,0,0,0,21.44,7.8V5.7A0.916,0.916,0,0,0,20.525,4.811L12.929,2A0.917,0.917,0,0,0,12,1.946ZM15.583,15.426a11.78,11.78,0,0,1-7.166,0V7.554l3.583-1.261,3.583,1.261Z" transform="translate(-2.5 1.054)"></path></svg>
+        <button id="dev-tool-toggle" class="fixed bottom-6 right-6 z-40 p-3 bg-indigo-600 text-white rounded-full shadow-lg
+                                           hover:bg-indigo-700 transition-all">
+            <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/>
+                <path d="M12 6c-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4-1.79-4-4-4zm0 6c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2z"/>
+                <path d="M5.64 16.36c-.49.49-1.28.49-1.77 0s-.49-1.28 0-1.77l1.77-1.77c.49-.49 1.28-.49 1.77 0s.49 1.28 0 1.77l-1.77 1.77zm12.72 0c.49.49 1.28.49 1.77 0s.49-1.28 0-1.77l-1.77-1.77c-.49-.49-1.28-.49-1.77 0s-.49 1.28 0 1.77l1.77 1.77z"/>
+                <path d="M12 20.5c.83 0 1.5-.67 1.5-1.5s-.67-1.5-1.5-1.5-1.5.67-1.5 1.5.67 1.5 1.5 1.5z"/>
+                <path d="M12 5.5c-.83 0-1.5-.67-1.5-1.5S11.17 2.5 12 2.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                <path d="M3.5 12.5c0-.83-.67-1.5-1.5-1.5S.5 11.67.5 12.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5z"/>
+                <path d="M20.5 12.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5-1.5.67-1.5 1.5z"/>
+            </svg>
         </button>
-        
-        <!-- Log Modal -->
-        <div id="dev-tool-modal" class="modal-backdrop fixed inset-0 bg-black/75 flex items-center justify-center z-40 transition-opacity hidden opacity-0">
-            <div class="modal-content bg-gray-800 rounded-lg shadow-xl p-6 relative w-11/12 h-5/6 max-w-7xl flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-2xl font-bold text-white">API Call Log</h3>
+
+        <div id="dev-tool-modal" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center hidden">
+            <div class="bg-gray-800 shadow-2xl rounded-lg w-[80%] h-[80%] flex flex-col">
+                <div class="flex justify-between items-center p-4 border-b border-gray-700">
+                    <h2 class="text-xl font-semibold text-white">Developer Tool: API Logs</h2>
                     <div>
-                        <button id="dev-tool-purge" class="text-gray-400 hover:text-white mr-4">
-                            <!-- Rubbish Bin Icon -->
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        <button id="dev-tool-purge" class="p-2 text-gray-400 hover:text-red-400 hover:bg-gray-700 rounded-md transition-all" title="Purge All Logs">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                         </button>
-                        <button id="dev-tool-close" class="text-gray-400 hover:text-white">
-                            <!-- Close Icon -->
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                        <button id="dev-tool-close" class="ml-2 p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-all" title="Close">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                         </button>
                     </div>
                 </div>
-                <div class="flex-1 overflow-auto border border-gray-700 rounded-md">
-                    <table class="w-full text-sm text-left text-gray-300">
-                        <thead class="text-xs text-gray-400 uppercase bg-gray-700 sticky top-0">
+                <div class="flex-grow p-4 overflow-auto">
+                    <table class="min-w-full text-left text-sm text-gray-300">
+                        <thead class="bg-gray-700 sticky top-0">
                             <tr>
-                                <th scope="col" class="px-4 py-3">Timestamp</th>
-                                <th scope="col" class="px-4 py-3">Status</th>
-                                <th scope="col" class="px-4 py-3">Method</th>
-                                <th scope="col" class="px-4 py-3">URL</th>
-                                <th scope="col" class="px-4 py-3">Request</th>
-                                <th scope="col" class="px-4 py-3">Response</th>
+                                <th class="p-3">Timestamp</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3">Method</th>
+                                <th class="p-3">URL</th>
+                                <th class="p-3">Request</th>
+                                <th class="p-3">Response</th>
                             </tr>
                         </thead>
-                        <tbody id="dev-log-table-body" class="divide-y divide-gray-700">
-                            <!-- Logs will be injected here -->
-                            <tr class="bg-gray-800">
-                                <td colspan="6" class="px-4 py-4 text-center">No API calls logged yet.</td>
-                            </tr>
-                        </tbody>
+                        <tbody id="dev-tool-log-body" class="divide-y divide-gray-700">
+                            </tbody>
                     </table>
                 </div>
             </div>
         </div>
-        
-        <!-- Payload Modal -->
-        <div id="payload-modal" class="modal-backdrop fixed inset-0 bg-black/75 flex items-center justify-center z-40 transition-opacity hidden opacity-0 z-50">
-            <div class="modal-content bg-gray-800 rounded-lg shadow-xl p-6 relative w-11/12 max-w-2xl h-4/5 flex flex-col">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-xl font-bold text-white">Payload Viewer</h3>
-                    <button id="payload-modal-close" class="text-gray-400 hover:text-white">
-                        <!-- Close Icon -->
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+
+        <div id="payload-modal" class="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center hidden">
+            <div class="bg-gray-800 shadow-2xl rounded-lg w-2/3 max-w-4xl h-3/4 flex flex-col">
+                <div class="flex justify-between items-center p-4 border-b border-gray-700">
+                    <h2 class="text-lg font-semibold text-white">Payload Viewer</h2>
+                    <button id="payload-modal-close" class="p-2 text-gray-400 hover:text-white hover:bg-gray-700 rounded-md transition-all" title="Close">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
-                <div class="flex-1 overflow-auto bg-gray-900 p-4 rounded-md">
-                    <pre id="payload-content" class="text-xs text-white"></pre>
+                <div class="flex-grow p-4 overflow-auto">
+                    <pre id="payload-content" class="text-sm text-gray-200 whitespace-pre-wrap break-all"></pre>
                 </div>
             </div>
         </div>
+
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', () => {
 
-            // --- CONSTANTS & CONFIG ---
-            const CONFIG_KEY = 'xpiConfig';
-            const DEV_LOG_KEY = 'xpiDevLog';
-            const CREDENTIALS_KEYS = ['xpiToken', 'xpiUsername', 'xpiPassword', 'xpiFirstName', 'xpiLastName', 'xpiAvatarUrl', 'clientId'];
-            const DEFAULT_CONFIG = {
-                xpiBaseUrl: 'https://api.wrikexpi.groupm.com'
-            };
+        // --- 1. CONFIGURATION & CONSTANTS ---
 
-            // --- DOM ELEMENTS ---
-            const initialLoader = document.getElementById('initial-loader');
-            const modules = {
-                login: document.getElementById('login-module'),
-                admin: document.getElementById('admin-module'),
-                campaign: document.getElementById('campaign-module'),
-            };
-            const sidebar = document.getElementById('sidebar');
-            const sidebarToggle = document.getElementById('sidebar-toggle');
+        const MODULE_CONFIG = {
+            'MOD.A': { name: 'Admin', type: 'Built-in', hash: '#admin' },
+            'MOD.B': { name: 'Login', type: 'Built-in', hash: '#login' },
+            'MOD.C': { name: 'Campaign Submission', type: 'User-defined', hash: '#campaign' }
+        };
+
+        const STORAGE_KEYS = {
+            baseUrl: 'xpiBaseUrl',
+            token: 'xpiToken',
+            username: 'xpiUsername',
+            password: 'xpiPassword',
+            firstName: 'xpiFirstName',
+            lastName: 'xpiLastName',
+            avatarUrl: 'xpiAvatarUrl',
+            clientId: 'xpiOAuthClientId',
+            apiLogs: 'xpiApiLogs'
+        };
+
+        // --- 2. DOM ELEMENT SELECTORS ---
+        const dom = {
+            navbar: document.getElementById('navbar'),
+            navToggleOpen: document.getElementById('nav-toggle-btn-open'),
+            navToggleClose: document.getElementById('nav-toggle-btn-close'),
+            navLinks: document.getElementById('nav-links'),
+            profileArea: document.getElementById('profile-area'),
+            profileAvatar: document.getElementById('profile-avatar'),
+            profileName: document.getElementById('profile-name'),
+            logoutLink: document.getElementById('logout-link'),
+            mainContent: document.getElementById('main-content'),
             
-            // User Profile
-            const userProfile = document.getElementById('user-profile');
-            const userAvatar = document.getElementById('user-avatar');
-            const userName = document.getElementById('user-name');
-            const logoutLink = document.getElementById('logout-link');
-
-            // Dev Tool
-            const devToolToggle = document.getElementById('dev-tool-toggle');
-            const devToolModal = document.getElementById('dev-tool-modal');
-            const devToolClose = document.getElementById('dev-tool-close');
-            const devToolPurge = document.getElementById('dev-tool-purge');
-            const devLogTableBody = document.getElementById('dev-log-table-body');
-            const payloadModal = document.getElementById('payload-modal');
-            const payloadModalClose = document.getElementById('payload-modal-close');
-            const payloadContent = document.getElementById('payload-content');
-            
-            // Login Module
-            const loginButton = document.getElementById('login-button');
-            const loginAuthMode = document.getElementById('login-auth-mode');
-            const loginCallbackMode = document.getElementById('login-callback-mode');
-            const loginErrorMode = document.getElementById('login-error-mode');
-            const loginStatusMessage = document.getElementById('login-status-message');
-            const loginErrorMessage = document.getElementById('login-error-message');
-            const loginErrorResponse = document.getElementById('login-error-response');
-            const loginStartOverButton = document.getElementById('login-start-over-button');
+            // Modules
+            moduleAdmin: document.getElementById('module-admin'),
+            moduleLogin: document.getElementById('module-login'),
+            moduleCampaign: document.getElementById('module-campaign'),
 
             // Admin Module
-            const adminForm = document.getElementById('admin-form');
-            const adminSaveFeedback = document.getElementById('admin-save-feedback');
+            adminForm: document.getElementById('admin-form'),
+            adminInput: document.getElementById('xpiBaseUrl-input'),
+            adminFeedback: document.getElementById('admin-save-feedback'),
+
+            // Login Module
+            loginContainer: document.getElementById('login-container'),
             
             // Campaign Module
-            const campaignForm = document.getElementById('campaign-form');
-            const campaignSubmitButton = document.getElementById('campaign-submit-button');
-            const campaignResultContainer = document.getElementById('campaign-result-container');
-            const campaignResultTitle = document.getElementById('campaign-result-title');
-            const campaignResult = document.getElementById('campaign-result');
-            const campaignLoadError = document.getElementById('campaign-load-error');
-            const campaignLoadErrorDetails = document.getElementById('campaign-load-error-details');
+            campaignForm: document.getElementById('campaign-form'),
+            campaignSubmitBtn: document.getElementById('campaign-submit-btn'),
+            campaignResultContainer: document.getElementById('campaign-result-container'),
+            campaignResultPre: document.getElementById('campaign-result-pre'),
+
+            // Dev Tool
+            devToolToggle: document.getElementById('dev-tool-toggle'),
+            devToolModal: document.getElementById('dev-tool-modal'),
+            devToolClose: document.getElementById('dev-tool-close'),
+            devToolPurge: document.getElementById('dev-tool-purge'),
+            devToolLogBody: document.getElementById('dev-tool-log-body'),
+
+            // Payload Modal
+            payloadModal: document.getElementById('payload-modal'),
+            payloadModalClose: document.getElementById('payload-modal-close'),
+            payloadContent: document.getElementById('payload-content')
+        };
+        
+        // Add shared form input styles
+        const formInputClasses = 'w-full bg-gray-700 border border-gray-600 text-white rounded-md p-2 focus:ring-blue-500 focus:border-blue-500 focus:outline-none disabled:bg-gray-600 disabled:opacity-70';
+        document.querySelectorAll('.form-input').forEach(el => el.classList.add(...formInputClasses.split(' ')));
 
 
-            // --- STATE & HELPERS ---
+        // --- 3. LOCALSTORAGE HELPERS ---
 
-            /**
-             * Gets a value from localStorage.
-             * @param {string} key - The key to retrieve.
-             * @param {any} defaultValue - The default value if key not found.
-             * @returns {any}
-             */
-            function getLocalStorage(key, defaultValue = null) {
-                const value = localStorage.getItem(key);
-                if (value === null) return defaultValue;
-                try {
-                    return JSON.parse(value);
-                } catch (e) {
-                    return value; // Return as string if not JSON
-                }
-            }
+        const getStorage = (key, defaultValue = null) => {
+            return localStorage.getItem(key) || defaultValue;
+        };
+        
+        const setStorage = (key, value) => {
+            localStorage.setItem(key, value);
+        };
+        
+        const removeStorage = (key) => {
+            localStorage.removeItem(key);
+        };
 
-            /**
-             * Sets a value in localStorage.
-             * @param {string} key - The key to set.
-             * @param {any} value - The value to store (will be JSON.stringified).
-             */
-            function setLocalStorage(key, value) {
-                if (value === undefined || value === null) {
-                    localStorage.removeItem(key);
-                } else {
-                    localStorage.setItem(key, JSON.stringify(value));
-                }
-            }
-            
-            /**
-             * Gets the global app configuration.
-             * @returns {object}
-             */
-            function getConfig() {
-                const storedConfig = getLocalStorage(CONFIG_KEY, {});
-                return { ...DEFAULT_CONFIG, ...storedConfig };
-            }
+        const getApiLogs = () => {
+            return JSON.parse(getStorage(STORAGE_KEYS.apiLogs, '[]'));
+        };
 
-            /**
-             * Sets a specific config key.
-             * @param {string} key - The config key.
-             * @param {string} value - The config value.
-             */
-            function setConfig(key, value) {
-                const config = getConfig();
-                config[key] = value;
-                setLocalStorage(CONFIG_KEY, config);
-            }
-
-            /**
-             * Checks if the user is logged in.
-             * @returns {boolean}
-             */
-            function isLoggedIn() {
-                return !!getLocalStorage('xpiToken') && !!getLocalStorage('xpiUsername');
-            }
-            
-            /**
-             * Gets credentials for API calls.
-             * @returns {object|null}
-             */
-            function getCredentials() {
-                if (!isLoggedIn()) return null;
-                return {
-                    username: getLocalStorage('xpiUsername'),
-                    password: getLocalStorage('xpiPassword'),
-                    token: getLocalStorage('xpiToken')
-                };
-            }
-
-            /**
-             * Clears all user-related data from localStorage and redirects.
-             */
-            function logout() {
-                CREDENTIALS_KEYS.forEach(key => localStorage.removeItem(key));
-                window.location.href = window.location.pathname; // Redirect to base
-            }
-
-            /**
-             * Updates the user info in the sidebar.
-             */
-            function updateUserInfoUI() {
-                if (isLoggedIn()) {
-                    userName.textContent = `${getLocalStorage('xpiFirstName', '')} ${getLocalStorage('xpiLastName', '')}`;
-                    userAvatar.src = getLocalStorage('xpiAvatarUrl', `https://placehold.co/40x40/4a5568/E2E8F0?text=${getLocalStorage('xpiFirstName', 'U')[0]}`);
-                    logoutLink.classList.remove('hidden');
-                } else {
-                    userName.textContent = 'Not Logged In';
-                    userAvatar.src = 'https://placehold.co/40x40/4a5568/E2E8F0?text=?';
-                    logoutLink.classList.add('hidden');
-                }
-            }
-
-                function showModule(moduleId) {
-                // Hide loader
-                initialLoader.classList.add('hidden');
-                
-                Object.values(modules).forEach(module => {
-                    if (module) {
-                        // module.classList.remove('active'); // OLD
-                        module.classList.add('hidden'); // NEW
-                    }
-                });
-                
-                if (modules[moduleId]) {
-                    // modules[moduleId].classList.add('active'); // OLD
-                    modules[moduleId].classList.remove('hidden'); // NEW
-                    
-                    // Update active nav link
-                    document.querySelectorAll('.nav-link').forEach(link => {
-                        link.classList.remove('bg-gray-700', 'text-white');
-                        if (link.dataset.moduleId === moduleId) {
-                            link.classList.add('bg-gray-700', 'text-white');
-                        }
-                    });
-
-                    // Special init for campaign module (to load dropdowns)
-                    if (moduleId === 'campaign' && !modules.campaign.dataset.initialized) {
-                        loadCampaignDropdowns();
-                        modules.campaign.dataset.initialized = 'true';
-                    }
-                    
-                    // Special init for admin module
-                    if (moduleId === 'admin') {
-                        initAdminModule();
-                    }
-                    
-                } else {
-                    console.error(`Module "${moduleId}" not found.`);
-                    // Show a fallback or error
-                }
-            }
-            
-            /**
-             * Formats JSON string for display.
-             * @param {any} data - The data to format.
-             * @returns {string}
-             */
-            function formatJSON(data) {
-                if (typeof data === 'string') {
-                    try {
-                        data = JSON.parse(data);
-                    } catch (e) {
-                        return data; // Not JSON, return as is
-                    }
-                }
-                return JSON.stringify(data, null, 2);
-            }
-
-            /**
-             * A SHA-256 hash helper function.
-             * @param {string} message - The string to hash.
-             * @returns {Promise<string>} - The hex-encoded hash.
-             */
-            async function sha256(message) {
-                const msgBuffer = new TextEncoder().encode(message);
-                const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
-                const hashArray = Array.from(new Uint8Array(hashBuffer));
-                const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-                return hashHex;
-            }
-
-            /**
-             * Redirects to the base URL (removes hash and query params).
-             */
-            function redirectToBase() {
-                window.location.href = window.location.pathname;
-            }
-
-
-            // --- DEV TOOL ---
-
-            /**
-             * Initializes the developer tool functionality.
-             */
-            function initDevTool() {
-                devToolToggle.addEventListener('click', () => {
-                    renderLogTable();
-                    devToolModal.classList.remove('hidden');
-                    setTimeout(() => devToolModal.classList.remove('opacity-0'), 10);
-                });
-                
-                devToolClose.addEventListener('click', () => {
-                    devToolModal.classList.add('opacity-0');
-                    setTimeout(() => devToolModal.classList.add('hidden'), 300);
-                });
-
-                devToolPurge.addEventListener('click', () => {
-                    if (window.confirm('Are you sure you want to purge all API logs?')) {
-                        setLocalStorage(DEV_LOG_KEY, []);
-                        renderLogTable();
-                    }
-                });
-                
-                payloadModalClose.addEventListener('click', () => {
-                    payloadModal.classList.add('opacity-0');
-                    setTimeout(() => payloadModal.classList.add('hidden'), 300);
-                });
-            }
-
-            /**
-             * Renders the log table from localStorage.
-             */
-            function renderLogTable() {
-                const logs = getLocalStorage(DEV_LOG_KEY, []);
-                devLogTableBody.innerHTML = ''; // Clear existing
-                
-                if (logs.length === 0) {
-                    devLogTableBody.innerHTML = `
-                        <tr class="bg-gray-800">
-                            <td colspan="6" class="px-4 py-4 text-center text-gray-400">No API calls logged yet.</td>
-                        </tr>
-                    `;
-                    return;
-                }
-                
-                // Show in reverse chronological order
-                logs.slice().reverse().forEach((log, index) => {
-                    const statusColor = log.status >= 400 ? 'text-red-400' : (log.status >= 300 ? 'text-yellow-400' : 'text-green-400');
-                    const reqLogIndex = `req-${logs.length - 1 - index}`;
-                    const resLogIndex = `res-${logs.length - 1 - index}`;
-                    
-                    const tr = document.createElement('tr');
-                    tr.className = 'bg-gray-800 border-b border-gray-700 hover:bg-gray-700';
-                    tr.innerHTML = `
-                        <td class="px-4 py-3 whitespace-nowrap">${new Date(log.timestamp).toLocaleTimeString()}</td>
-                        <td class="px-4 py-3 font-medium ${statusColor}">${log.status}</td>
-                        <td class="px-4 py-3">${log.method}</td>
-                        <td class="px-4 py-3 truncate" title="${log.url}">${log.url.replace(getConfig().xpiBaseUrl, '')}</td>
-                        <td class="px-4 py-3">
-                            <a href="#" class="text-blue-400 hover:underline" data-log-index="${reqLogIndex}">View</a>
-                        </td>
-                        <td class="px-4 py-3">
-                            <a href="#" class="text-blue-400 hover:underline" data-log-index="${resLogIndex}">View</a>
-                        </td>
-                    `;
-                    devLogTableBody.appendChild(tr);
-                });
-                
-                // Add event listeners to new links
-                devLogTableBody.querySelectorAll('a[data-log-index]').forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        const [type, index] = e.target.dataset.logIndex.split('-');
-                        const log = getLocalStorage(DEV_LOG_KEY, [])[index];
-                        if (log) {
-                            const content = (type === 'req') ? log.request : log.response;
-                            showPayloadModal(content);
-                        }
-                    });
-                });
-            }
-
-            /**
-             * Logs an API call to localStorage.
-             * @param {string} method
-             * @param {string} url
-             * @param {number} status
-             * @param {any} request
-             * @param {any} response
-             */
-            function logApiCall(method, url, status, request, response) {
-                const logs = getLocalStorage(DEV_LOG_KEY, []);
-                logs.push({
+        const logApiCall = async (method, url, status, requestPayload, responsePayload) => {
+            try {
+                const logs = getApiLogs();
+                const newLog = {
+                    id: Date.now(),
                     timestamp: new Date().toISOString(),
                     method,
                     url,
                     status,
-                    request,
-                    response
+                    request: requestPayload,
+                    response: responsePayload
+                };
+                logs.unshift(newLog); // Add to the beginning
+                if (logs.length > 100) logs.pop(); // Limit to 100 logs
+                setStorage(STORAGE_KEYS.apiLogs, JSON.stringify(logs));
+                
+                // If dev tool is open, refresh it
+                if (!dom.devToolModal.classList.contains('hidden')) {
+                    renderDevLogs();
+                }
+            } catch (e) {
+                console.error("Failed to log API call:", e);
+            }
+        };
+
+        // --- 4. API & AUTH HELPERS ---
+
+        /**
+         * Generic API fetch wrapper
+         * @param {string} url - The full URL to fetch
+         * @param {object} options - The options for fetch()
+         * @param {string} authType - 'bearer', 'basic', or 'none'
+         * @param {object} requestPayload - The body of the request (for logging)
+         * @returns {Promise<object>} - { data, error, errorData, status }
+         */
+        const apiFetch = async (url, options, authType = 'bearer', requestPayload = null) => {
+            const headers = new Headers(options.headers || {});
+            
+            // Add Authorization header based on authType
+            if (authType === 'bearer') {
+                const token = getStorage(STORAGE_KEYS.token);
+                if (token) headers.set('Authorization', `Bearer ${token}`);
+            } else if (authType === 'basic') {
+                const username = getStorage(STORAGE_KEYS.username);
+                const password = getStorage(STORAGE_KEYS.password);
+                if (username && password) {
+                    headers.set('Authorization', `Basic ${btoa(`${username}:${password}`)}`);
+                }
+            }
+            options.headers = headers;
+
+            let response, data, errorData;
+            let status = 0;
+
+            try {
+                response = await fetch(url, options);
+                status = response.status;
+                
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    data = await response.json();
+                } else {
+                    data = await response.text();
+                }
+
+                if (!response.ok) {
+                    errorData = data;
+                    data = null;
+                }
+            } catch (error) {
+                console.error('API Fetch Error:', error);
+                errorData = { message: error.message, isNetworkError: true };
+                data = null;
+            }
+
+            // Log the API call
+            logApiCall(options.method || 'GET', url, status, requestPayload, data || errorData);
+
+            return { data, error: !data, errorData, status };
+        };
+
+        const getApi = (url, authType = 'bearer') => {
+            return apiFetch(url, { method: 'GET' }, authType);
+        };
+
+        const postApi = (url, body, authType = 'bearer') => {
+            const options = {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            };
+            return apiFetch(url, options, authType, body);
+        };
+
+        /**
+         * Generates a SHA-256 hash and returns the last 7 hex chars
+         */
+        const generateClientId = async () => {
+            const data = `${Date.now()}-${Math.random()}`;
+            const encoder = new TextEncoder();
+            const buffer = await crypto.subtle.digest('SHA-256', encoder.encode(data));
+            const hashArray = Array.from(new Uint8Array(buffer));
+            const hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hexHash.slice(-7);
+        };
+
+        // --- 5. UI & ROUTING ---
+
+        const showModule = (moduleId) => {
+            [dom.moduleAdmin, dom.moduleLogin, dom.moduleCampaign].forEach(module => {
+                if (module.id === `module-${moduleId}`) {
+                    module.classList.remove('hidden');
+                } else {
+                    module.classList.add('hidden');
+                }
+            });
+        };
+
+        const updateUiForLoginState = (isLoggedIn) => {
+            if (isLoggedIn) {
+                // Show nav and profile
+                dom.navbar.classList.remove('hidden');
+                dom.navToggleOpen.classList.remove('hidden');
+                dom.profileArea.classList.remove('hidden');
+
+                // Populate profile
+                dom.profileAvatar.src = getStorage(STORAGE_KEYS.avatarUrl, 'https://via.placeholder.com/40');
+                dom.profileName.textContent = `${getStorage(STORAGE_KEYS.firstName, 'User')} ${getStorage(STORAGE_KEYS.lastName, '')}`;
+
+                // Build nav links
+                dom.navLinks.innerHTML = ''; // Clear existing
+                Object.values(MODULE_CONFIG).forEach(mod => {
+                    if (mod.type === 'User-defined') {
+                        const link = document.createElement('a');
+                        link.href = mod.hash;
+                        link.className = `block p-4 text-sm hover:bg-gray-700 transition-all ${window.location.hash === mod.hash ? 'bg-gray-900 text-white font-semibold' : ''}`;
+                        link.textContent = mod.name;
+                        dom.navLinks.appendChild(link);
+                    }
                 });
-                setLocalStorage(DEV_LOG_KEY, logs);
+            } else {
+                // Hide nav and profile
+                dom.navbar.classList.add('hidden', '-translate-x-full');
+                dom.navToggleOpen.classList.add('hidden');
+                dom.profileArea.classList.add('hidden');
+                dom.mainContent.classList.remove('md:ml-64');
             }
+        };
 
-            /**
-             * Shows the payload modal with content.
-             * @param {any} content - The request/response data.
-             */
-            function showPayloadModal(content) {
-                payloadContent.textContent = formatJSON(content);
-                payloadModal.classList.remove('hidden');
-                setTimeout(() => payloadModal.classList.remove('opacity-0'), 10);
-            }
+        const handleRouting = () => {
+            const hash = window.location.hash;
+            const params = new URLSearchParams(window.location.search);
+            const code = params.get('code');
+            const isLoggedIn = !!getStorage(STORAGE_KEYS.token);
             
-            /**
-             * A wrapper for the fetch API that logs requests and responses.
-             * @param {string} url - The URL to fetch.
-             * @param {object} options - The fetch options.
-             * @returns {Promise<Response>}
-             */
-            async function loggedFetch(url, options = {}) {
-                const method = options.method || 'GET';
-                const requestPayload = options.body ? (typeof options.body === 'string' ? options.body : 'Binary/FormData') : 'N/A';
+            updateUiForLoginState(isLoggedIn);
+
+            if (hash === '#admin') {
+                showModule('admin');
+                initAdminModule();
+            } else if (code) {
+                showModule('login');
+                initLoginModule(code);
+            } else if (isLoggedIn) {
+                // Default to campaign module if logged in and no other hash
+                const targetHash = hash || MODULE_CONFIG['MOD.C'].hash;
+                const activeModule = Object.values(MODULE_CONFIG).find(m => m.hash === targetHash);
                 
-                let status = 0;
-                let responsePayload = null;
-                
-                try {
-                    const response = await fetch(url, options);
-                    status = response.status;
-                    
-                    // Try to clone and parse JSON, fall back to text
-                    try {
-                        const clonedResponse = response.clone();
-                        responsePayload = await clonedResponse.json();
-                    } catch (e) {
-                        try {
-                            responsePayload = await response.clone().text();
-                        } catch (textError) {
-                            responsePayload = `[Could not read response body: ${textError.message}]`;
-                        }
+                if (activeModule && activeModule.type === 'User-defined') {
+                    if (window.location.hash !== activeModule.hash) {
+                         window.location.hash = activeModule.hash; // Set default hash
+                         return; // Routing will re-trigger
                     }
-                    
-                    logApiCall(method, url, status, requestPayload, responsePayload);
-                    return response;
-                    
-                } catch (error) {
-                    console.error('Fetch Error:', error);
-                    status = 0; // Network error
-                    responsePayload = { error: error.message, stack: error.stack };
-                    logApiCall(method, url, status, requestPayload, responsePayload);
-                    throw error; // Re-throw the error
+                    showModule('campaign');
+                    initCampaignModule();
+                } else {
+                    // Fallback to default campaign module
+                    window.location.hash = MODULE_CONFIG['MOD.C'].hash;
                 }
-            }
-
-            
-            // --- ADMIN MODULE ---
-
-            /**
-             * Initializes the Admin module (populates form).
-             */
-            function initAdminModule() {
-                const config = getConfig();
-                adminForm.elements.xpiBaseUrl.value = config.xpiBaseUrl;
-                
-                adminForm.onsubmit = (e) => {
-                    e.preventDefault();
-                    const newBaseUrl = adminForm.elements.xpiBaseUrl.value;
-                    setConfig('xpiBaseUrl', newBaseUrl);
-                    
-                    adminSaveFeedback.textContent = 'Configuration saved successfully!';
-                    adminSaveFeedback.classList.remove('hidden');
-                    setTimeout(() => adminSaveFeedback.classList.add('hidden'), 3000);
-                };
+            } else {
+                showModule('login');
+                initLoginModule(null); // No code, show auth mode
             }
             
-
-            // --- LOGIN MODULE ---
-
-            /**
-             * Initializes the Login module event listeners.
-             */
-            function initLoginModule() {
-                loginButton.addEventListener('click', handleLoginAuthClick);
-                loginStartOverButton.addEventListener('click', redirectToBase);
-            }
-
-            /**
-             * Handles the "Login & Authenticate" button click.
-             */
-            async function handleLoginAuthClick() {
-                try {
-                    loginButton.disabled = true;
-                    loginButton.textContent = 'Generating client ID...';
-
-                    const timestamp = Date.now().toString();
-                    const random = Math.random().toString();
-                    const hash = await sha256(timestamp + random);
-                    const clientId = hash.slice(-7);
-                    
-                    setLocalStorage('clientId', clientId);
-                    
-                    const config = getConfig();
-                    const redirectUri = window.location.origin + window.location.pathname;
-                    const authUrl = `${config.xpiBaseUrl}/?accountId=3128883&redirectUri=${encodeURIComponent(redirectUri)}&client_id=${clientId}`;
-                    
-                    // Redirect to Wrike auth
-                    window.location.href = authUrl;
-
-                } catch (error) {
-                    console.error('Login Error:', error);
-                    loginButton.disabled = false;
-                    loginButton.textContent = 'Login & Authenticate';
-                    // Show an error message to the user
-                    loginAuthMode.insertAdjacentHTML('beforeend', '<p class="text-red-400 text-center mt-4">Could not generate Client ID. Please try again.</p>');
+            // Highlight active nav link
+            document.querySelectorAll('#nav-links a').forEach(a => {
+                if (a.getAttribute('href') === window.location.hash) {
+                    a.classList.add('bg-gray-900', 'text-white', 'font-semibold');
+                } else {
+                    a.classList.remove('bg-gray-900', 'text-white', 'font-semibold');
                 }
-            }
+            });
+        };
 
-            /**
-             * Handles the OAuth callback (when `?code=...` is present).
-             * @param {string} code - The authorization code from the URL.
-             */
-            async function handleLoginCallback(code) {
-                // Show loading state
-                loginAuthMode.classList.add('hidden');
-                loginCallbackMode.classList.remove('hidden');
-                
-                const clientId = getLocalStorage('clientId');
-                
-                // 1. Validation
-                if (!clientId || !code) {
-                    showLoginError(
-                        'Authentication error: Missing Client ID or Code.',
-                        'Please ensure you are not opening this link directly. You will be redirected.'
-                    );
-                    setTimeout(redirectToBase, 10000);
-                    return;
-                }
-                
-                const config = getConfig();
-                
-                try {
-                    // 2. API Call 1: Exchange code for token
-                    loginStatusMessage.textContent = 'Exchanging authorization code...';
-                    const tokenUrl = `${config.xpiBaseUrl}/api/v1/wrikexpi/token/exchange?code=${code}&client_id=${clientId}&grant_type=authorization_code`;
-                    
-                    const tokenResponse = await loggedFetch(tokenUrl, { method: 'GET' });
-                    const tokenData = await tokenResponse.json();
+        // --- 6. MODULE INITIALIZATION ---
 
-                    if (!tokenResponse.ok || !tokenData.success || !tokenData.data) {
-                        throw new Error(JSON.stringify(tokenData || 'Failed to exchange token.', null, 2));
-                    }
-
-                    // 3. Store Credentials
-                    const { token, credentials } = tokenData.data;
-                    setLocalStorage('xpiToken', token);
-                    setLocalStorage('xpiUsername', credentials.username);
-                    setLocalStorage('xpiPassword', credentials.password);
-                    
-                    // 4. API Call 2: Verify credentials by getting user profile
-                    loginStatusMessage.textContent = 'Verifying credentials...';
-                    const profileUrl = `${config.xpiBaseUrl}/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me`;
-                    
-                    const profileResponse = await loggedFetch(profileUrl, {
-                        method: 'GET',
-                        headers: {
-                            'Authorization': 'Basic ' + btoa(`${credentials.username}:${credentials.password}`)
-                        }
-                    });
-                    
-                    const profileData = await profileResponse.json();
-                    
-                    if (!profileResponse.ok || !profileData.success || !profileData.data || profileData.data.length === 0) {
-                        throw new Error(JSON.stringify(profileData || 'Failed to verify user profile.', null, 2));
-                    }
-                    
-                    // 5. Success
-                    const user = profileData.data[0];
-                    setLocalStorage('xpiFirstName', user.firstName);
-                    setLocalStorage('xpiLastName', user.lastName);
-                    setLocalStorage('xpiAvatarUrl', user.avatarUrl);
-                    
-                    loginStatusMessage.textContent = `Welcome, ${user.firstName} ${user.lastName}! Login successful. Redirecting...`;
-                    updateUserInfoUI();
-                    
-                    // Redirect to campaign page (by removing query params)
-                    setTimeout(redirectToBase, 3000);
-
-                } catch (error) {
-                    // 6. Failure
-                    console.error('Callback Error:', error);
-                    showLoginError(
-                        'An unexpected technical error occurred.',
-                        error.message
-                    );
-                }
-            }
-            
-            /**
-             * Helper to show the login error state.
-             * @param {string} message - A user-friendly error message.
-             * @param {string} responseText - The technical details (e.g., API response).
-             */
-            function showLoginError(message, responseText) {
-                loginCallbackMode.classList.add('hidden');
-                loginErrorMode.classList.remove('hidden');
-                loginErrorMessage.textContent = message;
-                loginErrorResponse.textContent = formatJSON(responseText);
-            }
-
-
-            // --- CAMPAIGN MODULE ---
-
-            /**
-             * Fetches data for all dropdowns in the campaign form.
-             */
-            async function loadCampaignDropdowns() {
-                const creds = getCredentials();
-                if (!creds) {
-                    showCampaignLoadError('Not logged in. Cannot fetch form data.');
-                    return;
-                }
-                
-                const config = getConfig();
-                const headers = {
-                    'Authorization': 'Basic ' + btoa(`${creds.username}:${creds.password}`)
-                };
-
-                const endpoints = {
-                    client: `${config.xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/clients-grm-mys`,
-                    debtor: `${config.xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/debtors-grm-mys`,
-                    agency: `${config.xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/agencies`
-                };
-                
-                try {
-                    const [clientRes, debtorRes, agencyRes] = await Promise.all([
-                        loggedFetch(endpoints.client, { headers }),
-                        loggedFetch(endpoints.debtor, { headers }),
-                        loggedFetch(endpoints.agency, { headers })
-                    ]);
-
-                    const clientData = await clientRes.json();
-                    const debtorData = await debtorRes.json();
-                    const agencyData = await agencyRes.json();
-
-                    if (!clientRes.ok) throw new Error(`Clients: ${JSON.stringify(clientData)}`);
-                    if (!debtorRes.ok) throw new Error(`Debtors: ${JSON.stringify(debtorData)}`);
-                    if (!agencyRes.ok) throw new Error(`Agencies: ${JSON.stringify(agencyData)}`);
-                    
-                    populateSelect('client', clientData.value);
-                    populateSelect('debtor', debtorData.value);
-                    populateSelect('agency', agencyData.value);
-
-                } catch (error) {
-                    console.error('Failed to load campaign dropdowns:', error);
-                    showCampaignLoadError('One or more API calls failed.', error.message);
-                }
-            }
-
-            /**
-             * Populates a <select> element with options.
-             * @param {string} elementId - The ID of the select element.
-             * @param {Array<object>} items - The array of items (e.g., [{value: "3M"}, ...]).
-             */
-            function populateSelect(elementId, items) {
-                const select = document.getElementById(elementId);
-                if (!select) return;
-                
-                select.innerHTML = '<option value="">-- Select an option --</option>'; // Clear loading/default
-                if (items && Array.isArray(items)) {
-                    items.forEach(item => {
-                        const option = document.createElement('option');
-                        option.value = item.value;
-                        option.textContent = item.value;
-                        select.appendChild(option);
-                    });
-                }
-            }
-            
-            /**
-             * Shows an error message on the campaign form.
-             * @param {string} message
-             * @param {string} details
-             */
-            function showCampaignLoadError(message, details = '') {
-                campaignLoadError.classList.remove('hidden');
-                campaignLoadError.querySelector('p').textContent = message;
-                campaignLoadErrorDetails.textContent = formatJSON(details);
-            }
-            
-            /**
-             * Handles the submission of the campaign form.
-             * @param {Event} e - The form submit event.
-             */
-            async function handleCampaignSubmit(e) {
+        // A. Admin Module
+        const initAdminModule = () => {
+            dom.adminInput.value = getStorage(STORAGE_KEYS.baseUrl, 'https://api.wrikexpi.groupm.com');
+            dom.adminForm.onsubmit = (e) => {
                 e.preventDefault();
-                const creds = getCredentials();
-                if (!creds) {
-                    showCampaignResult(false, 'Error: You are not logged in.');
+                setStorage(STORAGE_KEYS.baseUrl, dom.adminInput.value);
+                dom.adminFeedback.textContent = 'Configuration saved!';
+                setTimeout(() => dom.adminFeedback.textContent = '', 3000);
+            };
+        };
+
+        // B. Login Module
+        const initLoginModule = (code) => {
+            if (code) {
+                // Mode 2: OAuth Callback
+                dom.loginContainer.innerHTML = `
+                    <div class="flex justify-center mb-4"><div class="spinner"></div></div>
+                    <p class="text-lg font-semibold text-white">Authenticating...</p>
+                    <p class="text-sm text-gray-400">Please wait while we verify your credentials.</p>
+                `;
+                handleOAuthCallback(code);
+            } else {
+                // Mode 1: Authentication
+                dom.loginContainer.innerHTML = `
+                    <h2 class="text-2xl font-bold text-white mb-6">Welcome to XPI Portal</h2>
+                    <p class="text-gray-400 mb-8">Please log in to continue.</p>
+                    <button id="login-redirect-btn" class="${formInputClasses} w-full bg-blue-600 font-semibold hover:bg-blue-700 transition">
+                        Login & Authenticate
+                    </button>
+                `;
+                document.getElementById('login-redirect-btn').onclick = handleLoginRedirect;
+            }
+        };
+
+        // C. Campaign Module
+        const initCampaignModule = async () => {
+            // This module is only loaded if user is logged in, so Basic Auth creds exist.
+            const baseUrl = getStorage(STORAGE_KEYS.baseUrl);
+
+            const loadDropdown = async (elementId, endpoint) => {
+                const select = document.getElementById(elementId);
+                select.disabled = true;
+                const { data, error, errorData } = await getApi(`${baseUrl}/${endpoint}`, 'basic');
+                
+                if (error) {
+                    console.error(`Failed to load ${elementId}:`, errorData);
+                    select.innerHTML = `<option value="">Error loading data</option>`;
+                    return;
+                }
+                
+                const defaultValue = dom.campaignForm.elements[elementId].value;
+                select.innerHTML = ''; // Clear "Loading..."
+                data.value.forEach(item => {
+                    const option = document.createElement('option');
+                    option.value = item.value;
+                    option.textContent = item.value;
+                    if (item.value === defaultValue) {
+                        option.selected = true;
+                    }
+                    select.appendChild(option);
+                });
+                select.disabled = false;
+            };
+
+            // Load all dropdowns in parallel
+            await Promise.all([
+                loadDropdown('client', 'api/v1/wrikexpi/v1.0/value/clients-grm-mys'),
+                loadDropdown('debtor', 'api/v1/wrikexpi/v1.0/value/debtors-grm-mys'),
+                loadDropdown('agency', 'api/v1/wrikexpi/v1.0/value/agencies')
+            ]);
+            
+            dom.campaignForm.onsubmit = handleCampaignSubmit;
+        };
+        
+        // --- 7. CORE LOGIC HANDLERS ---
+
+        const handleLoginRedirect = async () => {
+            const btn = document.getElementById('login-redirect-btn');
+            btn.disabled = true;
+            btn.textContent = 'Redirecting...';
+
+            try {
+                const clientId = await generateClientId();
+                setStorage(STORAGE_KEYS.clientId, clientId);
+                
+                const baseUrl = getStorage(STORAGE_KEYS.baseUrl, 'https://api.wrikexpi.groupm.com');
+                const redirectUri = window.location.origin + window.location.pathname;
+                
+                const authUrl = `${baseUrl}/?accountId=3128883&redirectUri=${encodeURIComponent(redirectUri)}&client_id=${clientId}`;
+                
+                // Redirect
+                window.location.href = authUrl;
+            } catch (error) {
+                dom.loginContainer.innerHTML += `<p class="text-red-400 text-sm mt-4">Error: ${error.message}</p>`;
+                btn.disabled = false;
+                btn.textContent = 'Login & Authenticate';
+            }
+        };
+
+        const handleOAuthCallback = async (code) => {
+            const clientId = getStorage(STORAGE_KEYS.clientId);
+            const baseUrl = getStorage(STORAGE_KEYS.baseUrl);
+
+            const showError = (message, response = null) => {
+                dom.loginContainer.innerHTML = `
+                    <h2 class="text-2xl font-bold text-red-400 mb-4">Login Failed</h2>
+                    <p class="text-gray-300 mb-6">${message}</p>
+                    ${response ? `<pre class="bg-gray-900 text-left text-xs text-red-300 p-4 rounded-md overflow-auto max-h-60">
+${JSON.stringify(response, null, 2)}
+</pre>` : ''}
+                    <button id="start-over-btn" class="${formInputClasses} w-full bg-blue-600 font-semibold hover:bg-blue-700 transition mt-6">
+                        Start Over
+                    </button>
+                `;
+                document.getElementById('start-over-btn').onclick = () => window.location.href = window.location.pathname;
+            };
+
+            if (!clientId || !code) {
+                showError('Missing authentication code or client ID. Your session may have expired.');
+                setTimeout(() => {
+                    if (document.getElementById('start-over-btn')) { // Check if user hasn't already clicked
+                        window.location.href = window.location.pathname;
+                    }
+                }, 10000);
+                return;
+            }
+
+            try {
+                // 1. Exchange code for token
+                const tokenUrl = `${baseUrl}/api/v1/wrikexpi/token/exchange?code=${code}&client_id=${clientId}&grant_type=authorization_code`;
+                const tokenRes = await getApi(tokenUrl, 'none'); // No auth for this call
+
+                if (tokenRes.error || !tokenRes.data.success) {
+                    showError('An unexpected technical error occurred during login.', tokenRes.errorData || tokenRes.data);
                     return;
                 }
 
-                campaignSubmitButton.disabled = true;
-                campaignSubmitButton.textContent = 'Submitting...';
+                const { token, credentials } = tokenRes.data.data;
+                setStorage(STORAGE_KEYS.token, token);
+                setStorage(STORAGE_KEYS.username, credentials.username);
+                setStorage(STORAGE_KEYS.password, credentials.password);
                 
-                const formData = new FormData(campaignForm);
-                const payload = {
-                    fields: {}
-                };
+                // 2. Verify credentials by getting profile
+                const profileUrl = `${baseUrl}/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me`;
+                const profileRes = await getApi(profileUrl, 'basic'); // Use Basic Auth now
+
+                if (profileRes.error || !profileRes.data.success || !profileRes.data.data.length) {
+                    // Clear failed creds
+                    handleLogout(); 
+                    showError('Login failed, we are unable to verify your account. Please try again.', profileRes.errorData || profileRes.data);
+                    return;
+                }
+
+                // 3. Success! Store profile and redirect
+                const user = profileRes.data.data[0];
+                setStorage(STORAGE_KEYS.firstName, user.firstName);
+                setStorage(STORAGE_KEYS.lastName, user.lastName);
+                setStorage(STORAGE_KEYS.avatarUrl, user.avatarUrl);
                 
-                // Get all form data
-                formData.forEach((value, key) => {
-                    if (['type', 'space', 'entity', 'varientId'].includes(key)) {
-                        // Top-level fields
-                        payload[key] = (key === 'varientId') ? parseInt(value, 10) : value;
-                    } else {
-                        // `fields` object
-                        payload.fields[key] = value;
-                    }
-                });
+                removeStorage(STORAGE_KEYS.clientId); // Clean up client ID
+
+                dom.loginContainer.innerHTML = `
+                    <h2 class="text-2xl font-bold text-green-400 mb-4">Success!</h2>
+                    <p class="text-gray-300 text-lg">
+                        ${user.firstName} ${user.lastName} logged in successfully.
+                    </p>
+                    <p class="text-gray-400 mt-4">Redirecting you to the portal...</p>
+                `;
                 
-                // Handle special case: selectedchannels
-                const channelsInput = payload.fields.selectedchannels || '';
-                payload.fields.selectedchannels = channelsInput
+                setTimeout(() => {
+                    // Redirect to base URL + campaign hash
+                    window.location.href = window.location.pathname + MODULE_CONFIG['MOD.C'].hash;
+                }, 2000);
+
+            } catch (error) {
+                showError('A critical error occurred.', { message: error.message });
+            }
+        };
+
+        const handleCampaignSubmit = async (e) => {
+            e.preventDefault();
+            dom.campaignSubmitBtn.disabled = true;
+            dom.campaignSubmitBtn.textContent = 'Submitting...';
+            dom.campaignResultContainer.classList.add('hidden');
+
+            try {
+                const formData = new FormData(dom.campaignForm);
+                const data = Object.fromEntries(formData.entries());
+
+                // Parse channels
+                const parsedChannels = data.selectedchannels
                     .split(',')
                     .map(s => s.trim())
-                    .filter(s => s.length > 0);
-                    
-                const config = getConfig();
-                const url = `${config.xpiBaseUrl}/api/v1/wrikexpi/campaign`;
-                
-                try {
-                    const response = await loggedFetch(url, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': 'Bearer ' + creds.token 
-                            // NOTE: Basic Auth was used for dropdowns, Bearer token is used for submission as per curl.
-                            // If Basic Auth is needed, change to:
-                            // 'Authorization': 'Basic ' + btoa(`${creds.username}:${creds.password}`)
-                        },
-                        body: JSON.stringify(payload)
-                    });
-                    
-                    const responseData = await response.json();
-                    
-                    if (response.ok) {
-                        showCampaignResult(true, responseData);
-                    } else {
-                        throw new Error(JSON.stringify(responseData || 'Submission failed.'));
+                    .filter(Boolean); // Filter out empty strings
+
+                // Construct the payload
+                const payload = {
+                    type: data.type,
+                    space: data.space,
+                    entity: data.entity,
+                    varientId: parseInt(data.varientId, 10),
+                    fields: {
+                        requestedstartdate: data.requestedstartdate,
+                        agency: data.agency,
+                        brand: data.brand,
+                        client: data.client,
+                        debtor: data.debtor,
+                        currency: data.currency,
+                        pod: data.pod,
+                        campaignname: data.campaignname,
+                        campaignstartdate: data.campaignstartdate,
+                        campaignenddate: data.campaignenddate,
+                        campaignobjective: data.campaignobjective,
+                        requestormarket: data.requestormarket,
+                        optin: data.optin,
+                        porequired: data.porequired,
+                        overallbudget: parseFloat(data.overallbudget), // Use parseFloat for budget
+                        selectedchannels: parsedChannels
                     }
-                    
-                } catch (error) {
-                    console.error('Campaign Submit Error:', error);
-                    showCampaignResult(false, error.message);
-                } finally {
-                    campaignSubmitButton.disabled = false;
-                    campaignSubmitButton.textContent = 'Create Campaign';
-                }
-            }
+                };
 
-            /**
-             * Displays the result of the campaign submission.
-             * @param {boolean} success - Whether the submission was successful.
-             * @param {any} data - The response data or error message.
-             */
-            function showCampaignResult(success, data) {
-                campaignResultContainer.classList.remove('hidden');
+                const baseUrl = getStorage(STORAGE_KEYS.baseUrl);
+                const url = `${baseUrl}/api/v1/wrikexpi/campaign`;
                 
-                if (success) {
-                    campaignResultTitle.textContent = 'Submission Successful';
-                    campaignResultTitle.className = 'text-xl font-semibold mb-2 text-green-400';
-                    campaignResult.className = 'w-full bg-gray-900 p-4 rounded-md text-xs overflow-auto max-h-96 text-green-300';
-                    campaignForm.reset(); // Clear form on success
-                    // Re-populate dropdowns (or just set their value to default)
-                    populateSelect('client', []);
-                    populateSelect('debtor', []);
-                    populateSelect('agency', []);
-                    loadCampaignDropdowns();
+                // Submit using Bearer token
+                const { data: responseData, error, errorData } = await postApi(url, payload, 'bearer');
+
+                if (error) {
+                    dom.campaignResultPre.className = 'bg-gray-900 p-4 rounded-md overflow-x-auto text-sm text-red-400';
+                    dom.campaignResultPre.textContent = `HTTP Error: ${errorData.status || 'Unknown'}\n\n${JSON.stringify(errorData, null, 2)}`;
                 } else {
-                    campaignResultTitle.textContent = 'Submission Failed';
-                    campaignResultTitle.className = 'text-xl font-semibold mb-2 text-red-400';
-                    campaignResult.className = 'w-full bg-gray-900 p-4 rounded-md text-xs overflow-auto max-h-96 text-red-300';
+                    dom.campaignResultPre.className = 'bg-gray-900 p-4 rounded-md overflow-x-auto text-sm text-green-400';
+                    dom.campaignResultPre.textContent = JSON.stringify(responseData, null, 2);
                 }
-                
-                campaignResult.textContent = formatJSON(data);
+                dom.campaignResultContainer.classList.remove('hidden');
+
+            } catch (err) {
+                dom.campaignResultPre.className = 'bg-gray-900 p-4 rounded-md overflow-x-auto text-sm text-red-400';
+                dom.campaignResultPre.textContent = `Something went wrong, please try again.\n\n${err.message}`;
+                dom.campaignResultContainer.classList.remove('hidden');
+            } finally {
+                dom.campaignSubmitBtn.disabled = false;
+                dom.campaignSubmitBtn.textContent = 'Submit Campaign';
             }
+        };
+
+        const handleLogout = () => {
+            Object.values(STORAGE_KEYS).forEach(key => {
+                // Don't clear logs or base URL on logout, only session data
+                if (key !== STORAGE_KEYS.apiLogs && key !== STORAGE_KEYS.baseUrl) {
+                    removeStorage(key);
+                }
+            });
+            window.location.href = window.location.pathname; // Reload to login
+        };
+        
+        // --- 8. DEV TOOL & MODAL LOGIC ---
+
+        const renderDevLogs = () => {
+            const logs = getApiLogs();
+            dom.devToolLogBody.innerHTML = ''; // Clear existing
             
-            // Add submit listener to campaign form
-            campaignForm.addEventListener('submit', handleCampaignSubmit);
-
-
-            // --- ROUTER & INITIALIZATION ---
-
-            /**
-             * Main application router. Decides which module to show.
-             */
-            function router() {
-                const hash = window.location.hash;
-                const params = new URLSearchParams(window.location.search);
-                const code = params.get('code');
-                
-                let currentModule = '';
-                
-                if (hash === '#admin') {
-                    currentModule = 'admin';
-                } else if (code) {
-                    currentModule = 'login';
-                    handleLoginCallback(code); // Special handling for callback
-                } else if (isLoggedIn()) {
-                    currentModule = 'campaign'; // Default for logged-in users
-                    // Allow hash navigation for logged-in users
-                    if (hash === '#campaign') currentModule = 'campaign';
-                } else {
-                    currentModule = 'login'; // Default for logged-out users
-                }
-                
-                // Set default hash if none
-                if (!hash && isLoggedIn()) {
-                    window.location.hash = '#campaign';
-                }
-
-                showModule(currentModule);
-                updateUserInfoUI();
+            if (logs.length === 0) {
+                dom.devToolLogBody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">No API logs recorded.</td></tr>';
+                return;
             }
 
-            /**
-             * Main App Initialization
-             */
-            function initApp() {
-                // Init sidebar toggle for mobile
-                sidebarToggle.addEventListener('click', () => {
-                    sidebar.classList.toggle('-translate-x-full');
-                });
-                
-                // Hide sidebar on nav link click (for mobile)
-                document.querySelectorAll('.nav-link').forEach(link => {
-                    link.addEventListener('click', () => {
-                        if (window.innerWidth < 768) { // md breakpoint
-                            sidebar.classList.add('-translate-x-full');
-                        }
-                    });
-                });
-                
-                // Logout link
-                logoutLink.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    logout();
-                });
+            logs.forEach(log => {
+                const statusColor = log.status >= 400 ? 'text-red-400' : log.status >= 300 ? 'text-yellow-400' : 'text-green-400';
+                const row = document.createElement('tr');
+                row.className = 'hover:bg-gray-700 transition-colors';
+                row.innerHTML = `
+                    <td class="p-3 whitespace-nowrap">${new Date(log.timestamp).toLocaleTimeString()}</td>
+                    <td class="p-3 font-semibold ${statusColor}">${log.status || '-'}</td>
+                    <td class="p-3 font-semibold">${log.method}</td>
+                    <td class="p-3 max-w-xs truncate" title="${log.url}">${log.url.replace(getStorage(STORAGE_KEYS.baseUrl, ''), '...')}</td>
+                    <td class="p-3">
+                        ${log.request ? `<a href="#" class="text-blue-400 hover:underline" data-payload-type="request" data-log-id="${log.id}">View</a>` : '-'}
+                    </td>
+                    <td class="p-3">
+                        ${log.response ? `<a href="#" class="text-blue-400 hover:underline" data-payload-type="response" data-log-id="${log.id}">View</a>` : '-'}
+                    </td>
+                `;
+                dom.devToolLogBody.appendChild(row);
+            });
+        };
 
-                // Init modules
-                initLoginModule();
-                initDevTool();
-                // Admin and Campaign modules are initialized when shown
-
-                // Handle routing on load and on hash change
-                router();
-                window.addEventListener('hashchange', router);
+        const showPayloadModal = (payload) => {
+            try {
+                // Try to pretty-print if it's JSON
+                const parsed = JSON.parse(payload);
+                dom.payloadContent.textContent = JSON.stringify(parsed, null, 2);
+            } catch (e) {
+                // Otherwise, show as text
+                dom.payloadContent.textContent = payload;
             }
+            dom.payloadModal.classList.remove('hidden');
+        };
 
-            // Start the application
-            initApp();
-        });
+        const handleDevLogClick = (e) => {
+            if (e.target.tagName === 'A' && e.target.dataset.logId) {
+                e.preventDefault();
+                const logId = parseInt(e.target.dataset.logId, 10);
+                const payloadType = e.target.dataset.payloadType;
+                const logs = getApiLogs();
+                const log = logs.find(l => l.id === logId);
+
+                if (log) {
+                    const payload = log[payloadType];
+                    showPayloadModal(typeof payload === 'object' ? JSON.stringify(payload, null, 2) : payload);
+                }
+            }
+        };
+
+        const purgeDevLogs = () => {
+            if (confirm('Are you sure you want to purge all API logs?')) {
+                setStorage(STORAGE_KEYS.apiLogs, '[]');
+                renderDevLogs();
+            }
+        };
+
+        const toggleNav = (forceOpen = null) => {
+            const isOpen = !dom.navbar.classList.contains('-translate-x-full');
+            if (forceOpen === true || (forceOpen === null && !isOpen)) {
+                // Open
+                dom.navbar.classList.remove('-translate-x-full');
+                dom.mainContent.classList.add('md:ml-64');
+            } else {
+                // Close
+                dom.navbar.classList.add('-translate-x-full');
+                dom.mainContent.classList.remove('md:ml-64');
+            }
+        };
+
+        // --- 9. EVENT LISTENERS ---
+
+        // Navigation
+        dom.navToggleOpen.onclick = () => toggleNav(true);
+        dom.navToggleClose.onclick = () => toggleNav(false);
+        dom.logoutLink.onclick = handleLogout;
+        window.addEventListener('hashchange', handleRouting);
+
+        // Dev Tool
+        dom.devToolToggle.onclick = () => {
+            dom.devToolModal.classList.remove('hidden');
+            renderDevLogs();
+        };
+        dom.devToolClose.onclick = () => dom.devToolModal.classList.add('hidden');
+        dom.devToolPurge.onclick = purgeDevLogs;
+        dom.devToolLogBody.addEventListener('click', handleDevLogClick);
+
+        // Payload Modal
+        dom.payloadModalClose.onclick = () => dom.payloadModal.classList.add('hidden');
+        dom.payloadModal.onclick = (e) => {
+            if (e.target === dom.payloadModal) dom.payloadModal.classList.add('hidden');
+        };
+
+        // --- 10. APP INITIALIZATION ---
+
+        const initApp = () => {
+            // Set default base URL if not present
+            if (!getStorage(STORAGE_KEYS.baseUrl)) {
+                setStorage(STORAGE_KEYS.baseUrl, 'https://api.wrikexpi.groupm.com');
+            }
+            handleRouting();
+        };
+
+        initApp();
+    });
     </script>
+
 </body>
 </html>
-
