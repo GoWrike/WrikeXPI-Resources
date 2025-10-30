@@ -457,9 +457,11 @@
                 }
 
                 try {
-                    // API uses POST for both Create and Update (distinguished by presence of 'id')
+                    const method = isUpdate ? 'PATCH' : 'POST';
+                    
+                    // Use PATCH for update, POST for create
                     const response = await fetch(API_URL, {
-                        method: 'POST', 
+                        method: method, 
                         headers: {
                             'Authorization': `Bearer ${bearerToken}`,
                             'Content-Type': 'application/json'
@@ -642,3 +644,4 @@
     </script>
 </body>
 </html>
+
