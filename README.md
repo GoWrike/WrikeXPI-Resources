@@ -1,14 +1,18 @@
-# WrikeXPI
+# WrikeXPI Showcase
 
-[XPI Campaign Page](Samples/WrikeXPI-Campaign.html)
+## Samples
 
 [XPI Portal](Samples/XPI-Portal.html)
 
-[XPI Portal 2](Samples/XPI-Portal2.html)
-
-
 [OAuth Test Page](Samples/OAuth-TestPage.html)
 
-[OAuth Test Page 2](Samples/OAuth-TestPage2.html)
+
+## Samples (Staging and Testing version)
+
+[XPI Portal](Samples-Staging/XPI-Portal-Staging.html)
+
+[OAuth Test Page](Samples-Staging/OAuth-TestPage-Staging.html)
+
+[XPI Master](Samples-Staging/XPI-Master-Staging.html)
 
 
