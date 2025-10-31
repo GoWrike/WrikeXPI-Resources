@@ -478,36 +478,37 @@
     <!-- ============================================= -->
     <script type="module">
         // Helper to apply common form element styles
-        function applyFormStyles() {
-            const inputs = `
-                w-full px-4 py-3 bg-gray-700 text-white border border-gray-600 rounded-lg 
-                focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none 
-                disabled:opacity-50 disabled:cursor-not-allowed
-            `;
-            const selects = `${inputs} appearance-none`;
-            const buttonsPrimary = `
-                inline-flex justify-center py-3 px-6 border border-transparent shadow-sm 
-                text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 
-                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-800
-                disabled:opacity-50 disabled:cursor-not-allowed
-            `;
-            const buttonsSecondary = `
-                inline-flex justify-center py-3 px-6 border border-gray-600 shadow-sm 
-                text-sm font-medium rounded-lg text-gray-200 bg-gray-700 hover:bg-gray-600 
-                focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 focus:ring-offset-gray-800
-                disabled:opacity-50 disabled:cursor-not-allowed
-            `;
-            const buttonsDanger = buttonsPrimary.replace(/blue/g, 'red').replace('bg-red-800', 'bg-red-700');
-            const tableHeaders = `
-                px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider
-            `;
+        const inputsStyles = `
+            w-full px-4 py-3 bg-gray-700 text-white border border-gray-600 rounded-lg 
+            focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none 
+            disabled:opacity-50 disabled:cursor-not-allowed
+        `.replace(/\s+/g, ' ').trim();
+        const selectsStyles = `${inputsStyles} appearance-none`;
+        const buttonsPrimaryStyles = `
+            inline-flex justify-center py-3 px-6 border border-transparent shadow-sm 
+            text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 
+            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-800
+            disabled:opacity-50 disabled:cursor-not-allowed
+        `.replace(/\s+/g, ' ').trim();
+        const buttonsSecondaryStyles = `
+            inline-flex justify-center py-3 px-6 border border-gray-600 shadow-sm 
+            text-sm font-medium rounded-lg text-gray-200 bg-gray-700 hover:bg-gray-600 
+            focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 focus:ring-offset-gray-800
+            disabled:opacity-50 disabled:cursor-not-allowed
+        `.replace(/\s+/g, ' ').trim();
+        const buttonsDangerStyles = buttonsPrimaryStyles.replace(/blue/g, 'red').replace('bg-red-800', 'bg-red-700');
+        const tableHeadersStyles = `
+            px-6 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider
+        `.replace(/\s+/g, ' ').trim();
 
-            document.querySelectorAll('.styled-input').forEach(el => el.className = inputs);
-            document.querySelectorAll('.styled-select').forEach(el => el.className = selects);
-            document.querySelectorAll('.styled-btn-primary').forEach(el => el.className = buttonsPrimary);
-            document.querySelectorAll('.styled-btn-secondary').forEach(el => el.className = buttonsSecondary);
-            document.querySelectorAll('.styled-btn-danger').forEach(el => el.className = buttonsDanger);
-            document.querySelectorAll('.md-table-header').forEach(el => el.className = tableHeaders);
+        function applyFormStyles() {
+            document.querySelectorAll('.styled-input').forEach(el => el.className = el.className.replace('styled-input', inputsStyles));
+            document.querySelectorAll('.styled-select').forEach(el => el.className = el.className.replace('styled-select', selectsStyles));
+            document.querySelectorAll('.styled-btn-primary').forEach(el => el.className = el.className.replace('styled-btn-primary', buttonsPrimaryStyles));
+            document.querySelectorAll('.styled-btn-secondary').forEach(el => el.className = el.className.replace('styled-btn-secondary', buttonsSecondaryStyles));
+            document.querySelectorAll('.styled-btn-danger').forEach(el => el.className = el.className.replace('styled-btn-danger', buttonsDangerStyles));
+            // Note: md-table-header is used as the *only* class, so replacing it fully is fine.
+            document.querySelectorAll('.md-table-header').forEach(el => el.className = tableHeadersStyles);
         }
         applyFormStyles();
 
@@ -1301,21 +1302,15 @@
                     <div>
                         <label for="md-field-${field}" class="block text-sm font-medium text-gray-300 mb-2">${field}</label>
                         <input type="text" id="md-field-${field}" name="${field}" 
-                               class="${applyFormStyles.inputs} styled-input"
+                               class="${inputsStyles} ${isReadOnly ? 'bg-gray-800 !border-gray-700 text-gray-400' : ''}"
                                value="${value}"
-                               ${isReadOnly ? 'readonly class="bg-gray-800 !border-gray-700"' : ''}
+                               ${isReadOnly ? 'readonly' : ''}
                                ${isRequired ? 'required' : ''}>
                     </div>
                 `;
             }).join('');
             
-            // Re-apply styles to new inputs
-            body.querySelectorAll('.styled-input').forEach(el => el.className = `
-                w-full px-4 py-3 bg-gray-700 text-white border border-gray-600 rounded-lg 
-                focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none 
-                disabled:opacity-50 disabled:cursor-not-allowed
-                read-only:bg-gray-800 read-only:!border-gray-700 read-only:text-gray-400
-            `);
+            // Re-apply styles to new inputs - This block is no longer needed as styles are applied directly
             
             modal.classList.remove('hidden');
         }
@@ -1488,3 +1483,4 @@
     </script>
 </body>
 </html>
+
