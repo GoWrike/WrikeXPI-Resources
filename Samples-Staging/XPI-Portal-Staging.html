@@ -145,10 +145,10 @@
                 <form id="admin-form" class="bg-gray-800 p-8 rounded-lg shadow-xl space-y-6">
                     <div>
                         <label for="admin-xpiBaseUrl" class="block text-sm font-medium text-gray-300 mb-2">XPI Base URL</label>
-                        <input type="url" id="admin-xpiBaseUrl" name="xpiBaseUrl" class="w-full px-4 py-3 bg-gray-700 text-white border border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none" placeholder="https://api.wrikexpi.groupm.com">
+                        <input type="url" id="admin-xpiBaseUrl" name="xpiBaseUrl" class="styled-input w-full" placeholder="https://api.wrikexpi.groupm.com">
                     </div>
                     <div class="text-right">
-                        <button type="submit" class="inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-800">
+                        <button type="submit" class="styled-btn-primary">
                             Save Configuration
                         </button>
                     </div>
@@ -161,7 +161,7 @@
                     <!-- Mode 1: Authentication -->
                     <div id="login-auth-mode">
                         <h2 class="text-2xl font-bold mb-6 text-white">Welcome to XPI Portal</h2>
-                        <button id="login-auth-btn" class="w-full py-3 px-6 border border-transparent shadow-sm text-base font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-800">
+                        <button id="login-auth-btn" class="styled-btn-primary w-full text-base">
                             Login & Authenticate with Wrike
                         </button>
                     </div>
@@ -280,7 +280,7 @@
 
                     <!-- Submit Button -->
                     <div class="mt-8 text-right">
-                        <button type="submit" id="campaign-submit-btn" class="inline-flex justify-center py-3 px-6 border border-transparent shadow-sm text-sm font-medium rounded-lg text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-800">
+                        <button type="submit" id="campaign-submit-btn" class="styled-btn-primary">
                             Submit Campaign
                         </button>
                     </div>
@@ -510,7 +510,7 @@
             // Note: md-table-header is used as the *only* class, so replacing it fully is fine.
             document.querySelectorAll('.md-table-header').forEach(el => el.className = tableHeadersStyles);
         }
-        applyFormStyles();
+        // *REMOVED* applyFormStyles(); from here. It's now called inside initApp.
 
 
         /**
@@ -893,7 +893,7 @@
                     <h4 class="font-semibold text-gray-300 mb-2">Headers</h4>
                     <pre class="p-3 bg-gray-900 rounded-md text-xs overflow-auto max-h-48">${JSON.stringify(log.request.headers, null, 2)}</pre>
                     <h4 class="font-semibold text-gray-300 mt-4 mb-2">Body</h4>
-                    <pre class="p-3 bg-gray-900 rounded-md text-xs overflow-auto max-h-64">${JSON.stringify(log.request.body ? JSON.parse(log.request.body) : 'No Body', null, 2)}</pre>
+                    <pre class="p-3 bg-gray-900 rounded-md text-xs overflow-auto max-h-64">${JSON.stringify(log.request.body ? (typeof log.request.body === 'string' ? JSON.parse(log.request.body) : log.request.body) : 'No Body', null, 2)}</pre>
                 `;
             } else {
                 title = `Response Payload (Status: ${log.status})`;
@@ -1202,19 +1202,19 @@
             
             // Attach event listeners (only once)
             const loadBtn = moduleEl.querySelector('.md-load-btn');
-            if (!loadBtn.dataset.listener) {
+            if (loadBtn && !loadBtn.dataset.listener) {
                 loadBtn.addEventListener('click', () => loadMasterData(moduleId));
                 loadBtn.dataset.listener = true;
             }
 
             const createBtn = moduleEl.querySelector('.md-create-btn');
-            if (!createBtn.dataset.listener) {
+            if (createBtn && !createBtn.dataset.listener) {
                 createBtn.addEventListener('click', () => openMasterDataModal(moduleId, null));
                 createBtn.dataset.listener = true;
             }
             
             const tableBody = moduleEl.querySelector('.md-table-body');
-            if (!tableBody.dataset.listener) {
+            if (tableBody && !tableBody.dataset.listener) {
                 tableBody.addEventListener('click', (e) => handleMasterDataAction(e, moduleId));
                 tableBody.dataset.listener = true;
             }
@@ -1310,7 +1310,9 @@
                 `;
             }).join('');
             
-            // Re-apply styles to new inputs - This block is no longer needed as styles are applied directly
+            // Re-apply styles to modal buttons
+            $('#md-modal-cancel').className = $('#md-modal-cancel').className.replace('styled-btn-secondary', buttonsSecondaryStyles);
+            $('#md-modal-save').className = $('#md-modal-save').className.replace('styled-btn-primary', buttonsPrimaryStyles);
             
             modal.classList.remove('hidden');
         }
@@ -1338,7 +1340,8 @@
             const formData = new FormData(form);
             const payload = {};
             fields.forEach(field => {
-                if (field !== 'id' || mode === 'edit') { // Don't send 'id' on create
+                // Do not send 'id' on create, but send it on edit
+                if (field !== 'id' || mode === 'edit') {
                     payload[field] = formData.get(field);
                 }
             });
@@ -1352,7 +1355,7 @@
             
             if (mode === 'edit') {
                 method = 'PATCH';
-                payload.id = recordId; // Ensure ID is in payload for PATCH
+                // ID is already in the payload from the loop above
             }
             
             const [data, error] = await safeFetch(url, {
@@ -1381,6 +1384,11 @@
             confirmBtn.dataset.moduleId = moduleId;
             confirmBtn.dataset.recordId = id;
             errorMsg.textContent = '';
+            
+            // Style buttons
+            $('#md-delete-cancel').className = $('#md-delete-cancel').className.replace('styled-btn-secondary', buttonsSecondaryStyles);
+            $('#md-delete-confirm').className = $('#md-delete-confirm').className.replace('styled-btn-danger', buttonsDangerStyles);
+
             modal.classList.remove('hidden');
         }
         
@@ -1423,6 +1431,9 @@
          */
         
         function initApp() {
+            // FIX: Apply styles *after* DOM is loaded, *before* logic runs.
+            applyFormStyles();
+
             // Load state
             loadGlobalConfig();
             loadApiLogs();
