@@ -995,9 +995,17 @@
                 const moduleCode = hash.substring(1);
                 if (MODULE_CONFIG.some(m => m.code === moduleCode && m.type === 'User-defined')) {
                     showModule(moduleCode);
+                    const moduleEl = document.querySelector(`#module-${moduleCode}`);
+
                     // Check if it's an MDM module that needs lazy init
-                    if (moduleCode.startsWith('MAS.') && !document.querySelector(`#module-${moduleCode}`).hasChildNodes()) {
+                    if (moduleCode.startsWith('MAS.') && moduleEl && !moduleEl.dataset.initialized) {
                         initMdmModule(MDM_CONFIG[moduleCode]);
+                    }
+                    
+                    // Check if it's the Campaign module that needs lazy init
+                    if (moduleCode === 'MOD.C' && moduleEl && !moduleEl.dataset.initialized) {
+                        initCampaignModule();
+                        moduleEl.dataset.initialized = true; // Mark as initialized
                     }
                 } else {
                     // Default to Campaign Submission
@@ -1602,9 +1610,9 @@
             
             // 4. Init static modules
             initAdminModule();
-            initCampaignModule();
+            // initCampaignModule(); // <-- REMOVED FROM HERE
             // Note: Login module is initialized by the router
-            // Note: MDM modules are initialized lazily by the router
+            // Note: MDM & Campaign modules are initialized lazily by the router
             
             // 5. Start the router
             mainRouter();
@@ -1614,3 +1622,5 @@
     </script>
 </body>
 </html>
+
+
