@@ -1,1651 +1,1614 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>XPI Portal</title>
-    <!-- Load Tailwind CSS -->
+    <!-- 1. Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Load Inter font from Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
+    
+    <!-- 2. Configure Tailwind & Load Inter Font -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    zIndex: {
+                        '60': '60',
+                        '70': '70',
+                    }
+                },
+            },
+        }
+    </script>
+    
+    <!-- 3. Base Styles & Loader -->
     <style>
-        /* Base styles */
+        /* Use Inter font */
         body {
             font-family: 'Inter', sans-serif;
-            /* Applied via JS */
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+        
+        /* Simple loader for initial page loads and callbacks */
+        .loader {
+            border: 4px solid #f3f3f3; /* Light grey */
+            border-top: 4px solid #3498db; /* Blue */
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
         }
 
-        /* Scrollbar styling for dark mode */
-        ::-webkit-scrollbar {
-            width: 12px;
-            height: 12px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #1f2937; /* gray-800 */
-        }
-        ::-webkit-scrollbar-thumb {
-            background-color: #4b5563; /* gray-600 */
-            border-radius: 20px;
-            border: 3px solid #1f2937; /* gray-800 */
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background-color: #6b7280; /* gray-500 */
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
-        /* Hide number input spinners */
-        input[type=number]::-webkit-inner-spin-button,
-        input[type=number]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
+        /* Hide scrollbar for webkit */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
         }
-        input[type=number] {
-            -moz-appearance: textfield;
+        /* Hide scrollbar for IE, Edge and Firefox */
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
 
-        /* Custom animation for toast */
-        @keyframes toast-in {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Styling for the tag input */
+        .tag-container .tag {
+            display: inline-flex;
+            align-items: center;
+            background-color: #374151; /* bg-gray-700 */
+            color: #D1D5DB; /* text-gray-300 */
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px; /* rounded-full */
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem; /* text-sm */
         }
-        @keyframes toast-out {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(20px); }
-        }
-        .toast-in {
-            animation: toast-in 0.3s ease-out forwards;
-        }
-        .toast-out {
-            animation: toast-out 0.3s ease-in forwards;
+        .tag-container .tag-close {
+            margin-left: 0.5rem;
+            cursor: pointer;
+            font-weight: bold;
         }
     </style>
 </head>
-<body class="styled-body h-full overflow-hidden">
+<body class="styled-body font-sans">
 
-    <!-- App Shell -->
-    <div class="flex h-full">
-        <!-- Collapsible Navigation Bar -->
-        <nav id="nav-bar" class="styled-nav-bar hidden h-full flex-col justify-between transition-all duration-300">
-            <!-- Top Section: Toggle and Links -->
-            <div>
-                <!-- Nav Toggle -->
-                <div class="flex items-center justify-between p-4 styled-nav-header">
-                    <span id="nav-logo" class="text-xl font-bold text-white transition-opacity duration-200">XPI Portal</span>
-                    <button id="nav-toggle" class="styled-icon-btn">
-                        <!-- Menu Icon -->
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" /></svg>
-                    </button>
-                </div>
-                <!-- Navigation Links -->
-                <div id="nav-links" class="mt-4 space-y-2 px-4">
-                    <!-- Links will be populated by JS -->
-                </div>
+    <!-- App Wrapper -->
+    <div class="flex w-screen h-screen">
+
+        <!-- ===== 1. Navigation Sidebar ===== -->
+        <nav id="app-sidebar" class="styled-sidebar flex-col flex-shrink-0 h-full styled-transition" data-visible="false">
+            <!-- Sidebar Header -->
+            <div class="flex items-center justify-between p-4 border-b styled-border-color">
+                <span class="text-xl font-semibold">XPI Portal</span>
+                <button id="sidebar-toggle-btn" class="styled-icon-btn">
+                    <span data-icon="menu"></span>
+                </button>
             </div>
 
-            <!-- Bottom Section: User Profile -->
-            <div id="user-profile" class="p-4 styled-nav-footer">
-                <div class="flex items-center space-x-3">
-                    <img id="user-avatar" src="https://placehold.co/40x40/6b7280/e5e7eb?text=?" alt="User Avatar" class="h-10 w-10 rounded-full styled-avatar">
-                    <div class="flex-1 overflow-hidden transition-opacity duration-200">
-                        <div id="user-name" class="font-medium text-white truncate">Not Logged In</div>
-                        <a id="logout-link" href="#" class="styled-link-sm">Logout</a>
+            <!-- Nav Links -->
+            <div id="nav-links-container" class="flex-1 overflow-y-auto py-4 space-y-2">
+                <!-- User-defined modules will be injected here by JS -->
+            </div>
+
+            <!-- User Profile (Bottom) -->
+            <div class="p-4 border-t styled-border-color mt-auto">
+                <div class="flex items-center">
+                    <img id="user-avatar" src="https://placehold.co/40x40/555/FFF?text=?" alt="User Avatar" class="w-10 h-10 rounded-full mr-3">
+                    <div>
+                        <div id="user-name" class="font-semibold">Not Logged In</div>
+                        <a id="logout-link" href="#" class="text-sm text-blue-400 hover:underline">Logout</a>
                     </div>
                 </div>
             </div>
         </nav>
 
-        <!-- Main Content Area -->
-        <main id="main-content" class="flex-1 h-full overflow-y-auto styled-main-content transition-all duration-300">
-            <!-- Module content will be injected here -->
+        <!-- ===== 2. Main Content Area ===== -->
+        <main id="main-content" class="flex-1 h-full overflow-y-auto styled-transition">
+            <div class="container mx-auto p-4 md:p-8">
+
+                <!-- Module: Loading (for login callback) -->
+                <div id="module-loading" class="module-container hidden">
+                    <div class="styled-card max-w-md mx-auto p-8 text-center">
+                        <div class="loader mx-auto mb-4"></div>
+                        <h2 class="styled-card-title">Processing Login...</h2>
+                        <p>Please wait while we verify your authentication.</p>
+                        <div id="loading-error-container" class="hidden mt-4">
+                            <p id="loading-error-message" class="styled-text-error"></p>
+                            <pre id="loading-error-details" class="styled-pre mt-2"></pre>
+                            <button id="loading-start-over-btn" class="styled-btn-secondary mt-4">Start Over</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Module: Login (Auth Mode) -->
+                <div id="module-login" class="module-container hidden">
+                    <div class="styled-card max-w-md mx-auto">
+                        <h2 class="styled-card-title mb-6 text-center">XPI Portal Login</h2>
+                        <button id="login-auth-btn" class="styled-btn-primary w-full">
+                            Login & Authenticate with Wrike
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Module: Admin -->
+                <div id="module-admin" class="module-container hidden">
+                    <div class="styled-card max-w-lg mx-auto">
+                        <h2 class="styled-card-title mb-6">Global Configuration</h2>
+                        <form id="admin-config-form">
+                            <div class="mb-4">
+                                <label for="config-xpiBaseUrl" class="styled-label">XPI Base URL</label>
+                                <input list="xpiBaseUrl-suggestions" id="config-xpiBaseUrl" name="xpiBaseUrl" type="text" class="styled-input w-full">
+                                <datalist id="xpiBaseUrl-suggestions">
+                                    <option value="https://api.wrikexpi.groupm.com"></option>
+                                    <option value="https://xpi-api.gowrike.space/"></option>
+                                </datalist>
+                            </div>
+                            <button type="submit" class="styled-btn-primary">Save Configuration</button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Module: Campaign Submission (MOD.C) -->
+                <div id="module-MOD.C" class="module-container hidden">
+                    <form id="campaign-form" class="styled-card max-w-4xl mx-auto">
+                        <h2 class="styled-card-title mb-6">Campaign Submission</h2>
+                        
+                        <!-- Hidden Fields -->
+                        <input type="hidden" name="type" value="Campaign Request">
+                        <input type="hidden" name="space" value="GRM-MYS-GMN">
+                        <input type="hidden" name="entity" value="Campaign">
+                        <input type="hidden" name="varientId" value="1">
+
+                        <!-- Form Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+                            <!-- Left Column -->
+                            <div>
+                                <label for="campaign-campaignname" class="styled-label">Campaign Name</label>
+                                <input type="text" id="campaign-campaignname" name="campaignname" value="World Pinball Day 7000" class="styled-input w-full">
+                            </div>
+                            <div>
+                                <label for="campaign-client" class="styled-label">Client</label>
+                                <select id="campaign-client" name="client" class="styled-input w-full">
+                                    <option value="Adidas Group">Adidas Group</option>
+                                    <!-- Options loaded by JS -->
+                                </select>
+                            </div>
+                             <div>
+                                <label for="campaign-brand" class="styled-label">Brand</label>
+                                <input type="text" id="campaign-brand" name="brand" value="World Pinball" class="styled-input w-full">
+                            </div>
+                            <div>
+                                <label for="campaign-debtor" class="styled-label">Debtor</label>
+                                <select id="campaign-debtor" name="debtor" class="styled-input w-full">
+                                    <option value="Adidas Malaysia Sdn Bhd">Adidas Malaysia Sdn Bhd</option>
+                                    <!-- Options loaded by JS -->
+                                </select>
+                            </div>
+                            <div>
+                                <label for="campaign-agency" class="styled-label">Agency</label>
+                                <select id="campaign-agency" name="agency" class="styled-input w-full">
+                                    <option value="Eightbar">Eightbar</option>
+                                    <!-- Options loaded by JS -->
+                                </select>
+                            </div>
+                            <div>
+                                <label for="campaign-pod" class="styled-label">Pod</label>
+                                <input type="text" id="campaign-pod" name="pod" value="Pod 1A" class="styled-input w-full">
+                            </div>
+                            <div>
+                                <label for="campaign-currency" class="styled-label">Currency</label>
+                                <input type="text" id="campaign-currency" name="currency" value="SGD" class="styled-input w-full">
+                            </div>
+                            <div>
+                                <label for="campaign-overallbudget" class="styled-label">Overall Budget</label>
+                                <input type="number" id="campaign-overallbudget" name="overallbudget" value="100" class="styled-input w-full">
+                            </div>
+
+                            <!-- Right Column -->
+                            <div>
+                                <label for="campaign-requestedstartdate" class="styled-label">Requested Start Date</label>
+                                <input type="date" id="campaign-requestedstartdate" name="requestedstartdate" value="2026-07-01" class="styled-input w-full">
+                            </div>
+                            <div>
+                                <label for="campaign-campaignstartdate" class="styled-label">Campaign Start Date</label>
+                                <input type="date" id="campaign-campaignstartdate" name="campaignstartdate" value="2026-08-29" class="styled-input w-full">
+                            </div>
+                            <div>
+                                <label for="campaign-campaignenddate" class="styled-label">Campaign End Date</label>
+                                <input type="date" id="campaign-campaignenddate" name="campaignenddate" value="2026-10-29" class="styled-input w-full">
+                            </div>
+                            <div>
+                                <label for="campaign-campaignobjective" class="styled-label">Campaign Objective</label>
+                                <input type="text" id="campaign-campaignobjective" name="campaignobjective" value="Upper Funnel / Awareness" class="styled-input w-full">
+                            </div>
+                            <div>
+                                <label for="campaign-requestormarket" class="styled-label">Requestor Market</label>
+                                <input type="text" id="campaign-requestormarket" name="requestormarket" value="Singapore" class="styled-input w-full">
+                            </div>
+                            <div>
+                                <label for="campaign-optin" class="styled-label">Opt-in</label>
+                                <select id="campaign-optin" name="optin" class="styled-input w-full">
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="campaign-porequired" class="styled-label">PO Required</label>
+                                <select id="campaign-porequired" name="porequired" class="styled-input w-full">
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
+
+                            <!-- Spanning full width -->
+                            <div class="md:col-span-2">
+                                <label for="campaign-selectedchannels-input" class="styled-label">Selected Channels (press Enter or comma to add)</label>
+                                <div class="styled-input w-full p-2 flex flex-wrap items-center tag-container">
+                                    <div id="campaign-selectedchannels-tags" class="flex flex-wrap">
+                                        <!-- Tags will be injected here -->
+                                    </div>
+                                    <input type="text" id="campaign-selectedchannels-input" placeholder="Type a channel..." class="bg-transparent flex-1 focus:outline-none min-w-[100px]">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submission -->
+                        <div class="mt-8 text-right">
+                            <button type="submit" id="campaign-submit-btn" class="styled-btn-primary">
+                                Submit Campaign
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Result Display -->
+                    <pre id="campaign-result" class="styled-pre max-w-4xl mx-auto mt-6 hidden"></pre>
+                </div>
+
+                <!-- Module: Master Data Template (for D & E) -->
+                <!-- This will be a reusable structure, cloned and configured by JS -->
+                <div id="mdm-template" class="hidden">
+                    <div class="styled-card max-w-6xl mx-auto">
+                        <div class="flex justify-between items-center mb-6">
+                            <h2 class="styled-card-title mdm-title">Master Data</h2>
+                            <div class="space-x-2">
+                                <button class="styled-btn-secondary mdm-load-btn">
+                                    <span data-icon="reload" class="inline-block w-4 h-4 mr-1"></span>
+                                    Load
+                                </button>
+                                <button class="styled-btn-primary mdm-create-btn">
+                                    <span data-icon="plus" class="inline-block w-4 h-4 mr-1"></span>
+                                    Create New
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Table -->
+                        <div class="w-full overflow-x-auto">
+                            <table class="styled-table w-full min-w-[600px]">
+                                <thead class="mdm-thead">
+                                    <!-- Header row injected by JS -->
+                                </thead>
+                                <tbody class="mdm-tbody">
+                                    <!-- Data rows injected by JS -->
+                                    <tr>
+                                        <td colspan="100%" class="text-center p-4">Click "Load" to fetch data.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mdm-loader loader mx-auto my-4 hidden"></div>
+                    </div>
+                </div>
+
+                <!-- Module: Demo Client (MAS.DemoCient) -->
+                <div id="module-MAS.DemoCient" class="module-container hidden">
+                    <!-- MDM Template will be injected here -->
+                </div>
+
+                <!-- Module: XPI Field Mapping (MAS.XPICFMapping) -->
+                <div id="module-MAS.XPICFMapping" class="module-container hidden">
+                    <!-- MDM Template will be injected here -->
+                </div>
+
+            </div>
         </main>
     </div>
 
-    <!-- Developer Tool Toggle -->
-    <button id="dev-tool-toggle" class="styled-dev-toggle-btn fixed bottom-6 right-6">
-        <!-- Hat Icon SVG -->
-        <svg class="h-8 w-8" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2C8.69 2 6 4.69 6 8C6 9.8 6.84 11.4 8 12.41V12.5C8 13.88 9.12 15 10.5 15H13.5C14.88 15 16 13.88 16 12.5V12.41C17.16 11.4 18 9.8 18 8C18 4.69 15.31 2 12 2ZM12 4C14.21 4 16 5.79 16 8C16 9.3 15.36 10.42 14.41 11.12C13.81 11.58 13.5 12.28 13.5 13H10.5C10.5 12.28 10.19 11.58 9.59 11.12C8.64 10.42 8 9.3 8 8C8 5.79 9.79 4 12 4Z" />
-            <path d="M18.82 17.12C19.16 16.63 19.06 15.98 18.57 15.63C18.08 15.29 17.43 15.39 17.09 15.88C15.93 17.39 14.1 18.25 12 18.25C9.9 18.25 8.07 17.39 6.91 15.88C6.57 15.39 5.92 15.29 5.43 15.63C4.94 15.98 4.84 16.63 5.18 17.12C6.82 19.34 9.3 20.75 12 20.75C14.7 20.75 17.18 19.34 18.82 17.12Z" />
-        </svg>
-    </button>
+    <!-- ===== 3. Modals & Overlays ===== -->
 
-    <!-- Global Modals -->
-
-    <!-- Developer Tool Modal -->
-    <div id="dev-tool-modal" class="styled-modal-backdrop hidden">
-        <div class="styled-modal-dialog" style="width: 80vw; height: 80vh;">
-            <!-- Modal Header -->
-            <div class="flex justify-between items-center p-4 styled-modal-header">
-                <h3 class="text-lg font-medium text-white">API Call Log</h3>
-                <div class="flex items-center space-x-4">
-                    <button id="purge-logs-btn" class="styled-icon-btn styled-icon-btn-danger">
-                        <!-- Trash Icon -->
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                    </button>
-                    <button data-modal-close="dev-tool-modal" class="styled-icon-btn">
-                        <!-- Close Icon -->
-                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                </div>
-            </div>
-            <!-- Modal Body -->
-            <div class="p-6 styled-modal-body flex-1 overflow-auto">
-                <div class="w-full overflow-x-auto">
-                    <table class="min-w-full divide-y styled-table-divider">
-                        <thead class="styled-table-header">
-                            <tr>
-                                <th scope="col" class="styled-table-th">Timestamp</th>
-                                <th scope="col" class="styled-table-th">Status</th>
-                                <th scope="col" class="styled-table-th">Method</th>
-                                <th scope="col" class="styled-table-th">URL</th>
-                                <th scope="col" class="styled-table-th">Request</th>
-                                <th scope="col" class="styled-table-th">Response</th>
-                            </tr>
-                        </thead>
-                        <tbody id="log-table-body" class="styled-table-body-bg divide-y styled-table-divider">
-                            <!-- Log rows will be injected here -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Payload Viewer Modal -->
-    <div id="payload-modal" class="styled-modal-backdrop hidden" style="z-index: 60;">
-        <div class="styled-modal-dialog" style="width: 60vw; height: 70vh;">
-            <!-- Modal Header -->
-            <div class="flex justify-between items-center p-4 styled-modal-header">
-                <h3 id="payload-modal-title" class="text-lg font-medium text-white">Payload</h3>
-                <button data-modal-close="payload-modal" class="styled-icon-btn">
-                    <!-- Close Icon -->
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+    <!-- Generic Modal for MDM Create/Edit -->
+    <div id="mdm-modal" class="styled-modal-overlay hidden">
+        <div class="styled-modal-card max-w-lg w-full">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="mdm-modal-title" class="styled-card-title">Modal Title</h3>
+                <button id="mdm-modal-close-btn" class="styled-icon-btn">
+                    <span data-icon="close"></span>
                 </button>
             </div>
-            <!-- Modal Body -->
-            <div class="p-6 styled-modal-body flex-1 overflow-auto">
-                <pre id="payload-modal-content" class="text-sm text-gray-200 whitespace-pre-wrap break-all"></pre>
-            </div>
-        </div>
-    </div>
-
-    <!-- Master Data CRUD Modal -->
-    <div id="master-data-modal" class="styled-modal-backdrop hidden">
-        <div class="styled-modal-dialog max-w-2xl">
-            <!-- Modal Header -->
-            <div class="flex justify-between items-center p-4 styled-modal-header">
-                <h3 id="master-data-modal-title" class="text-lg font-medium text-white">Manage Record</h3>
-                <button data-modal-close="master-data-modal" class="styled-icon-btn">
-                    <!-- Close Icon -->
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-            </div>
-            <!-- Modal Body -->
-            <form id="master-data-form">
-                <div class="p-6 styled-modal-body space-y-4" id="master-data-form-fields">
-                    <!-- Form fields will be injected here -->
+            <!-- Form -->
+            <form id="mdm-modal-form">
+                <input type="hidden" id="mdm-form-id" name="id">
+                <div id="mdm-form-fields" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                    <!-- Form fields injected by JS -->
                 </div>
-                <!-- Modal Footer -->
-                <div class="p-4 styled-modal-footer flex justify-end space-x-3">
-                    <button type="button" data-modal-close="master-data-modal" class="styled-btn-secondary">Cancel</button>
-                    <button type="submit" id="master-data-save-btn" class="styled-btn-primary">Save Record</button>
+                <div class="mt-6 text-right">
+                    <button type="submit" id="mdm-form-save-btn" class="styled-btn-primary">
+                        Save
+                    </button>
                 </div>
             </form>
         </div>
     </div>
+    
+    <!-- Generic Modal for MDM Delete Confirmation -->
+    <div id="mdm-delete-modal" class="styled-modal-overlay hidden">
+        <div class="styled-modal-card max-w-md w-full">
+            <h3 class="styled-card-title mb-4">Confirm Deletion</h3>
+            <p id="mdm-delete-message">Are you sure you want to delete this record?</p>
+            <div class="mt-6 flex justify-end space-x-3">
+                <button id="mdm-delete-cancel-btn" class="styled-btn-secondary">Cancel</button>
+                <button id="mdm-delete-confirm-btn" class="styled-btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Developer Tool Toggle Button -->
+    <button id="dev-tool-toggle" class="fixed bottom-6 right-6 styled-btn-primary p-3 rounded-full shadow-lg z-30">
+        <span data-icon="hat"></span>
+    </button>
 
-    <!-- Master Data Delete Confirm Modal -->
-    <div id="master-data-delete-modal" class="styled-modal-backdrop hidden">
-        <div class="styled-modal-dialog max-w-md">
-            <!-- Modal Header -->
-            <div class="flex justify-between items-center p-4 styled-modal-header">
-                <h3 class="text-lg font-medium text-white">Confirm Deletion</h3>
-                <button data-modal-close="master-data-delete-modal" class="styled-icon-btn">
-                    <!-- Close Icon -->
-                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+    <!-- Developer Tool Modal -->
+    <div id="dev-tool-modal" class="styled-modal-overlay hidden">
+        <div class="styled-modal-card w-[80%] h-[80%] max-w-none max-h-none flex flex-col">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                <h3 class="styled-card-title">Developer Tool: API Logs</h3>
+                <div>
+                    <button id="dev-tool-purge-btn" class="styled-icon-btn mr-2" title="Clear Logs">
+                        <span data-icon="trash"></span>
+                    </button>
+                    <button id="dev-tool-close-btn" class="styled-icon-btn" title="Close">
+                        <span data-icon="close"></span>
+                    </button>
+                </div>
+            </div>
+            <!-- Log Table -->
+            <div class="flex-1 overflow-auto no-scrollbar">
+                <table class="styled-table w-full min-w-[800px]">
+                    <thead>
+                        <tr>
+                            <th class="w-1/6">Timestamp</th>
+                            <th class="w-16">Status</th>
+                            <th class="w-16">Method</th>
+                            <th>URL</th>
+                            <th class="w-24">Request</th>
+                            <th class="w-24">Response</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dev-tool-log-body">
+                        <!-- Logs injected by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Developer Tool Payload Viewer Modal -->
+    <div id="dev-payload-modal" class="styled-modal-overlay hidden z-60">
+        <div class="styled-modal-card w-[70%] h-[70%] max-w-none max-h-none flex flex-col">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-4 flex-shrink-0">
+                <h3 id="dev-payload-title" class="styled-card-title">Payload</h3>
+                <button id="dev-payload-close-btn" class="styled-icon-btn">
+                    <span data-icon="close"></span>
                 </button>
             </div>
-            <!-- Modal Body -->
-            <div class="p-6 styled-modal-body">
-                <p class="text-gray-300">Are you sure you want to delete this record? This action cannot be undone.</p>
-                <input type="hidden" id="master-data-delete-id">
-                <input type="hidden" id="master-data-delete-slug">
-            </div>
-            <!-- Modal Footer -->
-            <div class="p-4 styled-modal-footer flex justify-end space-x-3">
-                <button type="button" data-modal-close="master-data-delete-modal" class="styled-btn-secondary">Cancel</button>
-                <button type="button" id="master-data-delete-confirm-btn" class="styled-btn-danger">Delete</button>
+            <!-- Payload -->
+            <div class="flex-1 overflow-auto no-scrollbar">
+                <pre id="dev-payload-content" class="styled-pre w-full h-full"></pre>
             </div>
         </div>
     </div>
 
-    <!-- Global Loading Spinner -->
-    <div id="global-loader" class="styled-modal-backdrop hidden" style="z-index: 999; background-color: rgba(0, 0, 0, 0.7);">
-        <svg class="animate-spin h-10 w-10 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-        </svg>
-    </div>
-
     <!-- Toast Notification Container -->
-    <div id="toast-container" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm space-y-3">
-        <!-- Toasts will be injected here -->
+    <div id="toast-container" class="fixed top-6 right-6 space-y-3 z-70">
+        <!-- Toasts injected by JS -->
     </div>
 
 
-    <!-- ====================================================================== -->
-    <!-- JAVASCRIPT APPLICATION -->
-    <!-- ====================================================================== -->
+    <!-- ===== 4. JavaScript Application ===== -->
     <script type="module">
-        // --- CONFIGURATION ---
-
         /**
-         * @typedef {Object} ModuleConfig
-         * @property {string} code - The unique module code.
-         * @property {string} name - The display name for the navigation.
-         * @property {string} hash - The URL hash (e.g., '#campaign').
-         * @property {string} type - 'Built-in' or 'User-defined'.
-         * @property {string} icon - SVG path for the nav icon.
+         * XPI Portal Application
+         * All logic is contained within this module.
          */
 
-        /** @type {Object<string, ModuleConfig>} */
-        const moduleConfig = {
-            "MOD.A": { code: "MOD.A", name: "Admin", hash: "#admin", type: "Built-in", icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />` },
-            "MOD.B": { code: "MOD.B", name: "Login", hash: "#login", type: "Built-in", icon: `` }, // No icon, it's a special route
-            "MOD.C": { code: "MOD.C", name: "Campaign Submission", hash: "#campaign", type: "User-defined", icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />` },
-            "MAS.DemoCient": { code: "MAS.DemoCient", name: "Demo Clients", hash: "#demo-client", type: "User-defined", icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.653-.124-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.653.124-1.283.356-1.857m0 0a3.001 3.001 0 015.688 0M12 12a3 3 0 100-6 3 3 0 000 6z" />` },
-            "MAS.XPICFMapping": { code: "MAS.XPICFMapping", name: "XPI Field Mapping", hash: "#xpi-mapping", type: "User-defined", icon: `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />` }
+        // ---------------------------------------------------------------------
+        // A. CONSTANTS & CONFIGURATION
+        // ---------------------------------------------------------------------
+
+        const MODULE_CONFIG = [
+            { code: "MOD.A", name: "Admin", type: "Built-in" },
+            { code: "MOD.B", name: "Login", type: "Built-in" },
+            { code: "MOD.C", name: "Campaign Submission", type: "User-defined" },
+            { code: "MAS.DemoCient", name: "Demo Client", type: "User-defined" },
+            { code: "MAS.XPICFMapping", name: "XPI Field Mapping", type: "User-defined" }
+        ];
+
+        const GLOBAL_CONFIG_DEFAULTS = {
+            xpiBaseUrl: 'https://xpi-api.gowrike.space/'
+        };
+        
+        /**
+         * Icon definitions (Bootstrap Icons)
+         * Using data-icon="name" in HTML will replace the span with the SVG.
+         */
+        const ICONS = {
+            'menu': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z"/></svg>',
+            'close': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16"><path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/></svg>',
+            'trash': '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16"><path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.958 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.042 3.5h9.916Zm-7.487 1a.5.5 0 0 1 .528.47l.5 8.5a.5.5 0 0 1-.998.06L5 5.03a.5.5 0 0 1 .47-.528ZM8 4.5a.5.5 0 0 1 .5.5v8.5a.5.5 0 0 1-1 0V5a.5.5 0 0 1 .5-.5Zm3.5 0a.5.5 0 0 1 .5.47l-.5 8.5a.5.5 0 0 1-.998-.06l.5-8.5a.5.5 0 0 1 .528-.47Z"/></svg>',
+            'hat': '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-mortarboard-fill" viewBox="0 0 16 16"><path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3.5a.5.5 0 0 0 .372 0L15.5 6.464a.5.5 0 0 0 .025-.917l-7.5-3.5Z"/><path d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466 4.176 9.032Zm-.068 1.873.22-.748L8 11.123l3.672-1.465.22.748L8 12.596 4.108 10.905Z"/></svg>',
+            'reload': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/></svg>',
+            'plus': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/></svg>',
+            'edit': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-fill" viewBox="0 0 16 16"><path d="M12.854.146a.5.5 0 0 0-.707 0L10.5 1.793 14.207 5.5l1.647-1.646a.5.5 0 0 0 0-.708l-3-3zm.646 6.061L9.793 2.5 3.293 9H3.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.5h.5a.5.5 0 0 1 .5.5v.207l6.5-6.5zm-7.468 7.468A.5.5 0 0 1 6 13.5V13h-.5a.5.5 0 0 1-.5-.5V12h-.5a.5.5 0 0 1-.5-.5V11h-.5a.5.5 0 0 1-.5-.5V10h-.5a.499.499 0 0 1-.175-.032l-.179.178a.5.5 0 0 0-.11.168l-2 5a.5.5 0 0 0 .65.65l5-2a.5.5 0 0 0 .168-.11l.178-.178z"/></svg>',
+            'delete': '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16"><path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1H2.5zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zM8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5zm3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0z"/></svg>',
+        };
+        
+        /**
+         * Style Guide for dynamic class replacement.
+         * This is the core of the dynamic styling requirement.
+         */
+        const STYLE_GUIDE = {
+            'styled-body': 'bg-gray-900 text-gray-200',
+            'styled-sidebar': 'w-64 bg-gray-800 border-r border-gray-700',
+            'styled-border-color': 'border-gray-700',
+            'styled-transition': 'transition-all duration-300 ease-in-out',
+            'styled-card': 'bg-gray-800 shadow-xl rounded-lg p-6 md:p-8',
+            'styled-card-title': 'text-2xl font-semibold text-white mb-1',
+            'styled-label': 'block text-sm font-medium text-gray-400 mb-2',
+            'styled-input': 'bg-gray-700 border border-gray-600 text-gray-200 rounded-md w-full p-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent placeholder-gray-500',
+            'styled-btn-primary': 'bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-5 rounded-md transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed',
+            'styled-btn-secondary': 'bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2 px-5 rounded-md transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed',
+            'styled-btn-danger': 'bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-5 rounded-md transition duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed',
+            'styled-icon-btn': 'text-gray-400 hover:text-white hover:bg-gray-700 p-2 rounded-full transition duration-200',
+            'styled-pre': 'bg-gray-900 border border-gray-700 text-gray-300 text-sm rounded-md p-4 overflow-auto max-h-60',
+            'styled-text-error': 'text-red-400 font-medium',
+            'styled-text-success': 'text-green-400 font-medium',
+            'styled-table': 'w-full text-left border-collapse',
+            'styled-modal-overlay': 'fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-40',
+            'styled-modal-card': 'bg-gray-800 shadow-xl rounded-lg p-6 z-50',
+            'styled-toast-success': 'bg-green-600 text-white p-4 rounded-md shadow-lg',
+            'styled-toast-error': 'bg-red-600 text-white p-4 rounded-md shadow-lg',
+        };
+        
+        // MDM Module configurations
+        const MDM_CONFIG = {
+            'MAS.DemoCient': {
+                moduleId: 'MAS.DemoCient',
+                slug: 'demoxpiclients',
+                title: 'Demo Clients',
+                fields: ['id', 'value', 'note', 'fincode', 'code'],
+                fieldLabels: {
+                    id: 'ID',
+                    value: 'Value',
+                    note: 'Note',
+                    fincode: 'Fin Code',
+                    code: 'Code'
+                },
+                readOnlyFields: ['id'],
+                requiredFields: ['value']
+            },
+            'MAS.XPICFMapping': {
+                moduleId: 'MAS.XPICFMapping',
+                slug: 'xpicfmapping',
+                title: 'XPI Custom Field Mappings',
+                fields: ['id', 'value', 'cfName'], // Assuming 'cfName' is the key
+                fieldLabels: {
+                    id: 'ID',
+                    value: 'Value',
+                    cfName: 'CF Name'
+                },
+                readOnlyFields: ['id'],
+                requiredFields: ['value']
+            }
+        };
+
+
+        // ---------------------------------------------------------------------
+        // B. CORE APPLICATION STATE & UTILITIES
+        // ---------------------------------------------------------------------
+
+        /**
+         * Global state for MDM modules to avoid stale closures.
+         * Stores the currently active record for edit/delete.
+         */
+        const mdmState = {
+            activeRecord: null,
+            isEditMode: false,
+            activeModuleId: null
         };
 
         /**
-         * Defines the Tailwind CSS classes for placeholder styles.
+         * Replaces placeholder class strings with full Tailwind classes.
+         * Preserves other classes on the element.
          */
-        const styleConfig = {
-            "styled-body": "bg-gray-900 text-gray-300 h-full",
-            "styled-nav-bar": "bg-gray-800 text-gray-400 w-64",
-            "styled-nav-header": "border-b border-gray-700",
-            "styled-nav-footer": "border-t border-gray-700",
-            "styled-avatar": "bg-gray-600 border border-gray-500",
-            "styled-link-sm": "text-sm text-indigo-400 hover:text-indigo-300",
-            "styled-nav-link": "flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-700 hover:text-white transition-colors duration-200",
-            "styled-nav-link-active": "flex items-center space-x-3 p-2 rounded-lg bg-indigo-600 text-white font-medium shadow-lg transition-colors duration-200",
-            "styled-main-content": "bg-gray-900",
-            "styled-dev-toggle-btn": "bg-indigo-600 text-white p-2 rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900 transition-all duration-300 transform hover:scale-110",
-            
-            // Forms & Inputs
-            "styled-card": "bg-gray-800 shadow-xl rounded-lg overflow-hidden",
-            "styled-card-header": "p-5 border-b border-gray-700",
-            "styled-card-body": "p-6",
-            "styled-card-footer": "p-5 bg-gray-800 border-t border-gray-700",
-            "styled-input-label": "block text-sm font-medium text-gray-300 mb-1",
-            "styled-input": "block w-full bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm",
-            "styled-select": "block w-full bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm",
-            
-            // Buttons
-            "styled-btn-primary": "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed",
-            "styled-btn-secondary": "inline-flex justify-center py-2 px-4 border border-gray-600 shadow-sm text-sm font-medium rounded-md text-gray-300 bg-gray-700 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed",
-            "styled-btn-danger": "inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed",
-            "styled-icon-btn": "p-2 rounded-full text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors",
-            "styled-icon-btn-danger": "p-2 rounded-full text-red-400 hover:bg-red-900 hover:text-red-300 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition-colors",
-
-            // Modals
-            "styled-modal-backdrop": "fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-75 backdrop-blur-sm",
-            "styled-modal-dialog": "flex flex-col bg-gray-800 rounded-lg shadow-2xl border border-gray-700 max-h-[90vh] w-full",
-            "styled-modal-header": "border-b border-gray-700",
-            "styled-modal-body": "overflow-y-auto",
-            "styled-modal-footer": "border-t border-gray-700",
-
-            // Tables
-            "styled-table-divider": "divide-gray-700",
-            "styled-table-header": "bg-gray-700",
-            "styled-table-body-bg": "bg-gray-800",
-            "styled-table-th": "px-4 py-3 text-left text-xs font-medium text-gray-400 uppercase tracking-wider",
-            "styled-table-td": "px-4 py-4 whitespace-nowrap text-sm text-gray-300",
-            "styled-table-link": "text-indigo-400 hover:text-indigo-300 hover:underline",
-            
-            // Other
-            "styled-tag": "inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-indigo-800 text-indigo-200",
-            "styled-tag-remove": "ml-1.5 flex-shrink-0 h-4 w-4 rounded-full inline-flex items-center justify-center text-indigo-400 hover:bg-indigo-700 hover:text-indigo-200 focus:outline-none focus:bg-indigo-700 focus:text-white"
-        };
-        
-        // --- STATE & CORE ---
-        
-        let navOpen = true; // Nav state
-        let masterDataLoaders = {}; // To store init functions for master data modules
-
-        // --- UTILITY FUNCTIONS ---
-        
-        /**
-         * Applies Tailwind styles by replacing placeholder classes.
-         */
-        function applyTailwindStyles() {
-            for (const [placeholder, tailwind] of Object.entries(styleConfig)) {
-                document.querySelectorAll(`.${placeholder}`).forEach(el => {
-                    // Split the full Tailwind string into individual classes
-                    const tailwindClasses = tailwind.split(' ').filter(c => c.length > 0);
-                    // Add new classes
-                    el.classList.add(...tailwindClasses);
-                    // Remove the placeholder
-                    el.classList.remove(placeholder);
+        function initTailwindPlaceholders() {
+            for (const [placeholder, classString] of Object.entries(STYLE_GUIDE)) {
+                const elements = document.querySelectorAll(`.${placeholder}`);
+                elements.forEach(el => {
+                    // Use replace to only swap the placeholder, keeping other classes
+                    el.className = el.className.replace(placeholder, classString);
                 });
             }
-        }
+            
+            // Special handling for table headers/rows in the template
+            const tableHead = document.querySelector('#mdm-template .styled-table thead');
+            if (tableHead) tableHead.className = 'bg-gray-700';
+            
+            const tableBody = document.querySelector('#mdm-template .styled-table tbody');
+            if (tableBody) tableBody.className = 'divide-y divide-gray-700';
 
-        /**
-         * Gets a configuration value from localStorage.
-         * @param {string} key - The config key.
-         * @returns {string} - The config value.
-         */
-        function getConfig(key) {
-            const defaults = {
-                xpiBaseUrl: "https://api.wrikexpi.groupm.com"
-            };
-            return localStorage.getItem(key) || defaults[key];
-        }
-
-        /**
-         * Sets a configuration value in localStorage.
-         * @param {string} key - The config key.
-         * @param {string} value - The config value.
-         */
-        function setConfig(key, value) {
-            localStorage.setItem(key, value);
-        }
-
-        /**
-         * Gets API logs from localStorage.
-         * @returns {Array} - Array of log entries.
-         */
-        function getApiLogs() {
-            try {
-                return JSON.parse(localStorage.getItem('apiLogs') || '[]');
-            } catch (e) {
-                return [];
-            }
-        }
-
-        /**
-         * Logs an API call to localStorage (request, response, or error).
-         * @param {object} request - The request details (method, url, headers, body).
-         * @param {object|null} response - The response details (status, body).
-         * @param {object|null} error - The error object.
-         */
-        function logApiCall(request, response, error) {
-            const logs = getApiLogs();
-            const logEntry = {
-                timestamp: new Date().toISOString(),
-                request: request,
-                response: response,
-                error: error ? error.message : null,
-                status: response ? response.status : (error ? 'Network Error' : 'N/A')
-            };
-            logs.unshift(logEntry); // Add to the top
-            if (logs.length > 100) { // Keep max 100 logs
-                logs.pop();
-            }
-            localStorage.setItem('apiLogs', JSON.stringify(logs));
-            // Refresh the dev tool table if it's open
-            if (!document.getElementById('dev-tool-modal').classList.contains('hidden')) {
-                renderDevToolLogs();
-            }
-        }
-
-        /**
-         * Secure fetch wrapper that logs requests/responses.
-         * @param {string} url - The URL to fetch.
-         * @param {object} options - The fetch options.
-         * @returns {Promise<Response>} - The fetch response.
-         */
-        async function secureFetch(url, options = {}) {
-            const requestLog = {
-                method: options.method || 'GET',
-                url: url,
-                headers: {},
-                body: options.body ? JSON.parse(options.body) : null
-            };
-
-            // Clone and scrub headers for logging
-            if (options.headers) {
-                for (const [key, value] of Object.entries(options.headers)) {
-                    if (key.toLowerCase() === 'authorization') {
-                        requestLog.headers[key] = 'Bearer [REDACTED]';
-                    } else {
-                        requestLog.headers[key] = value;
-                    }
-                }
-            }
-
-            let responseData = null;
-            let responseToLog = null;
-
-            try {
-                showLoading(true);
-                const response = await fetch(url, options);
-                
-                // Clone the response to read it
-                const clonedResponse = response.clone();
-                let responseBody = null;
-                try {
-                    responseBody = await clonedResponse.json();
-                } catch (e) {
-                    responseBody = await clonedResponse.text();
-                }
-
-                responseData = { ok: response.ok, status: response.status, statusText: response.statusText, data: responseBody };
-                
-                responseToLog = {
-                    status: response.status,
-                    statusText: response.statusText,
-                    body: responseBody
-                };
-                
-                logApiCall(requestLog, responseToLog, null);
-                
-                return responseData;
-
-            } catch (error) {
-                logApiCall(requestLog, null, error);
-                showToast(`Network Error: ${error.message}`, 'error');
-                throw error; // Re-throw to be caught by caller
-            } finally {
-                showLoading(false);
-            }
+            // Find all th/td in the template and apply styles
+            document.querySelectorAll('#mdm-template .styled-table th').forEach(th => {
+                th.className = 'p-3 font-semibold text-left';
+            });
+            document.querySelectorAll('#mdm-template .styled-table td').forEach(td => {
+                td.className = 'p-3';
+            });
         }
         
         /**
-         * Computes the SHA-256 hash of a string.
-         * @param {string} str - The input string.
-         * @returns {Promise<string>} - The hex-encoded hash.
+         * Injects SVG icons into elements with [data-icon] attribute.
          */
-        async function sha256(str) {
-            const textAsBuffer = new TextEncoder().encode(str);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', textAsBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            return hexHash;
+        function initSvgIcons() {
+            document.querySelectorAll('[data-icon]').forEach(el => {
+                const iconName = el.getAttribute('data-icon');
+                if (ICONS[iconName]) {
+                    el.innerHTML = ICONS[iconName];
+                }
+            });
         }
-
+        
         /**
          * Shows a toast notification.
          * @param {string} message - The message to display.
-         * @param {'success'|'error'|'info'} type - The toast type.
+         * @param {'success' | 'error'} type - The type of toast.
          */
         function showToast(message, type = 'success') {
             const container = document.getElementById('toast-container');
-            const id = `toast-${Date.now()}`;
+            const toast = document.createElement('div');
+            const styleClass = type === 'success' ? 'styled-toast-success' : 'styled-toast-error';
             
-            let bgColor, icon;
-            switch(type) {
-                case 'error':
-                    bgColor = 'bg-red-600';
-                    icon = `<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
-                    break;
-                case 'info':
-                    bgColor = 'bg-blue-600';
-                    icon = `<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
-                    break;
-                default: // success
-                    bgColor = 'bg-green-600';
-                    icon = `<svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
-            }
+            toast.className = `${STYLE_GUIDE[styleClass]} opacity-0 transform translate-x-10 transition-all duration-300`;
+            toast.textContent = message;
+            
+            container.appendChild(toast);
+            
+            // Animate in
+            setTimeout(() => {
+                toast.classList.remove('opacity-0', 'translate-x-10');
+            }, 10);
+            
+            // Animate out and remove
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
 
-            const toastHTML = `
-                <div id="${id}" class="flex items-center p-4 rounded-lg shadow-lg text-white ${bgColor} toast-in">
-                    <div class="flex-shrink-0">${icon}</div>
-                    <div class="ml-3 text-sm font-medium">${message}</div>
-                    <button type="button" class="ml-auto -mx-1.5 -my-1.5 p-1.5 rounded-full inline-flex hover:bg-white hover:bg-opacity-20" data-toast-dismiss="${id}">
-                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                    </button>
-                </div>
-            `;
-            container.insertAdjacentHTML('beforeend', toastHTML);
+        /**
+         * Hides all module containers and shows the one with the specified ID.
+         * @param {string} moduleCode - The module code (e.g., 'login', 'MOD.C').
+         */
+        function showModule(moduleCode) {
+            document.querySelectorAll('.module-container').forEach(mod => {
+                mod.classList.add('hidden');
+            });
             
-            const toastEl = document.getElementById(id);
-            const dismissBtn = toastEl.querySelector(`[data-toast-dismiss="${id}"]`);
+            const moduleEl = document.getElementById(`module-${moduleCode}`);
+            if (moduleEl) {
+                moduleEl.classList.remove('hidden');
+            } else {
+                console.error(`Module container not found: #module-${moduleCode}`);
+                // Fallback to login if all else fails
+                if (!sessionStorage.getItem('token')) {
+                    document.getElementById('module-login').classList.remove('hidden');
+                }
+            }
             
-            const removeToast = () => {
-                toastEl.classList.remove('toast-in');
-                toastEl.classList.add('toast-out');
-                setTimeout(() => toastEl.remove(), 300);
+            // Update active nav link
+            document.querySelectorAll('#nav-links-container a').forEach(a => {
+                if (a.hash === `#${moduleCode}`) {
+                    a.classList.add('bg-gray-700', 'text-white');
+                    a.classList.remove('text-gray-400', 'hover:bg-gray-700');
+                } else {
+                    a.classList.remove('bg-gray-700', 'text-white');
+                    a.classList.add('text-gray-400', 'hover:bg-gray-700');
+                }
+            });
+        }
+
+        /**
+         * Gets a value from Global Config (localStorage).
+         * @param {string} key - The config key.
+         * @returns {string} The config value.
+         */
+        function getGlobalConfig(key) {
+            return localStorage.getItem(key) || GLOBAL_CONFIG_DEFAULTS[key];
+        }
+
+        /**
+         * Sets a value in Global Config (localStorage).
+         * @param {string} key - The config key.
+         * @param {string} value - The config value.
+         */
+        function setGlobalConfig(key, value) {
+            localStorage.setItem(key, value);
+        }
+        
+        /**
+         * Initializes default global config if not set.
+         */
+        function initGlobalConfig() {
+            if (!localStorage.getItem('xpiBaseUrl')) {
+                localStorage.setItem('xpiBaseUrl', GLOBAL_CONFIG_DEFAULTS.xpiBaseUrl);
+            }
+        }
+        
+        /**
+         * Hashes a string using SHA-256.
+         * @param {string} string - The string to hash.
+         * @returns {Promise<string>} The hex-encoded hash.
+         */
+        async function sha256(string) {
+            const utf8 = new TextEncoder().encode(string);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', utf8);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            return hashHex;
+        }
+
+        // ---------------------------------------------------------------------
+        // C. API & DEVELOPER TOOL
+        // ---------------------------------------------------------------------
+
+        /**
+         * Logs an API call to localStorage for the dev tool.
+         * Scrubs Authorization header.
+         * @param {object} request - Request details { method, url, headers, body }.
+         * @param {object} response - Response details { status, body }.
+         */
+        async function logApiCall(request, response) {
+            let logs = [];
+            try {
+                logs = JSON.parse(localStorage.getItem('apiLogs') || '[]');
+            } catch (e) {
+                console.error("Failed to parse apiLogs, resetting.", e);
+                logs = [];
+            }
+            
+            // Deep copy and scrub headers
+            const loggedRequest = JSON.parse(JSON.stringify(request));
+            if (loggedRequest.headers && loggedRequest.headers['Authorization']) {
+                loggedRequest.headers['Authorization'] = 'Bearer [REDACTED]';
+            }
+            
+            const logEntry = {
+                id: crypto.randomUUID(),
+                timestamp: new Date().toISOString(),
+                method: loggedRequest.method,
+                url: loggedRequest.url,
+                status: response.status,
+                request: loggedRequest,
+                response: response
             };
 
-            dismissBtn.addEventListener('click', removeToast);
-            setTimeout(removeToast, 5000); // Auto-dismiss after 5s
-        }
-
-        /**
-         * Shows or hides the global loading spinner.
-         * @param {boolean} show - True to show, false to hide.
-         */
-        function showLoading(show) {
-            const loader = document.getElementById('global-loader');
-            if (show) {
-                loader.classList.remove('hidden');
-            } else {
-                loader.classList.add('hidden');
-            }
+            logs.unshift(logEntry); // Add to start (chronological)
+            localStorage.setItem('apiLogs', JSON.stringify(logs.slice(0, 100))); // Limit logs
         }
         
         /**
-         * Shows a modal by its ID.
-         * @param {string} modalId - The ID of the modal to show.
+         * Secure fetch wrapper.
+         * Handles auth, logging, and base URL.
+         * @param {string} url - The API endpoint (e.g., '/token/exchange').
+         * @param {object} options - Fetch options.
+         * @param {'bearer' | 'basic' | 'none'} authType - Type of authentication.
+         * @param {string} [username] - For basic auth.
+         * @param {string} [password] - For basic auth.
+         * @returns {Promise<Response>} The fetch Response object.
          */
-        function showModal(modalId) {
-            document.getElementById(modalId)?.classList.remove('hidden');
-        }
-
-        /**
-         * Hides a modal by its ID.
-         * @param {string} modalId - The ID of the modal to hide.
-         */
-        function hideModal(modalId) {
-            document.getElementById(modalId)?.classList.add('hidden');
-        }
-        
-        // --- UI & NAVIGATION ---
-
-        /**
-         * Toggles the navigation bar state (open/closed).
-         */
-        function toggleNav() {
-            navOpen = !navOpen;
-            const nav = document.getElementById('nav-bar');
-            const main = document.getElementById('main-content');
-            const logo = document.getElementById('nav-logo');
-            const profileText = document.querySelector('#user-profile > div > div');
-            const navLinks = document.querySelectorAll('#nav-links a span');
-
-            if (navOpen) {
-                nav.classList.remove('w-20');
-                nav.classList.add('w-64');
-                main.style.marginLeft = '16rem'; // 64 * 0.25rem
-                logo.classList.remove('opacity-0');
-                profileText.classList.remove('opacity-0');
-                navLinks.forEach(span => span.classList.remove('opacity-0'));
-            } else {
-                nav.classList.remove('w-64');
-                nav.classList.add('w-20');
-                main.style.marginLeft = '5rem'; // 20 * 0.25rem
-                logo.classList.add('opacity-0');
-                profileText.classList.add('opacity-0');
-                navLinks.forEach(span => span.classList.add('opacity-0'));
-            }
-        }
-
-        /**
-         * Builds the navigation links from the moduleConfig.
-         */
-        function buildNav() {
-            const navLinksContainer = document.getElementById('nav-links');
-            navLinksContainer.innerHTML = '';
+        async function secureFetch(url, options = {}, authType = 'none', username = '', password = '') {
+            const xpiBaseUrl = getGlobalConfig('xpiBaseUrl').replace(/\/$/, ''); // Remove trailing slash
+            const fullUrl = url.startsWith('http') ? url : `${xpiBaseUrl}${url}`;
             
-            Object.values(moduleConfig)
+            const headers = new Headers(options.headers || {});
+            headers.set('Content-Type', 'application/json');
+
+            if (authType === 'bearer') {
+                const token = sessionStorage.getItem('token');
+                if (token) {
+                    headers.set('Authorization', `Bearer ${token}`);
+                }
+            } else if (authType === 'basic' && username && password) {
+                headers.set('Authorization', `Basic ${btoa(`${username}:${password}`)}`);
+            }
+            
+            const requestDetails = {
+                method: options.method || 'GET',
+                url: fullUrl,
+                headers: Object.fromEntries(headers.entries()),
+                body: options.body ? JSON.parse(options.body) : null
+            };
+            
+            let response;
+            let responseBody;
+            let responseStatus;
+
+            try {
+                response = await fetch(fullUrl, { ...options, headers });
+                responseStatus = response.status;
+                
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    responseBody = await response.json();
+                } else {
+                    responseBody = await response.text();
+                }
+
+                // Clone response to log and return
+                const responseToReturn = new Response(JSON.stringify(responseBody), {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: response.headers
+                });
+                
+                // Log the call
+                await logApiCall(requestDetails, { status: responseStatus, body: responseBody });
+                
+                return responseToReturn;
+
+            } catch (error) {
+                console.error('Fetch Error:', error);
+                const errorResponse = {
+                    status: 0,
+                    body: { error: 'Network Error', message: error.message }
+                };
+                await logApiCall(requestDetails, errorResponse);
+                
+                // Return a response-like object for consistency
+                return new Response(JSON.stringify(errorResponse.body), {
+                    status: errorResponse.status,
+                    statusText: 'Network Error'
+                });
+            }
+        }
+        
+        /**
+         * Initializes the Developer Tool functionality.
+         */
+        function initDevTool() {
+            const toggleBtn = document.getElementById('dev-tool-toggle');
+            const modal = document.getElementById('dev-tool-modal');
+            const closeBtn = document.getElementById('dev-tool-close-btn');
+            const purgeBtn = document.getElementById('dev-tool-purge-btn');
+            const logBody = document.getElementById('dev-tool-log-body');
+            
+            const payloadModal = document.getElementById('dev-payload-modal');
+            const payloadTitle = document.getElementById('dev-payload-title');
+            const payloadContent = document.getElementById('dev-payload-content');
+            const payloadCloseBtn = document.getElementById('dev-payload-close-btn');
+
+            const showDevModal = (visible) => {
+                if (visible) {
+                    loadDevLogs();
+                    modal.classList.remove('hidden');
+                } else {
+                    modal.classList.add('hidden');
+                }
+            };
+
+            const showPayloadModal = (title, payload) => {
+                payloadTitle.textContent = title;
+                try {
+                    payloadContent.textContent = JSON.stringify(payload, null, 2);
+                } catch (e) {
+                    payloadContent.textContent = "Failed to stringify payload:\n\n" + payload;
+                }
+                payloadModal.classList.remove('hidden');
+            };
+
+            toggleBtn.addEventListener('click', () => showDevModal(true));
+            closeBtn.addEventListener('click', () => showDevModal(false));
+            payloadCloseBtn.addEventListener('click', () => payloadModal.classList.add('hidden'));
+            
+            purgeBtn.addEventListener('click', () => {
+                if (confirm('Are you sure you want to purge all API logs?')) {
+                    localStorage.removeItem('apiLogs');
+                    loadDevLogs();
+                }
+            });
+
+            function loadDevLogs() {
+                logBody.innerHTML = ''; // Clear existing
+                let logs = [];
+                try {
+                    logs = JSON.parse(localStorage.getItem('apiLogs') || '[]');
+                } catch (e) {
+                    logBody.innerHTML = `<tr><td colspan="6" class="p-4 text-red-400">Error loading logs. They may be corrupt.</td></tr>`;
+                    return;
+                }
+                
+                if (logs.length === 0) {
+                    logBody.innerHTML = `<tr><td colspan="6" class="p-4 text-center">No API calls logged.</td></tr>`;
+                    return;
+                }
+                
+                logs.forEach(log => {
+                    const tr = document.createElement('tr');
+                    tr.className = 'border-b border-gray-700 hover:bg-gray-700';
+                    
+                    const statusClass = log.status >= 400 ? 'text-red-400' : log.status >= 300 ? 'text-yellow-400' : 'text-green-400';
+                    
+                    tr.innerHTML = `
+                        <td class="p-2 text-xs">${new Date(log.timestamp).toLocaleTimeString()}</td>
+                        <td class="p-2 font-semibold ${statusClass}">${log.status}</td>
+                        <td class="p-2">${log.method}</td>
+                        <td class="p-2 text-xs break-all">${log.url.replace(getGlobalConfig('xpiBaseUrl'), '.../')}</td>
+                        <td class="p-2"><button class="styled-btn-secondary !py-1 !px-2 text-xs" data-log-id="${log.id}" data-type="request">View</button></td>
+                        <td class="p-2"><button class="styled-btn-secondary !py-1 !px-2 text-xs" data-log-id="${log.id}" data-type="response">View</button></td>
+                    `;
+                    
+                    // Replace placeholder classes
+                    tr.querySelectorAll('.styled-btn-secondary').forEach(btn => {
+                        btn.className = btn.className.replace('styled-btn-secondary', STYLE_GUIDE['styled-btn-secondary']);
+                    });
+                    
+                    logBody.appendChild(tr);
+                });
+            }
+
+            // Event delegation for payload buttons
+            logBody.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON' && e.target.dataset.logId) {
+                    const logId = e.target.dataset.logId;
+                    const type = e.target.dataset.type;
+                    const logs = JSON.parse(localStorage.getItem('apiLogs') || '[]');
+                    const log = logs.find(l => l.id === logId);
+                    
+                    if (log) {
+                        showPayloadModal(`${type.charAt(0).toUpperCase() + type.slice(1)} Payload`, log[type]);
+                    }
+                }
+            });
+        }
+
+        // ---------------------------------------------------------------------
+        // D. NAVIGATION & ROUTING
+        // ---------------------------------------------------------------------
+        
+        /**
+         * Initializes sidebar, nav links, and user profile.
+         */
+        function initNavigation() {
+            const sidebar = document.getElementById('app-sidebar');
+            const mainContent = document.getElementById('main-content');
+            const toggleBtn = document.getElementById('sidebar-toggle-btn');
+            const linksContainer = document.getElementById('nav-links-container');
+            const logoutLink = document.getElementById('logout-link');
+
+            // Toggle sidebar
+            toggleBtn.addEventListener('click', () => {
+                const isVisible = sidebar.dataset.visible === 'true';
+                if (isVisible) {
+                    sidebar.dataset.visible = 'false';
+                    sidebar.classList.add('-translate-x-full');
+                    mainContent.classList.remove('md:ml-64');
+                } else {
+                    sidebar.dataset.visible = 'true';
+                    sidebar.classList.remove('-translate-x-full');
+                    mainContent.classList.add('md:ml-64');
+                }
+            });
+
+            // Populate nav links
+            linksContainer.innerHTML = '';
+            MODULE_CONFIG
                 .filter(mod => mod.type === 'User-defined')
                 .forEach(mod => {
-                    const link = document.createElement('a');
-                    link.href = mod.hash;
-                    link.id = `nav-link-${mod.code}`;
-                    link.className = 'styled-nav-link'; // Placeholder
-                    link.innerHTML = `
-                        <svg class="h-6 w-6 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">${mod.icon}</svg>
-                        <span class="transition-opacity duration-200">${mod.name}</span>
-                    `;
-                    navLinksContainer.appendChild(link);
+                    const a = document.createElement('a');
+                    a.href = `#${mod.code}`;
+                    a.className = 'block py-2.5 px-4 rounded text-gray-400 hover:bg-gray-700 hover:text-white transition duration-200';
+                    a.textContent = mod.name;
+                    linksContainer.appendChild(a);
                 });
             
-            // Re-apply styles to new elements
-            applyTailwindStyles();
-        }
-
-        /**
-         * Updates the active state of navigation links based on the current hash.
-         * @param {string} currentHash - The current URL hash.
-         */
-        function updateActiveNav(currentHash) {
-            document.querySelectorAll('#nav-links a').forEach(a => {
-                const placeholder = 'styled-nav-link';
-                const activePlaceholder = 'styled-nav-link-active';
-                const tailwind = styleConfig[placeholder];
-                const activeTailwind = styleConfig[activePlaceholder];
-                
-                a.classList.remove(...activeTailwind.split(' '), activePlaceholder);
-                a.classList.add(...tailwind.split(' '), placeholder);
+            // Logout
+            logoutLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                sessionStorage.clear();
+                location.href = location.origin + location.pathname; // Redirect to base
             });
-            
-            const activeLink = document.querySelector(`#nav-links a[href="${currentHash}"]`);
-            if (activeLink) {
-                const placeholder = 'styled-nav-link';
-                const activePlaceholder = 'styled-nav-link-active';
-                const tailwind = styleConfig[placeholder];
-                const activeTailwind = styleConfig[activePlaceholder];
-
-                activeLink.classList.remove(...tailwind.split(' '), placeholder);
-                activeLink.classList.add(...activeTailwind.split(' '), activePlaceholder);
-            }
         }
         
         /**
-         * Updates the user profile display from sessionStorage.
+         * Updates UI elements based on login state (token, user info).
          */
-        function updateProfileUI() {
-            const userName = sessionStorage.getItem('userName');
-            const avatarUrl = sessionStorage.getItem('avatarUrl');
+        function updateLoginStateUI() {
             const token = sessionStorage.getItem('token');
-            
-            const nav = document.getElementById('nav-bar');
-            const profile = document.getElementById('user-profile');
-            const nameEl = document.getElementById('user-name');
-            const avatarEl = document.getElementById('user-avatar');
-            const logoutEl = document.getElementById('logout-link');
+            const sidebar = document.getElementById('app-sidebar');
+            const mainContent = document.getElementById('main-content');
+            const userAvatar = document.getElementById('user-avatar');
+            const userName = document.getElementById('user-name');
+            const logoutLink = document.getElementById('logout-link');
 
-            if (token && userName) {
-                nameEl.textContent = userName;
-                avatarEl.src = avatarUrl || 'https://placehold.co/40x40/6b7280/e5e7eb?text=?';
-                logoutEl.classList.remove('hidden');
-                profile.classList.remove('hidden');
-                nav.classList.remove('hidden');
-                // Open nav by default on login
-                if (!navOpen) {
-                    toggleNav();
-                }
+            if (token) {
+                // Logged In
+                const firstName = sessionStorage.getItem('firstName');
+                const lastName = sessionStorage.getItem('lastName');
+                const avatarUrl = sessionStorage.getItem('avatarUrl');
+
+                userName.textContent = `${firstName || 'User'} ${lastName || ''}`;
+                userAvatar.src = avatarUrl || 'https://placehold.co/40x40/555/FFF?text=?';
+                logoutLink.classList.remove('hidden');
+
+                sidebar.classList.remove('hidden', '-translate-x-full');
+                sidebar.dataset.visible = 'true';
+                mainContent.classList.add('md:ml-64'); // Adjust main content for sidebar
+                
             } else {
-                nameEl.textContent = 'Not Logged In';
-                avatarEl.src = 'https://placehold.co/40x40/6b7280/e5e7eb?text=?';
-                logoutEl.classList.add('hidden');
-                profile.classList.add('hidden');
-                nav.classList.add('hidden');
-                // Close nav and reset margin if logged out
-                if (navOpen) {
-                    toggleNav();
-                }
-                document.getElementById('main-content').style.marginLeft = '0';
+                // Logged Out
+                userName.textContent = 'Not Logged In';
+                userAvatar.src = 'https://placehold.co/40x40/555/FFF?text=?';
+                logoutLink.classList.add('hidden');
+                
+                sidebar.classList.add('hidden', '-translate-x-full');
+                sidebar.dataset.visible = 'false';
+                mainContent.classList.remove('md:ml-64');
             }
         }
         
-        /**
-         * Logs the user out by clearing session and redirecting.
-         */
-        function logout() {
-            sessionStorage.clear();
-            updateProfileUI();
-            location.hash = '#login';
-            showToast('You have been logged out.', 'info');
-        }
-
-        // --- DEV TOOL ---
-
-        /**
-         * Renders the API logs into the dev tool table.
-         */
-        function renderDevToolLogs() {
-            const tbody = document.getElementById('log-table-body');
-            tbody.innerHTML = '';
-            const logs = getApiLogs();
-
-            if (logs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="styled-table-td text-center text-gray-500">No API calls logged.</td></tr>`;
-                applyTailwindStyles();
-                return;
-            }
-            
-            logs.forEach((log, index) => {
-                const tr = document.createElement('tr');
-                tr.innerHTML = `
-                    <td class="styled-table-td">${new Date(log.timestamp).toLocaleTimeString()}</td>
-                    <td class="styled-table-td">
-                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                            log.status >= 200 && log.status < 300 ? 'bg-green-800 text-green-200' :
-                            log.status >= 400 ? 'bg-red-800 text-red-200' :
-                            'bg-yellow-800 text-yellow-200'
-                        }">
-                            ${log.status}
-                        </span>
-                    </td>
-                    <td class="styled-table-td">${log.request.method}</td>
-                    <td class="styled-table-td max-w-xs truncate" title="${log.request.url}">${log.request.url}</td>
-                    <td class="styled-table-td"><a href="#" class="styled-table-link" data-payload-type="request" data-log-index="${index}">View</a></td>
-                    <td class="styled-table-td"><a href="#" class="styled-table-link" data-payload-type="response" data-log-index="${index}">View</a></td>
-                `;
-                tbody.appendChild(tr);
-            });
-            applyTailwindStyles();
-        }
-
-        /**
-         * Shows the payload modal with the selected log data.
-         * @param {string} type - 'request' or 'response'.
-         * @param {number} index - The index of the log in the array.
-         */
-        function showPayload(type, index) {
-            const logs = getApiLogs();
-            const log = logs[index];
-            if (!log) return;
-
-            const titleEl = document.getElementById('payload-modal-title');
-            const contentEl = document.getElementById('payload-modal-content');
-            
-            let dataToShow = null;
-            if (type === 'request') {
-                titleEl.textContent = `Request: ${log.request.method} ${log.request.url}`;
-                dataToShow = { headers: log.request.headers, body: log.request.body };
-            } else {
-                titleEl.textContent = `Response: ${log.status}`;
-                dataToShow = log.response ? log.response.body : log.error;
-            }
-            
-            contentEl.textContent = JSON.stringify(dataToShow, null, 2);
-            showModal('payload-modal');
-        }
-
-        // --- ROUTING & MODULES ---
-        
-        const mainContent = document.getElementById('main-content');
-
         /**
          * Main application router.
+         * Decides which module to show based on URL and login state.
          */
-        function router() {
-            const hash = location.hash || '#';
+        function mainRouter() {
+            updateLoginStateUI(); // Update nav/profile on every route change
+            
+            const hash = location.hash;
             const params = new URLSearchParams(location.search);
             const token = sessionStorage.getItem('token');
             
-            // 1. Admin route
             if (hash === '#admin') {
-                showAdminModule();
-                updateActiveNav(hash);
-                return;
-            }
-
-            // 2. OAuth Callback
-            if (params.has('code')) {
-                showLoginModule(params.get('code'));
-                updateActiveNav('#login');
-                return;
-            }
-            
-            // 3. Check for token
-            if (token) {
-                // User is logged in
-                if (hash === '#' || hash === '#login') {
-                    // Default route for logged-in user
-                    location.hash = '#campaign';
-                    return; // Router will run again
-                }
-                
-                // Find and show the correct module
-                const module = Object.values(moduleConfig).find(m => m.hash === hash);
-                if (module) {
-                    if (module.code === 'MOD.C') {
-                        showCampaignModule();
-                    } else if (module.code === 'MAS.DemoCient') {
-                        showMasterDataModule('demoxpiclients', ['id', 'value', 'note', 'fincode', 'code'], 'Demo Clients');
-                    } else if (module.code === 'MAS.XPICFMapping') {
-                        showMasterDataModule('xpicfmapping', ['id', 'value', 'CF Name'], 'XPI Field Mapping');
+                showModule('admin');
+            } else if (params.has('code')) {
+                showModule('loading');
+                handleLoginCallback(params.get('code'));
+            } else if (token) {
+                // Logged in
+                const moduleCode = hash.substring(1);
+                if (MODULE_CONFIG.some(m => m.code === moduleCode && m.type === 'User-defined')) {
+                    showModule(moduleCode);
+                    // Check if it's an MDM module that needs lazy init
+                    if (moduleCode.startsWith('MAS.') && !document.querySelector(`#module-${moduleCode}`).hasChildNodes()) {
+                        initMdmModule(MDM_CONFIG[moduleCode]);
                     }
-                    updateActiveNav(hash);
                 } else {
-                    // Not found, go to default
-                    location.hash = '#campaign';
+                    // Default to Campaign Submission
+                    location.hash = 'MOD.C';
                 }
             } else {
-                // 4. Not logged in
-                showLoginModule(null); // Show login prompt
-                updateActiveNav('#login');
+                // Not logged in
+                showModule('login');
+                initLoginAuthMode();
+            }
+        }
+
+        // ---------------------------------------------------------------------
+        // E. MODULE: LOGIN (MOD.B)
+        // ---------------------------------------------------------------------
+        
+        /**
+         * Wires up the "Login" button for OAuth redirect.
+         */
+        function initLoginAuthMode() {
+            const loginBtn = document.getElementById('login-auth-btn');
+            if (loginBtn.dataset.wired) return; // Prevent re-wiring
+            
+            loginBtn.addEventListener('click', async () => {
+                try {
+                    const timestamp = Date.now().toString();
+                    const random = Math.random().toString();
+                    const hash = await sha256(timestamp + random);
+                    const clientId = hash.slice(-7);
+                    
+                    sessionStorage.setItem('clientId', clientId);
+                    
+                    const redirectUri = location.origin + location.pathname;
+                    const xpiBaseUrl = getGlobalConfig('xpiBaseUrl');
+                    const authUrl = `${xpiBaseUrl}?accountId=3128883&redirectUri=${encodeURIComponent(redirectUri)}&client_id=${clientId}`;
+                    
+                    location.href = authUrl;
+                } catch (error) {
+                    console.error("Failed to generate clientId:", error);
+                    showToast("Failed to initiate login. Please try again.", "error");
+                }
+            });
+            loginBtn.dataset.wired = true;
+        }
+
+        /**
+         * Handles the OAuth callback.
+         * @param {string} code - The 'code' from the URL query parameter.
+         */
+        async function handleLoginCallback(code) {
+            const clientId = sessionStorage.getItem('clientId');
+            const errorContainer = document.getElementById('loading-error-container');
+            const errorMessage = document.getElementById('loading-error-message');
+            const errorDetails = document.getElementById('loading-error-details');
+            const startOverBtn = document.getElementById('loading-start-over-btn');
+
+            startOverBtn.onclick = () => location.href = location.origin + location.pathname;
+
+            const showError = (message, details = null) => {
+                errorMessage.textContent = message;
+                if (details) {
+                    errorDetails.textContent = typeof details === 'string' ? details : JSON.stringify(details, null, 2);
+                    errorDetails.classList.remove('hidden');
+                } else {
+                    errorDetails.classList.add('hidden');
+                }
+                errorContainer.classList.remove('hidden');
+                document.querySelector('#module-loading .loader').classList.add('hidden');
+            };
+
+            // 1. Validation
+            if (!code || !clientId) {
+                showError('Login failed: Missing code or client ID. Redirecting...');
+                setTimeout(() => startOverBtn.click(), 10000);
+                return;
+            }
+
+            try {
+                // 2. Exchange code for token
+                const tokenUrl = `/api/v1/wrikexpi/token/exchange?code=${code}&client_id=${clientId}&grant_type=authorization_code`;
+                const tokenResponse = await secureFetch(tokenUrl, { method: 'GET' }, 'none');
+                const tokenData = await tokenResponse.json();
+
+                if (!tokenResponse.ok || !tokenData.success) {
+                    showError('Login failed: Could not exchange token.', tokenData);
+                    return;
+                }
+
+                const { token, credentials } = tokenData.data;
+                sessionStorage.setItem('token', token);
+
+                // 3. Verify credentials by fetching profile
+                const profileUrl = '/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me';
+                const profileResponse = await secureFetch(
+                    profileUrl, 
+                    { method: 'GET' }, 
+                    'basic', 
+                    credentials.username, 
+                    credentials.password 
+                    // Credentials are used here and then discarded, not stored.
+                );
+                const profileData = await profileResponse.json();
+                
+                if (!profileResponse.ok || !profileData.success || !profileData.data[0]) {
+                    sessionStorage.removeItem('token'); // Clear invalid token
+                    showError('Login failed: We are unable to verify your account. Please try again.', profileData);
+                    return;
+                }
+
+                // 4. Success! Store user info
+                const user = profileData.data[0];
+                sessionStorage.setItem('firstName', user.firstName);
+                sessionStorage.setItem('lastName', user.lastName);
+                sessionStorage.setItem('avatarUrl', user.avatarUrl);
+                
+                // Show success and redirect
+                document.querySelector('#module-loading .loader').classList.add('hidden');
+                errorMessage.textContent = `Welcome, ${user.firstName} ${user.lastName}! Login successful.`;
+                errorMessage.className = 'styled-text-success';
+                errorDetails.classList.add('hidden');
+                errorContainer.classList.remove('hidden');
+                
+                setTimeout(() => {
+                    location.href = location.origin + location.pathname; // Redirect to base to trigger mainRouter
+                }, 2000);
+
+            } catch (error) {
+                console.error("Login Callback Error:", error);
+                showError('An unexpected technical error occurred.', error.message);
             }
         }
         
-        // --- MODULE: Admin (MOD.A) ---
+        // ---------------------------------------------------------------------
+        // F. MODULE: ADMIN (MOD.A)
+        // ---------------------------------------------------------------------
         
-        function getAdminModuleHTML() {
-            const currentUrl = getConfig('xpiBaseUrl');
-            return `
-                <div class="max-w-4xl mx-auto p-6 lg:p-10">
-                    <h1 class="text-3xl font-bold text-white mb-6">Admin Configuration</h1>
-                    <div class="styled-card">
-                        <div class="styled-card-header">
-                            <h2 class="text-xl font-semibold text-white">Global Configuration</h2>
-                        </div>
-                        <form id="admin-form">
-                            <div class="styled-card-body">
-                                <p class="text-sm text-gray-400 mb-4">These settings are stored in your browser's local storage.</p>
-                                <div>
-                                    <label for="xpiBaseUrl" class="styled-input-label">XPI Base URL</label>
-                                    <input type="url" id="xpiBaseUrl" name="xpiBaseUrl" class="styled-input" value="${currentUrl}">
-                                </div>
-                            </div>
-                            <div class="styled-card-footer text-right">
-                                <button type="submit" class="styled-btn-primary">Save Configuration</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            `;
-        }
-
+        /**
+         * Initializes the Admin module form.
+         */
         function initAdminModule() {
-            document.getElementById('admin-form').addEventListener('submit', e => {
+            const form = document.getElementById('admin-config-form');
+            const urlInput = document.getElementById('config-xpiBaseUrl');
+            
+            // Load current config
+            urlInput.value = getGlobalConfig('xpiBaseUrl');
+            
+            form.addEventListener('submit', (e) => {
                 e.preventDefault();
-                const newUrl = document.getElementById('xpiBaseUrl').value;
-                setConfig('xpiBaseUrl', newUrl);
+                setGlobalConfig('xpiBaseUrl', urlInput.value);
                 showToast('Configuration saved successfully!', 'success');
             });
         }
         
-        function showAdminModule() {
-            mainContent.innerHTML = getAdminModuleHTML();
-            applyTailwindStyles();
-            initAdminModule();
-        }
-
-        // --- MODULE: Login (MOD.B) ---
-
-        function getLoginModuleHTML(mode, errorData = null) {
-            if (mode === 'callback') {
-                return `
-                <div class="max-w-xl mx-auto p-6 lg:p-10 mt-10">
-                    <div class="styled-card text-center">
-                        <div class="styled-card-body p-10">
-                            <h2 class="text-2xl font-bold text-white mb-4">Authenticating...</h2>
-                            <p class="text-gray-400 mb-6">Please wait while we verify your login.</p>
-                            <svg class="animate-spin h-10 w-10 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                `;
-            }
-            if (mode === 'error') {
-                 return `
-                <div class="max-w-2xl mx-auto p-6 lg:p-10 mt-10">
-                    <div class="styled-card">
-                        <div class="styled-card-body p-10">
-                            <h2 class="text-2xl font-bold text-red-400 mb-4">Authentication Failed</h2>
-                            <p class="text-gray-400 mb-6">${errorData.message}</p>
-                            ${errorData.response ? `
-                            <label class="styled-input-label">API Response:</label>
-                            <pre class="w-full bg-gray-900 text-red-300 p-4 rounded-md overflow-auto text-xs border border-gray-700">${JSON.stringify(errorData.response, null, 2)}</pre>
-                            ` : ''}
-                            <div class="mt-6 text-center">
-                                <button id="start-over-btn" class="styled-btn-secondary">Start Over</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                `;
-            }
-            // Default: 'login' prompt
-            return `
-                <div class="max-w-xl mx-auto p-6 lg:p-10 mt-20">
-                    <div class="styled-card text-center">
-                        <div class="styled-card-header">
-                             <h2 class="text-2xl font-bold text-white">Welcome to XPI Portal</h2>
-                        </div>
-                        <div class="styled-card-body p-10">
-                            <p class="text-gray-400 mb-8">Please log in with your Wrike account to continue.</p>
-                            <button id="login-auth-btn" class="styled-btn-primary w-full text-lg">
-                                Login & Authenticate
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function initLoginModule(code) {
-            if (code) {
-                // Callback mode
-                handleOAuthCallback(code);
-            } else if (document.getElementById('start-over-btn')) {
-                // Error mode
-                document.getElementById('start-over-btn').addEventListener('click', () => {
-                    location.href = location.origin + location.pathname;
-                });
-            } else {
-                // Login prompt mode
-                document.getElementById('login-auth-btn').addEventListener('click', handleLoginRedirect);
-            }
-        }
+        // ---------------------------------------------------------------------
+        // G. MODULE: CAMPAIGN SUBMISSION (MOD.C)
+        // ---------------------------------------------------------------------
         
-        async function handleLoginRedirect() {
-            showLoading(true);
-            try {
-                const timestamp = Date.now().toString();
-                const random = Math.random().toString();
-                const hash = await sha256(timestamp + random);
-                const clientId = hash.slice(-7);
-                
-                sessionStorage.setItem('clientId', clientId);
-                
-                const xpiBaseUrl = getConfig('xpiBaseUrl');
-                const redirectUri = location.origin + location.pathname;
-                const authUrl = `${xpiBaseUrl}/?accountId=3128883&redirectUri=${encodeURIComponent(redirectUri)}&client_id=${clientId}`;
-                
-                location.href = authUrl; // Redirect
-            } catch (error) {
-                showLoading(false);
-                showToast('Failed to generate client ID. Please try again.', 'error');
-                console.error('SHA-256 Error:', error);
-            }
-        }
-
-        async function handleOAuthCallback(code) {
-            const clientId = sessionStorage.getItem('clientId');
-            
-            if (!code || !clientId) {
-                mainContent.innerHTML = getLoginModuleHTML('error', { message: 'Invalid session or callback code. Missing "code" or "client_id".' });
-                applyTailwindStyles();
-                initLoginModule(null); // Init 'start over' button
-                setTimeout(() => {
-                    location.href = location.origin + location.pathname;
-                }, 10000);
-                return;
-            }
-
-            const xpiBaseUrl = getConfig('xpiBaseUrl');
-            
-            try {
-                // 1. Exchange token
-                const tokenUrl = `${xpiBaseUrl}/api/v1/wrikexpi/token/exchange?code=${code}&client_id=${clientId}&grant_type=authorization_code`;
-                const tokenResponse = await secureFetch(tokenUrl);
-                
-                if (!tokenResponse.ok || !tokenResponse.data.success) {
-                    throw new Error('Token exchange failed', { cause: tokenResponse.data });
-                }
-
-                const { token, credentials } = tokenResponse.data.data;
-                sessionStorage.setItem('token', token);
-                
-                // 2. Verify with profile
-                const profileUrl = `${xpiBaseUrl}/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me`;
-                const basicAuth = btoa(`${credentials.username}:${credentials.password}`);
-                
-                const profileResponse = await secureFetch(profileUrl, {
-                    headers: { 'Authorization': `Basic ${basicAuth}` }
-                });
-
-                // --- IMPORTANT: Discard credentials immediately ---
-                // (They were only used for the secureFetch call)
-                
-                if (!profileResponse.ok || !profileResponse.data.success || !profileResponse.data.data.length > 0) {
-                     throw new Error('Login failed, we are unable to verify your account. Please try again.', { cause: profileResponse.data });
-                }
-                
-                // 3. Success
-                const profile = profileResponse.data.data[0];
-                const userName = `${profile.firstName} ${profile.lastName}`;
-                
-                sessionStorage.setItem('userName', userName);
-                sessionStorage.setItem('avatarUrl', profile.avatarUrl);
-                
-                updateProfileUI();
-                showToast(`Welcome, ${userName}! Login successful.`, 'success');
-                
-                // Clear query params and redirect
-                history.replaceState(null, '', location.pathname); 
-                location.hash = '#campaign';
-
-            } catch (error) {
-                sessionStorage.clear();
-                updateProfileUI();
-                mainContent.innerHTML = getLoginModuleHTML('error', { 
-                    message: error.message || 'An unknown error occurred.',
-                    response: error.cause || null
-                });
-                applyTailwindStyles();
-                initLoginModule(null); // Init 'start over' button
-            }
-        }
-        
-        function showLoginModule(code) {
-            const mode = code ? 'callback' : 'login';
-            mainContent.innerHTML = getLoginModuleHTML(mode);
-            applyTailwindStyles();
-            initLoginModule(code);
-        }
-        
-        // --- MODULE: Campaign Submission (MOD.C) ---
-        
-        function getCampaignModuleHTML() {
-            // Note: Default values are from the cURL example
-            return `
-            <div class="max-w-4xl mx-auto p-6 lg:p-10">
-                <h1 class="text-3xl font-bold text-white mb-6">Campaign Submission</h1>
-                <form id="campaign-form">
-                    <div class="styled-card">
-                        <div class="styled-card-body">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Hidden Fields -->
-                                <input type="hidden" name="type" value="Campaign Request">
-                                <input type="hidden" name="space" value="GRM-MYS-GMN">
-                                <input type="hidden" name="entity" value="Campaign">
-                                <input type="hidden" name="varientId" value="1">
-
-                                <!-- Form Fields -->
-                                <div>
-                                    <label for="campaignname" class="styled-input-label">Campaign Name</label>
-                                    <input type="text" name="campaignname" id="campaignname" class="styled-input" value="World Pinball Day 7000" required>
-                                </div>
-                                <div>
-                                    <label for="brand" class="styled-input-label">Brand</label>
-                                    <input type="text" name="brand" id="brand" class="styled-input" value="World Pinball">
-                                </div>
-                                <div>
-                                    <label for="client" class="styled-input-label">Client</label>
-                                    <select name="client" id="client" class="styled-select" required>
-                                        <option value="">Loading clients...</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="debtor" class="styled-input-label">Debtor</label>
-                                    <select name="debtor" id="debtor" class="styled-select" required>
-                                        <option value="">Loading debtors...</option>
-                                    </select>
-                                </div>
-                                 <div>
-                                    <label for="agency" class="styled-input-label">Agency</label>
-                                    <select name="agency" id="agency" class="styled-select" required>
-                                        <option value="">Loading agencies...</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="pod" class="styled-input-label">Pod</label>
-                                    <input type="text" name="pod" id="pod" class="styled-input" value="Pod 1A">
-                                </div>
-                                <div>
-                                    <label for="requestormarket" class="styled-input-label">Requestor Market</label>
-                                    <input type="text" name="requestormarket" id="requestormarket" class="styled-input" value="Singapore">
-                                </div>
-                                <div>
-                                    <label for="campaignobjective" class="styled-input-label">Campaign Objective</label>
-                                    <input type="text" name="campaignobjective" id="campaignobjective" class="styled-input" value="Upper Funnel / Awareness">
-                                </div>
-                                <div>
-                                    <label for="requestedstartdate" class="styled-input-label">Requested Start Date</label>
-                                    <input type="date" name="requestedstartdate" id="requestedstartdate" class="styled-input" value="2026-07-01" required>
-                                </div>
-                                <div>
-                                    <label for="campaignstartdate" class="styled-input-label">Campaign Start Date</label>
-                                    <input type="date" name="campaignstartdate" id="campaignstartdate" class="styled-input" value="2026-08-29" required>
-                                </div>
-                                 <div>
-                                    <label for="campaignenddate" class="styled-input-label">Campaign End Date</label>
-                                    <input type="date" name="campaignenddate" id="campaignenddate" class="styled-input" value="2026-10-29" required>
-                                </div>
-                                <div>
-                                    <label for="currency" class="styled-input-label">Currency</label>
-                                    <input type="text" name="currency" id="currency" class="styled-input" value="SGD">
-                                </div>
-                                 <div>
-                                    <label for="overallbudget" class="styled-input-label">Overall Budget</label>
-                                    <input type="number" name="overallbudget" id="overallbudget" class="styled-input" value="100">
-                                </div>
-                                <div>
-                                    <label for="optin" class="styled-input-label">Opt-in</label>
-                                    <select name="optin" id="optin" class="styled-select">
-                                        <option value="No">No</option>
-                                        <option value="Yes">Yes</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="porequired" class="styled-input-label">PO Required</label>
-                                    <select name="porequired" id="porequired" class="styled-select">
-                                        <option value="No">No</option>
-                                        <option value="Yes">Yes</option>
-                                    </select>
-                                </div>
-                                
-                                <!-- Tagging Interface -->
-                                <div class="md:col-span-2">
-                                    <label for="channels-input" class="styled-input-label">Selected Channels</label>
-                                    <div class="styled-input flex flex-wrap gap-2 p-2" id="channels-container">
-                                        <!-- Tags will be added here -->
-                                        <input type="text" id="channels-input" class="bg-transparent flex-1 focus:outline-none min-w-[100px]" placeholder="Type channel and press Enter...">
-                                    </div>
-                                </div>
-                                
-                            </div>
-                        </div>
-                        <div class="styled-card-footer flex justify-end">
-                            <button type="submit" id="campaign-submit-btn" class="styled-btn-primary">Create Campaign</button>
-                        </div>
-                    </div>
-                </form>
-                
-                <!-- Result Section -->
-                <div id="form-result-container" class="mt-6 hidden">
-                     <h3 class="text-lg font-medium text-white mb-2">Submission Result</h3>
-                     <pre id="form-result" class="w-full bg-gray-800 p-4 rounded-md overflow-auto text-sm border border-gray-700"></pre>
-                </div>
-            </div>
-            `;
-        }
-        
-        async function initCampaignModule() {
+        /**
+         * Initializes the Campaign Submission module.
+         */
+        function initCampaignModule() {
             const form = document.getElementById('campaign-form');
-            form.addEventListener('submit', handleCampaignSubmit);
-            
-            initTagInput();
-            
-            // Populate dropdowns
-            await populateDropdown('client', '/api/v1/wrikexpi/v1.0/value/clients-grm-mys');
-            await populateDropdown('debtor', '/api/v1/wrikexpi/v1.0/value/debtors-grm-mys');
-            await populateDropdown('agency', '/api/v1/wrikexpi/v1.0/value/agencies');
-            
-            // Set default values for dropdowns from cURL
-            document.getElementById('client').value = "Adidas Group";
-            document.getElementById('debtor').value = "Adidas Malaysia Sdn Bhd";
-            document.getElementById('agency').value = "Eightbar";
-            document.getElementById('optin').value = "No";
-            document.getElementById('porequired').value = "No";
-            
-            // Add initial tag
-            addTag("Twitter");
-        }
+            const submitBtn = document.getElementById('campaign-submit-btn');
+            const resultPre = document.getElementById('campaign-result');
+            const tagInput = document.getElementById('campaign-selectedchannels-input');
+            const tagContainer = document.getElementById('campaign-selectedchannels-tags');
 
-        async function populateDropdown(elementId, apiUrlPath) {
-            const selectEl = document.getElementById(elementId);
-            if (!selectEl) return;
-            
-            const token = sessionStorage.getItem('token');
-            if (!token) {
-                showToast('Authentication error. Cannot load form data.', 'error');
-                return;
-            }
-            
-            try {
-                const url = getConfig('xpiBaseUrl') + apiUrlPath;
-                const response = await secureFetch(url, {
-                    headers: { 'Authorization': `Bearer ${token}` }
+            let tags = ['Twitter']; // Default value
+
+            // --- Tag Input Logic ---
+            function updateTagsUI() {
+                tagContainer.innerHTML = '';
+                tags.forEach(tag => {
+                    const tagEl = document.createElement('span');
+                    tagEl.className = 'tag';
+                    tagEl.innerHTML = `${tag} <span class="tag-close" data-tag="${tag}">&times;</span>`;
+                    tagContainer.appendChild(tagEl);
                 });
-                
-                if (response.ok && response.data.value) {
-                    selectEl.innerHTML = '<option value="">-- Select an option --</option>'; // Clear 'Loading...'
-                    response.data.value.forEach(item => {
-                        const option = document.createElement('option');
-                        option.value = item.value;
-                        option.textContent = item.value;
-                        selectEl.appendChild(option);
-                    });
-                    
-                    // Add the default value from cURL if it's not in the list (as it's a dynamic list)
-                    // This is a bit of a hack, but ensures the form matches the cURL
-                    if (elementId === 'client' && !response.data.value.find(i => i.value === "Adidas Group")) {
-                         selectEl.insertAdjacentHTML('beforeend', '<option value="Adidas Group">Adidas Group</option>');
-                    }
-                    if (elementId === 'debtor' && !response.data.value.find(i => i.value === "Adidas Malaysia Sdn Bhd")) {
-                         selectEl.insertAdjacentHTML('beforeend', '<option value="Adidas Malaysia Sdn Bhd">Adidas Malaysia Sdn Bhd</option>');
-                    }
-                    if (elementId === 'agency' && !response.data.value.find(i => i.value === "Eightbar")) {
-                         selectEl.insertAdjacentHTML('beforeend', '<option value="Eightbar">Eightbar</option>');
-                    }
-                    
-                } else {
-                    selectEl.innerHTML = '<option value="">Error loading data</option>';
-                    throw new Error(`Failed to load data for ${elementId}`);
-                }
-            } catch (error) {
-                console.error(`Error populating ${elementId}:`, error);
-                showToast(`Error loading ${elementId} list.`, 'error');
-                selectEl.innerHTML = '<option value="">Error loading data</option>';
             }
-        }
-        
-        function initTagInput() {
-            const container = document.getElementById('channels-container');
-            const input = document.getElementById('channels-input');
-            
-            container.addEventListener('click', () => {
-                input.focus();
-            });
-            
-            input.addEventListener('keydown', e => {
+
+            tagInput.addEventListener('keydown', (e) => {
                 if (e.key === 'Enter' || e.key === ',') {
                     e.preventDefault();
-                    const value = input.value.trim();
-                    if (value) {
-                        addTag(value);
-                        input.value = '';
+                    const tag = e.target.value.trim();
+                    if (tag && !tags.includes(tag)) {
+                        tags.push(tag);
+                        updateTagsUI();
                     }
+                    e.target.value = '';
                 }
             });
-        }
-        
-        function addTag(value) {
-            const container = document.getElementById('channels-container');
-            const input = document.getElementById('channels-input');
-            
-            const tag = document.createElement('span');
-            tag.className = 'styled-tag'; // Placeholder
-            tag.innerHTML = `
-                ${value}
-                <button type="button" class="styled-tag-remove">
-                    <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-            `;
-            
-            tag.querySelector('button').addEventListener('click', () => {
-                tag.remove();
-            });
-            
-            container.insertBefore(tag, input);
-            applyTailwindStyles(); // Apply styles to the new tag
-        }
 
-        async function handleCampaignSubmit(e) {
-            e.preventDefault();
-            const submitBtn = document.getElementById('campaign-submit-btn');
-            const resultContainer = document.getElementById('form-result-container');
-            const resultEl = document.getElementById('form-result');
-            
-            submitBtn.disabled = true;
-            submitBtn.textContent = 'Submitting...';
-            resultContainer.classList.add('hidden');
-            
-            const token = sessionStorage.getItem('token');
-            if (!token) {
-                showToast('Authentication error. Please log in again.', 'error');
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Create Campaign';
-                return;
+            tagContainer.addEventListener('click', (e) => {
+                if (e.target.classList.contains('tag-close')) {
+                    const tag = e.target.dataset.tag;
+                    tags = tags.filter(t => t !== tag);
+                    updateTagsUI();
+                }
+            });
+            updateTagsUI(); // Initial render
+
+            // --- Dropdown Loading ---
+            async function loadDropdown(endpoint, selectId, valueKey = 'value') {
+                const select = document.getElementById(selectId);
+                try {
+                    const response = await secureFetch(`/api/v1/wrikexpi/v1.0/value/${endpoint}`, { method: 'GET' }, 'bearer');
+                    if (!response.ok) throw new Error(`Failed to load ${endpoint}`);
+                    
+                    const data = await response.json();
+                    if (data && data.value) {
+                        // Clear existing options (except the default one from HTML)
+                        const defaultOption = select.querySelector('option');
+                        select.innerHTML = '';
+                        if(defaultOption) select.appendChild(defaultOption);
+
+                        data.value.forEach(item => {
+                            const option = document.createElement('option');
+                            option.value = item[valueKey];
+                            option.textContent = item[valueKey];
+                            // Prevent duplicates
+                            if (option.value !== defaultOption?.value) {
+                                select.appendChild(option);
+                            }
+                        });
+                    }
+                } catch (error) {
+                    console.error(`Error loading dropdown ${selectId}:`, error);
+                    showToast(`Failed to load ${endpoint} data`, 'error');
+                }
             }
 
-            try {
-                const formData = new FormData(e.target);
+            loadDropdown('clients-grm-mys', 'campaign-client');
+            loadDropdown('debtors-grm-mys', 'campaign-debtor');
+            loadDropdown('agencies', 'campaign-agency');
+
+            // --- Form Submission ---
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+                resultPre.classList.add('hidden');
+                resultPre.className = 'styled-pre max-w-4xl mx-auto mt-6 hidden'; // Reset styles
+                
+                const formData = new FormData(form);
                 const payload = {
                     fields: {}
                 };
-                
-                // Get all form data
+
                 formData.forEach((value, key) => {
                     if (['type', 'space', 'entity', 'varientId'].includes(key)) {
-                        payload[key] = value;
+                        payload[key] = key === 'varientId' ? parseInt(value) : value;
                     } else {
                         payload.fields[key] = value;
                     }
                 });
                 
-                // Get tags
-                const tags = [];
-                document.querySelectorAll('#channels-container .styled-tag').forEach(tag => {
-                    tags.push(tag.textContent.trim());
-                });
+                // Add tags
                 payload.fields.selectedchannels = tags;
-
-                // Make API call
-                const url = getConfig('xpiBaseUrl') + '/api/v1/wrikexpi/campaign';
-                const response = await secureFetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(payload)
-                });
-                
-                resultEl.textContent = JSON.stringify(response.data, null, 2);
-                if (response.ok) {
-                    resultEl.style.color = '#86efac'; // green-300
-                    showToast('Campaign created successfully!', 'success');
-                } else {
-                    resultEl.style.color = '#f87171'; // red-400
-                    showToast('Failed to create campaign.', 'error');
-                }
-                
-            } catch (error) {
-                resultEl.style.color = '#f87171'; // red-400
-                resultEl.textContent = `Error: ${error.message}\n\nSee developer log for more details.`;
-                showToast('A network error occurred.', 'error');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtn.textContent = 'Create Campaign';
-                resultContainer.classList.remove('hidden');
-            }
-        }
-        
-        function showCampaignModule() {
-            mainContent.innerHTML = getCampaignModuleHTML();
-            applyTailwindStyles();
-            initCampaignModule();
-        }
-        
-        // --- MODULE: Master Data (Factory) ---
-        
-        /**
-         * Generates the HTML for a Master Data module.
-         * @param {string} slug - The masterDataSlug.
-         * @param {string[]} fields - The list of field names.
-         * @param {string} title - The module title.
-         */
-        function getMasterDataModuleHTML(slug, fields, title) {
-            const tableHeaders = fields.map(f => `<th scope="col" class="styled-table-th">${f}</th>`).join('');
-            
-            return `
-            <div class="max-w-7xl mx-auto p-6 lg:p-10">
-                <div class="flex justify-between items-center mb-6">
-                    <h1 class="text-3xl font-bold text-white">${title}</h1>
-                    <div class="space-x-3">
-                        <button id="md-load-${slug}" class="styled-btn-secondary">Load Data</button>
-                        <button id="md-create-${slug}" class="styled-btn-primary">Create New</button>
-                    </div>
-                </div>
-                <div class="styled-card">
-                    <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y styled-table-divider">
-                            <thead class="styled-table-header">
-                                <tr>
-                                    ${tableHeaders}
-                                    <th scope="col" class="styled-table-th text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="md-table-body-${slug}" class="styled-table-body-bg divide-y styled-table-divider">
-                                <tr><td colspan="${fields.length + 1}" class="styled-table-td text-center text-gray-500">Click "Load Data" to fetch records.</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            `;
-        }
-
-        /**
-         * Initializes a Master Data module (adds event listeners, etc.).
-         * @param {string} slug - The masterDataSlug.
-         * @param {string[]} fields - The list of field names.
-         * @param {string} title - The module title.
-         */
-        function initMasterDataModule(slug, fields, title) {
-            const loadBtn = document.getElementById(`md-load-${slug}`);
-            const createBtn = document.getElementById(`md-create-${slug}`);
-            const tableBody = document.getElementById(`md-table-body-${slug}`);
-            
-            const form = document.getElementById('master-data-form');
-            const formFields = document.getElementById('master-data-form-fields');
-            const modalTitle = document.getElementById('master-data-modal-title');
-            const saveBtn = document.getElementById('master-data-save-btn');
-            
-            const deleteModal = document.getElementById('master-data-delete-modal');
-            const deleteConfirmBtn = document.getElementById('master-data-delete-confirm-btn');
-            const deleteIdInput = document.getElementById('master-data-delete-id');
-            const deleteSlugInput = document.getElementById('master-data-delete-slug');
-
-            const xpiBaseUrl = getConfig('xpiBaseUrl');
-            const apiUrl = `${xpiBaseUrl}/api/v1/wrikexpi/v1.0/record/${slug}`;
-            const odataContext = `${xpiBaseUrl}/api/v1/wrikexpi/v1.0/${slug}`; // Per spec
-            
-            let currentData = []; // Cache data for editing
-
-            // Function to get auth token
-            const getToken = () => {
-                const token = sessionStorage.getItem('token');
-                if (!token) {
-                    showToast('Authentication error. Please log in.', 'error');
-                }
-                return token;
-            };
-
-            // Load Data
-            const loadData = async () => {
-                const token = getToken();
-                if (!token) return;
                 
                 try {
-                    const response = await secureFetch(apiUrl, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
+                    const response = await secureFetch('/api/v1/wrikexpi/campaign', {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    }, 'bearer');
                     
-                    if (response.ok && response.data.value) {
-                        currentData = response.data.value; // Cache it
-                        renderTable(currentData);
-                        showToast('Data loaded successfully.', 'success');
+                    const responseData = await response.json();
+                    
+                    resultPre.textContent = JSON.stringify(responseData, null, 2);
+                    if (response.ok) {
+                        resultPre.classList.add(STYLE_GUIDE['styled-text-success'].split(' ').join(' '));
                     } else {
-                        showToast(`Failed to load data: ${response.data.message || 'Unknown error'}`, 'error');
+                        resultPre.classList.add(STYLE_GUIDE['styled-text-error'].split(' ').join(' '));
                     }
+
                 } catch (error) {
-                    showToast('Network error while loading data.', 'error');
+                    resultPre.textContent = `Network Error: ${error.message}`;
+                    resultPre.classList.add(STYLE_GUIDE['styled-text-error'].split(' ').join(' '));
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Campaign';
+                    resultPre.classList.remove('hidden');
                 }
-            };
-
-            // Render Table
-            const renderTable = (data) => {
-                tableBody.innerHTML = '';
-                if (data.length === 0) {
-                    tableBody.innerHTML = `<tr><td colspan="${fields.length + 1}" class="styled-table-td text-center text-gray-500">No records found.</td></tr>`;
-                    applyTailwindStyles();
-                    return;
-                }
-                
-                data.forEach(record => {
-                    const tr = document.createElement('tr');
-                    let rowHTML = '';
-                    fields.forEach(field => {
-                        const value = record[field] !== null && record[field] !== undefined ? record[field] : 'N/A';
-                        rowHTML += `<td class="styled-table-td">${value}</td>`;
-                    });
-                    
-                    rowHTML += `
-                        <td class="styled-table-td text-right space-x-2">
-                            <button data-id="${record.id}" class="md-edit-btn styled-table-link">Edit</button>
-                            <button data-id="${record.id}" class="md-delete-btn text-red-400 hover:text-red-300 hover:underline">Delete</button>
-                        </td>
-                    `;
-                    tr.innerHTML = rowHTML;
-                    tableBody.appendChild(tr);
-                });
-                applyTailwindStyles();
-            };
-
-            // Build Modal Form
-            const buildForm = (record = null) => {
-                formFields.innerHTML = '';
-                let formHTML = '<input type="hidden" name="id" value="">';
-                
-                fields.forEach(field => {
-                    const isReadOnly = (field === 'id');
-                    const isRequired = (field === 'value');
-                    const value = record ? (record[field] || '') : '';
-                    
-                    formHTML += `
-                        <div>
-                            <label for="md-form-${field}" class="styled-input-label">${field} ${isRequired ? '*' : ''}</label>
-                            <input 
-                                type="text" 
-                                name="${field}" 
-                                id="md-form-${field}" 
-                                class="styled-input" 
-                                value="${value}"
-                                ${isReadOnly ? 'readonly' : ''}
-                                ${isRequired ? 'required' : ''}
-                            >
-                        </div>
-                    `;
-                });
-                formFields.innerHTML = formHTML;
-                
-                if (record && record.id) {
-                    formFields.querySelector('input[name="id"]').value = record.id;
-                }
-                
-                applyTailwindStyles();
-            };
-
-            // Create: Show Modal
-            createBtn.addEventListener('click', () => {
-                form.reset();
-                buildForm(null);
-                modalTitle.textContent = `Create New ${title} Record`;
-                form.dataset.mode = 'create';
-                form.dataset.slug = slug;
-                showModal('master-data-modal');
             });
-            
-            // Edit & Delete: Event Delegation
-            tableBody.addEventListener('click', e => {
-                const recordId = e.target.dataset.id;
-                if (!recordId) return;
+        }
+        
+        // ---------------------------------------------------------------------
+        // H. MODULE: MASTER DATA MANAGEMENT (MDM) FACTORY
+        // ---------------------------------------------------------------------
 
-                if (e.target.classList.contains('md-edit-btn')) {
-                    // Edit
-                    const record = currentData.find(r => r.id === recordId);
-                    if (record) {
-                        form.reset();
-                        buildForm(record);
-                        modalTitle.textContent = `Edit ${title} Record (ID: ${recordId})`;
-                        form.dataset.mode = 'edit';
-                        form.dataset.slug = slug;
-                        showModal('master-data-modal');
+        /**
+         * Factory function to initialize an MDM module.
+         * @param {object} config - The configuration object from MDM_CONFIG.
+         */
+        function initMdmModule(config) {
+            const container = document.getElementById(`module-${config.moduleId}`);
+            if (container.dataset.initialized) return; // Already initialized
+
+            // 1. Clone template
+            const template = document.getElementById('mdm-template').firstElementChild.cloneNode(true);
+            container.innerHTML = ''; // Clear
+            container.appendChild(template);
+            
+            // 2. Get elements from the *cloned* template
+            const titleEl = template.querySelector('.mdm-title');
+            const loadBtn = template.querySelector('.mdm-load-btn');
+            const createBtn = template.querySelector('.mdm-create-btn');
+            const tableHead = template.querySelector('.mdm-thead');
+            const tableBody = template.querySelector('.mdm-tbody');
+            const loader = template.querySelector('.mdm-loader');
+            
+            // 3. Get Modal elements (these are global)
+            const modal = document.getElementById('mdm-modal');
+            const modalTitle = document.getElementById('mdm-modal-title');
+            const modalForm = document.getElementById('mdm-modal-form');
+            const modalFormFields = document.getElementById('mdm-form-fields');
+            const modalSaveBtn = document.getElementById('mdm-form-save-btn');
+            const modalCloseBtn = document.getElementById('mdm-modal-close-btn');
+            const hiddenIdInput = document.getElementById('mdm-form-id');
+            
+            const deleteModal = document.getElementById('mdm-delete-modal');
+            const deleteMessage = document.getElementById('mdm-delete-message');
+            const deleteConfirmBtn = document.getElementById('mdm-delete-confirm-btn');
+            const deleteCancelBtn = document.getElementById('mdm-delete-cancel-btn');
+
+            // 4. Configure UI
+            titleEl.textContent = config.title;
+
+            // Create table header
+            const trHead = document.createElement('tr');
+            config.fields.forEach(fieldKey => {
+                const th = document.createElement('th');
+                th.className = 'p-3 font-semibold text-left'; // Apply style
+                th.textContent = config.fieldLabels[fieldKey] || fieldKey;
+                trHead.appendChild(th);
+            });
+            const thActions = document.createElement('th');
+            thActions.className = 'p-3 font-semibold text-right';
+            thActions.textContent = 'Actions';
+            trHead.appendChild(thActions);
+            tableHead.innerHTML = ''; // Clear
+            tableHead.appendChild(trHead);
+
+            // --- Helper Functions (bound to this module) ---
+
+            const showMdmModal = (visible) => {
+                if (visible) {
+                    mdmState.activeModuleId = config.moduleId; // Track active modal
+                    modal.classList.remove('hidden');
+                } else {
+                    if (mdmState.activeModuleId === config.moduleId) {
+                        modal.classList.add('hidden');
+                        mdmState.activeModuleId = null;
+                        mdmState.activeRecord = null;
                     }
-                } else if (e.target.classList.contains('md-delete-btn')) {
-                    // Delete
-                    deleteIdInput.value = recordId;
-                    deleteSlugInput.value = slug;
-                    showModal('master-data-delete-modal');
+                }
+            };
+            
+            const showDeleteModal = (visible) => {
+                if (visible) {
+                    mdmState.activeModuleId = config.moduleId;
+                    deleteModal.classList.remove('hidden');
+                } else {
+                    if (mdmState.activeModuleId === config.moduleId) {
+                        deleteModal.classList.add('hidden');
+                        mdmState.activeModuleId = null;
+                        mdmState.activeRecord = null;
+                    }
+                }
+            };
+
+            const populateForm = (record = {}) => {
+                modalFormFields.innerHTML = '';
+                hiddenIdInput.value = record.id || '';
+                
+                config.fields.forEach(fieldKey => {
+                    // Don't create an input for 'id' if it's readOnly
+                    if (fieldKey === 'id' && config.readOnlyFields.includes('id')) {
+                        return;
+                    }
+                    
+                    const div = document.createElement('div');
+                    const label = document.createElement('label');
+                    label.className = STYLE_GUIDE['styled-label'];
+                    label.textContent = config.fieldLabels[fieldKey] || fieldKey;
+                    label.htmlFor = `mdm-form-${fieldKey}`;
+                    
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = `mdm-form-${fieldKey}`;
+                    input.name = fieldKey;
+                    input.className = STYLE_GUIDE['styled-input'] + ' w-full';
+                    input.value = record[fieldKey] || '';
+                    
+                    if (config.readOnlyFields.includes(fieldKey)) {
+                        input.readOnly = true;
+                        input.classList.add('opacity-70', 'bg-gray-600');
+                    }
+                    if (config.requiredFields.includes(fieldKey)) {
+                        input.required = true;
+                    }
+
+                    div.appendChild(label);
+                    div.appendChild(input);
+                    modalFormFields.appendChild(div);
+                });
+            };
+
+            const loadData = async () => {
+                loader.classList.remove('hidden');
+                tableBody.innerHTML = '';
+                try {
+                    const url = `/api/v1/wrikexpi/v1.0/record/${config.slug}`;
+                    const response = await secureFetch(url, { method: 'GET' }, 'bearer');
+                    if (!response.ok) throw new Error('Failed to fetch data');
+                    
+                    const data = await response.json();
+                    
+                    if (!data.value || data.value.length === 0) {
+                        tableBody.innerHTML = `<tr><td colspan="${config.fields.length + 1}" class="text-center p-4">No records found.</td></tr>`;
+                        return;
+                    }
+                    
+                    data.value.forEach(record => {
+                        const tr = document.createElement('tr');
+                        tr.className = 'border-b border-gray-700 hover:bg-gray-700';
+                        
+                        // Add data cells
+                        config.fields.forEach(fieldKey => {
+                            const td = document.createElement('td');
+                            td.className = 'p-3';
+                            td.textContent = record[fieldKey] || 'N/A';
+                            tr.appendChild(td);
+                        });
+                        
+                        // Add actions cell
+                        const tdActions = document.createElement('td');
+                        tdActions.className = 'p-3 text-right space-x-2';
+                        
+                        const editBtn = document.createElement('button');
+                        editBtn.className = 'styled-icon-btn !p-1';
+                        editBtn.innerHTML = ICONS['edit'];
+                        editBtn.title = 'Edit';
+                        editBtn.dataset.record = JSON.stringify(record);
+                        editBtn.dataset.action = 'edit';
+                        
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'styled-icon-btn !p-1 !text-red-400 hover:!text-red-300';
+                        deleteBtn.innerHTML = ICONS['delete'];
+                        deleteBtn.title = 'Delete';
+                        deleteBtn.dataset.record = JSON.stringify(record);
+                        deleteBtn.dataset.action = 'delete';
+
+                        // Apply styles
+                        editBtn.className = editBtn.className.replace('styled-icon-btn', STYLE_GUIDE['styled-icon-btn']);
+                        deleteBtn.className = deleteBtn.className.replace('styled-icon-btn', STYLE_GUIDE['styled-icon-btn']);
+                        
+                        tdActions.appendChild(editBtn);
+                        tdActions.appendChild(deleteBtn);
+                        tr.appendChild(tdActions);
+                        
+                        tableBody.appendChild(tr);
+                    });
+
+                } catch (error) {
+                    console.error('MDM Load Error:', error);
+                    showToast(`Error loading ${config.title}: ${error.message}`, 'error');
+                    tableBody.innerHTML = `<tr><td colspan="${config.fields.length + 1}" class="text-center p-4 text-red-400">Failed to load data.</td></tr>`;
+                } finally {
+                    loader.classList.add('hidden');
+                }
+            };
+
+            // --- Event Listeners (Module specific) ---
+            
+            loadBtn.addEventListener('click', loadData);
+            
+            createBtn.addEventListener('click', () => {
+                mdmState.isEditMode = false;
+                mdmState.activeRecord = null;
+                modalTitle.textContent = `Create New ${config.title}`;
+                populateForm();
+                showMdmModal(true);
+            });
+
+            // Use event delegation for table actions
+            tableBody.addEventListener('click', (e) => {
+                const btn = e.target.closest('button');
+                if (!btn || !btn.dataset.action) return;
+                
+                const record = JSON.parse(btn.dataset.record);
+                mdmState.activeRecord = record; // Set state
+                
+                if (btn.dataset.action === 'edit') {
+                    mdmState.isEditMode = true;
+                    modalTitle.textContent = `Edit ${config.title} (ID: ${record.id})`;
+                    populateForm(record);
+                    showMdmModal(true);
+                } else if (btn.dataset.action === 'delete') {
+                    deleteMessage.textContent = `Are you sure you want to delete "${record.value || record.id}"?`;
+                    showDeleteModal(true);
                 }
             });
             
-            // Save (Create/Update)
-            form.addEventListener('submit', async e => {
-                e.preventDefault();
-                const token = getToken();
-                if (!token) return;
+            // --- Event Listeners (Global Modals) ---
+            // These are wired once per module, but check activeModuleId
+            
+            modalCloseBtn.addEventListener('click', () => showMdmModal(false));
+            deleteCancelBtn.addEventListener('click', () => showDeleteModal(false));
 
-                const mode = form.dataset.mode;
-                const currentSlug = form.dataset.slug;
-                if (currentSlug !== slug) return; // Wrong module
+            modalForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (mdmState.activeModuleId !== config.moduleId) return; // Only act if this module is active
+
+                modalSaveBtn.disabled = true;
                 
-                const formData = new FormData(form);
+                const formData = new FormData(modalForm);
                 const payload = {
-                    "@odata.context": odataContext
+                    '@odata.context': `${getGlobalConfig('xpiBaseUrl')}/api/v1/wrikexpi/v1.0/${config.slug}`
                 };
+                
                 formData.forEach((value, key) => {
                     payload[key] = value;
                 });
-                
-                const method = (mode === 'create') ? 'POST' : 'PATCH';
-                
-                saveBtn.disabled = true;
-                saveBtn.textContent = 'Saving...';
+
+                let url = `/api/v1/wrikexpi/v1.0/record/${config.slug}`;
+                let method = 'POST';
+
+                if (mdmState.isEditMode) {
+                    method = 'PATCH';
+                    payload.id = mdmState.activeRecord.id;
+                }
 
                 try {
-                    const response = await secureFetch(apiUrl, {
+                    const response = await secureFetch(url, {
                         method: method,
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${token}`
-                        },
                         body: JSON.stringify(payload)
-                    });
+                    }, 'bearer');
                     
-                    if (response.ok) {
-                        showToast(`Record ${mode === 'create' ? 'created' : 'updated'} successfully!`, 'success');
-                        hideModal('master-data-modal');
-                        loadData(); // Refresh table
-                    } else {
-                        showToast(`Failed to save: ${response.data.message || 'Unknown error'}`, 'error');
+                    if (!response.ok) {
+                        const errData = await response.json();
+                        throw new Error(errData.message || `Failed to ${method}`);
                     }
+                    
+                    showToast(`Record ${mdmState.isEditMode ? 'updated' : 'created'} successfully!`, 'success');
+                    showMdmModal(false);
+                    loadData(); // Refresh list
+
                 } catch (error) {
-                    showToast('Network error while saving.', 'error');
+                    console.error('MDM Save Error:', error);
+                    showToast(`Error: ${error.message}`, 'error');
                 } finally {
-                    saveBtn.disabled = false;
-                    saveBtn.textContent = 'Save Record';
+                    modalSaveBtn.disabled = false;
                 }
             });
-            
-            // Delete Confirm
+
             deleteConfirmBtn.addEventListener('click', async () => {
-                const token = getToken();
-                if (!token) return;
-                
-                const idToDelete = deleteIdInput.value;
-                const slugToDelete = deleteSlugInput.value;
-                if (slugToDelete !== slug || !idToDelete) return;
+                if (mdmState.activeModuleId !== config.moduleId) return;
                 
                 deleteConfirmBtn.disabled = true;
-                deleteConfirmBtn.textContent = 'Deleting...';
+                const record = mdmState.activeRecord;
                 
                 try {
-                    const deleteUrl = `${apiUrl}/${idToDelete}`;
-                    const response = await secureFetch(deleteUrl, {
-                        method: 'DELETE',
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
+                    const url = `/api/v1/wrikexpi/v1.0/record/${config.slug}/${record.id}`;
+                    const response = await secureFetch(url, { method: 'DELETE' }, 'bearer');
                     
-                    if (response.ok) {
-                        showToast('Record deleted successfully!', 'success');
-                        hideModal('master-data-delete-modal');
-                        loadData(); // Refresh
-                    } else {
-                        showToast(`Failed to delete: ${response.data.message || 'Unknown error'}`, 'error');
+                    if (!response.ok) {
+                        const errData = await response.json();
+                        throw new Error(errData.message || 'Failed to delete record');
                     }
+                    
+                    showToast('Record deleted successfully!', 'success');
+                    showDeleteModal(false);
+                    loadData(); // Refresh list
+
                 } catch (error) {
-                    showToast('Network error while deleting.', 'error');
+                    console.error('MDM Delete Error:', error);
+                    showToast(`Error: ${error.message}`, 'error');
                 } finally {
                     deleteConfirmBtn.disabled = false;
-                    deleteConfirmBtn.textContent = 'Delete';
                 }
             });
 
-            // Initial Load
-            loadBtn.addEventListener('click', loadData);
-        }
-        
-        /**
-         * Generic function to show a master data module.
-         */
-        function showMasterDataModule(slug, fields, title) {
-            mainContent.innerHTML = getMasterDataModuleHTML(slug, fields, title);
-            applyTailwindStyles();
-            initMasterDataModule(slug, fields, title);
+            container.dataset.initialized = true;
         }
 
-        // --- GLOBAL INITIALIZATION ---
+
+        // ---------------------------------------------------------------------
+        // I. APPLICATION INITIALIZATION
+        // ---------------------------------------------------------------------
         
         document.addEventListener('DOMContentLoaded', () => {
-            // 1. Apply styles
-            applyTailwindStyles();
+            // 1. Apply dynamic styles FIRST
+            initTailwindPlaceholders();
             
-            // 2. Build static UI
-            buildNav();
-            updateProfileUI(); // Check auth state
+            // 2. Inject all SVGs
+            initSvgIcons();
             
-            // 3. Add global event listeners
-            document.getElementById('nav-toggle').addEventListener('click', toggleNav);
-            document.getElementById('logout-link').addEventListener('click', (e) => {
-                e.preventDefault();
-                logout();
-            });
+            // 3. Setup core systems
+            initGlobalConfig();
+            initNavigation();
+            initDevTool();
             
-            // Dev Tool Listeners
-            document.getElementById('dev-tool-toggle').addEventListener('click', () => {
-                renderDevToolLogs();
-                showModal('dev-tool-modal');
-            });
-            document.getElementById('purge-logs-btn').addEventListener('click', () => {
-                localStorage.removeItem('apiLogs');
-                renderDevToolLogs();
-                showToast('API logs cleared.', 'info');
-            });
-            document.getElementById('dev-tool-modal').addEventListener('click', e => {
-                // Payload link delegation
-                if (e.target.dataset.payloadType) {
-                    e.preventDefault();
-                    showPayload(e.target.dataset.payloadType, parseInt(e.target.dataset.logIndex));
-                }
-            });
+            // 4. Init static modules
+            initAdminModule();
+            initCampaignModule();
+            // Note: Login module is initialized by the router
+            // Note: MDM modules are initialized lazily by the router
             
-            // Global Modal Close Listeners
-            document.querySelectorAll('[data-modal-close]').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    hideModal(btn.dataset.modalClose);
-                });
-            });
-            
-            // 4. Start router
-            window.addEventListener('hashchange', router);
-            router(); // Initial page load
+            // 5. Start the router
+            mainRouter();
+            window.addEventListener('hashchange', mainRouter);
         });
 
     </script>
