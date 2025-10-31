@@ -6,17 +6,17 @@
     <title>XPI Portal</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Crypto-JS CDN for SHA-256 -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
-    <!-- Google Font: Inter -->
+    <!-- Inter Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
     <style>
-        /* Custom styles */
+        /* Base styling */
         body {
             font-family: 'Inter', sans-serif;
+            background-color: #111827; /* bg-gray-900 */
+            color: #d1d5db; /* bg-gray-300 */
         }
         
         /* Custom scrollbar for dark mode */
@@ -25,1302 +25,1351 @@
             height: 8px;
         }
         ::-webkit-scrollbar-track {
-            background: #1f2937; /* gray-800 */
+            background: #1f2937; /* bg-gray-800 */
         }
         ::-webkit-scrollbar-thumb {
-            background: #4b5563; /* gray-600 */
+            background: #4b5563; /* bg-gray-600 */
             border-radius: 4px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #6b7280; /* gray-500 */
+            background: #6b7280; /* bg-gray-500 */
         }
 
-        /* Hide modules by default */
-        .module-container {
-            display: none;
+        /* Form elements dark theme */
+        .form-input {
+            @apply w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500;
+        }
+        .form-select {
+            @apply w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded-md shadow-sm text-gray-200 placeholder-gray-400 focus:ring-blue-500 focus:border-blue-500;
+        }
+        .form-label {
+            @apply block mb-2 text-sm font-medium text-gray-300;
+        }
+        .btn {
+            @apply px-4 py-2 font-medium rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 transition duration-150 ease-in-out;
+        }
+        .btn-primary {
+            @apply bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500;
+        }
+        .btn-secondary {
+            @apply bg-gray-600 text-gray-100 hover:bg-gray-700 focus:ring-gray-500;
+        }
+        .btn-danger {
+            @apply bg-red-600 text-white hover:bg-red-700 focus:ring-red-500;
+        }
+        .btn-icon {
+            @apply p-2 rounded-full text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500;
+        }
+        
+        /* Page transition spinner */
+        #page-loader {
+            @apply fixed inset-0 z-50 flex items-center justify-center bg-gray-900 bg-opacity-75;
+        }
+        .spinner {
+            @apply w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin;
+        }
+
+        /* Toast notifications */
+        #toast-container {
+            @apply fixed top-5 right-5 z-50 w-full max-w-sm;
+        }
+        .toast {
+            @apply w-full p-4 mb-4 rounded-lg shadow-lg text-white flex items-center;
+        }
+        .toast-success { @apply bg-green-600; }
+        .toast-error { @apply bg-red-600; }
+        .toast-info { @apply bg-blue-600; }
+
+        /* Modal styles */
+        .modal {
+            @apply fixed inset-0 z-40 bg-gray-900 bg-opacity-75 flex items-center justify-center;
+        }
+        .modal-content {
+            @apply bg-gray-800 rounded-lg shadow-xl max-h-[90vh] flex flex-col;
+        }
+        .modal-header {
+            @apply p-5 border-b border-gray-700 flex justify-between items-center;
+        }
+        .modal-title {
+            @apply text-xl font-semibold text-white;
+        }
+        .modal-body {
+            @apply p-6 overflow-y-auto;
+        }
+        .modal-footer {
+            @apply p-5 border-t border-gray-700 bg-gray-800 rounded-b-lg flex justify-end space-x-3;
         }
     </style>
 </head>
-<body class="bg-gray-900 text-gray-200 h-full overflow-hidden">
+<body class="h-full bg-gray-900 overflow-hidden">
 
-    <!-- Main Application Container -->
+    <!-- Global Page Loader -->
+    <div id="page-loader" class="hidden">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container"></div>
+
+    <!-- Main App Layout -->
     <div class="flex h-full">
-
+        
         <!-- Sidebar Navigation -->
-        <nav id="sidebar" class="bg-gray-800 w-64 h-full flex flex-col shadow-lg fixed z-30 transform -translate-x-full transition-transform duration-300 ease-in-out md:translate-x-0 md:relative">
-            <!-- Sidebar Header -->
-            <div class="flex items-center justify-between p-4 h-16 border-b border-gray-700">
-                <h1 class="text-xl font-bold text-white">XPI Portal</h1>
-                <!-- Mobile Toggle Button (placed here, but controls sidebar) -->
-                <button id="sidebar-toggle-close" class="md:hidden text-gray-400 hover:text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+        <nav id="sidebar" class="hidden md:flex md:flex-col md:w-64 bg-gray-800 shadow-lg transition-all duration-300 ease-in-out">
+            <div class="flex-1 flex flex-col pt-5 pb-4 overflow-y-auto">
+                <!-- Sidebar Header -->
+                <div class="flex items-center justify-between px-4">
+                    <span class="text-2xl font-bold text-white">XPI Portal</span>
+                    <button id="sidebar-toggle-btn" class="btn-icon md:hidden">
+                        <!-- Close icon -->
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                
+                <!-- Navigation Links -->
+                <div class="mt-5 flex-1 px-2 space-y-1" id="nav-links">
+                    <!-- User-defined modules will be injected here -->
+                </div>
             </div>
-
-            <!-- Navigation Links -->
-            <div id="nav-links" class="flex-1 overflow-y-auto p-4 space-y-2">
-                <!-- User-defined modules will be injected here -->
-            </div>
-
-            <!-- User Profile -->
-            <div id="user-profile" class="p-4 border-t border-gray-700 hidden">
-                <div class="flex items-center space-x-3">
-                    <img id="user-avatar" src="" alt="User Avatar" class="w-10 h-10 rounded-full bg-gray-600 object-cover">
-                    <div>
-                        <p id="user-name" class="font-semibold text-sm text-white">Loading...</p>
-                        <a href="#" id="logout-link" class="text-xs text-blue-400 hover:text-blue-300">Logout</a>
+            
+            <!-- User Profile Section -->
+            <div id="user-profile" class="flex-shrink-0 p-4 border-t border-gray-700">
+                <div class="flex items-center">
+                    <img id="user-avatar" class="h-10 w-10 rounded-full" src="https://placehold.co/40x40/555/FFF?text=X" alt="User Avatar">
+                    <div class="ml-3">
+                        <p id="user-name" class="text-sm font-medium text-white">Guest User</p>
+                        <a href="#" id="logout-link" class="text-xs font-medium text-blue-400 hover:text-blue-300">Logout</a>
                     </div>
                 </div>
             </div>
         </nav>
 
         <!-- Main Content Area -->
-        <main id="main-content" class="flex-1 flex flex-col h-full overflow-hidden">
-            <!-- Top Bar (for mobile toggle) -->
-            <header class="bg-gray-800 shadow-md h-16 flex items-center justify-between p-4 md:hidden">
-                 <button id="sidebar-toggle-open" class="text-gray-400 hover:text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-                </button>
-                <h1 class="text-xl font-bold text-white md:hidden">XPI Portal</h1>
-                <div></div> <!-- Spacer -->
-            </header>
-            
-            <!-- Module Content -->
-            <div class="flex-1 overflow-y-auto p-6 md:p-10">
-
-                <!-- A. Admin Module -->
-                <div id="module-admin" class="module-container">
-                    <h2 class="text-3xl font-bold text-white mb-6">Admin Configuration</h2>
-                    <div class="max-w-xl bg-gray-800 p-6 rounded-lg shadow-xl">
-                        <form id="admin-form">
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="xpiBaseUrl" class="block text-sm font-medium text-gray-300">XPI Base URL</label>
-                                    <input type="text" id="xpiBaseUrl" name="xpiBaseUrl" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500">
-                                </div>
-                            </div>
-                            <div class="mt-6">
-                                <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-900">
-                                    Save Configuration
-                                </button>
-                            </div>
-                        </form>
-                    </div>
+        <main class="flex-1 overflow-y-auto relative">
+            <!-- Mobile Header -->
+            <div class="md:hidden sticky top-0 bg-gray-800 z-10 shadow-md">
+                <div class="flex items-center justify-between px-4 py-3">
+                     <span class="text-2xl font-bold text-white">XPI Portal</span>
+                    <button id="mobile-menu-btn" class="btn-icon">
+                        <!-- Menu icon -->
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                    </button>
                 </div>
+            </div>
 
-                <!-- B. Login Module -->
-                <div id="module-login" class="module-container">
-                    <div class="max-w-md mx-auto mt-10">
-                        <div class="bg-gray-800 p-8 rounded-lg shadow-xl text-center">
-                            <!-- Auth Mode -->
-                            <div id="login-auth-mode">
-                                <h2 class="text-2xl font-bold text-white mb-6">XPI Portal Login</h2>
-                                <button id="login-button" class="w-full py-3 px-4 font-semibold rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-900 transition duration-150 ease-in-out">
-                                    Login & Authenticate
-                                </button>
+            <!-- Module Container -->
+            <div class="p-4 md:p-8" id="module-container">
+
+                <!-- ===== MODULE: Login (MOD.B) ===== -->
+                <div id="module-login" class="module hidden max-w-lg mx-auto">
+                    <!-- Mode 1: Authentication -->
+                    <div id="login-auth-mode">
+                        <div class="bg-gray-800 shadow-xl rounded-lg p-8 text-center">
+                            <h2 class="text-2xl font-bold text-white mb-6">Welcome to XPI Portal</h2>
+                            <p class="text-gray-400 mb-8">Please login to continue.</p>
+                            <button id="login-auth-btn" class="btn btn-primary w-full text-lg">
+                                Login & Authenticate
+                            </button>
+                        </div>
+                    </div>
+                    <!-- Mode 2: OAuth Callback -->
+                    <div id="login-callback-mode">
+                        <div class="bg-gray-800 shadow-xl rounded-lg p-8">
+                            <div id="login-callback-loading" class="text-center">
+                                <div class="spinner mx-auto mb-4"></div>
+                                <h3 class="text-xl font-semibold text-white">Authenticating...</h3>
+                                <p class="text-gray-400">Please wait while we verify your credentials.</p>
                             </div>
-                            <!-- Callback Mode -->
-                            <div id="login-callback-mode" class="hidden">
-                                <div class="flex justify-center items-center mb-4">
-                                    <svg class="animate-spin -ml-1 mr-3 h-8 w-8 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                    </svg>
-                                    <p class="text-lg text-white">Authenticating... Please wait.</p>
-                                </div>
+                            <div id="login-callback-error" class="hidden">
+                                <h3 class="text-xl font-semibold text-red-500 mb-4">Authentication Failed</h3>
+                                <p id="login-error-message" class="text-gray-300 mb-4"></p>
+                                <pre id="login-error-details" class="bg-gray-900 text-red-400 rounded-md p-4 max-h-60 overflow-auto text-sm"></pre>
+                                <button id="login-start-over-btn" class="btn btn-secondary w-full mt-6">Start Over</button>
                             </div>
-                            <!-- Error/Result Display -->
-                            <div id="login-result" class="hidden mt-6 text-left">
-                                <p id="login-message" class="text-red-400"></p>
-                                <pre id="login-response-pre" class="mt-4 bg-gray-900 text-red-300 p-4 rounded-md overflow-x-auto text-sm"></pre>
-                                <button id="login-start-over" class="hidden w-full mt-6 py-2 px-4 font-semibold rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 focus:ring-offset-gray-900">
-                                    Start Over
-                                </button>
+                            <div id="login-callback-success" class="hidden text-center">
+                                <h3 class="text-xl font-semibold text-green-500 mb-4">Login Successful!</h3>
+                                <p id="login-success-message" class="text-gray-300 mb-4"></p>
+                                <p class="text-gray-400">Redirecting you to the portal...</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- C. Campaign Submission Module -->
-                <div id="module-campaign-submission" class="module-container">
-                    <h2 class="text-3xl font-bold text-white mb-6">Campaign Submission</h2>
-                    <form id="campaign-form" class="max-w-4xl bg-gray-800 p-6 md:p-8 rounded-lg shadow-xl">
-                        <!-- Hidden Fields -->
-                        <input type="hidden" name="type" value="Campaign Request">
-                        <input type="hidden" name="space" value="GRM-MYS-GMN">
-                        <input type="hidden" name="entity" value="Campaign">
-                        <input type="hidden" name="varientId" value="1">
-
-                        <!-- Form Grid -->
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Left Column -->
-                            <div class="space-y-4">
+                <!-- ===== MODULE: Admin (MOD.A) ===== -->
+                <div id="module-admin" class="module hidden max-w-2xl mx-auto">
+                    <div class="bg-gray-800 shadow-xl rounded-lg">
+                        <div class="p-6 border-b border-gray-700">
+                            <h2 class="text-2xl font-bold text-white">Admin Configuration</h2>
+                        </div>
+                        <div class="p-6">
+                            <form id="admin-form">
                                 <div>
-                                    <label for="campaignname" class="block text-sm font-medium text-gray-300">Campaign Name</label>
-                                    <input type="text" name="campaignname" id="campaignname" value="World Pinball Day 7000" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500" required>
+                                    <label for="admin-xpiBaseUrl" class="form-label">XPI Base URL</label>
+                                    <input type="url" id="admin-xpiBaseUrl" class="form-input" required>
+                                </div>
+                                <div class="mt-6">
+                                    <button type="submit" class="btn btn-primary">Save Configuration</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== MODULE: Campaign Submission (MOD.C) ===== -->
+                <div id="module-campaign-submission" class="module hidden max-w-4xl mx-auto">
+                    <div class="bg-gray-800 shadow-xl rounded-lg">
+                        <div class="p-6 border-b border-gray-700">
+                            <h2 class="text-2xl font-bold text-white">Campaign Submission</h2>
+                        </div>
+                        <form id="campaign-form" class_="p-6">
+                            <!-- Hidden Fields -->
+                            <input type="hidden" id="campaign-type" value="Campaign Request">
+                            <input type="hidden" id="campaign-space" value="GRM-MYS-GMN">
+                            <input type="hidden" id="campaign-entity" value="Campaign">
+                            <input type="hidden" id="campaign-varientId" value="1">
+                            
+                            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <!-- Editable Fields -->
+                                <div>
+                                    <label for="campaign-campaignname" class="form-label">Campaign Name</label>
+                                    <input type="text" id="campaign-campaignname" class="form-input" value="World Pinball Day 7000">
                                 </div>
                                 <div>
-                                    <label for="client" class="block text-sm font-medium text-gray-300">Client</label>
-                                    <select name="client" id="client" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500" required>
+                                    <label for="campaign-requestedstartdate" class="form-label">Requested Start Date</label>
+                                    <input type="date" id="campaign-requestedstartdate" class="form-input" value="2026-07-01">
+                                </div>
+                                <div>
+                                    <label for="campaign-campaignstartdate" class="form-label">Campaign Start Date</label>
+                                    <input type="date" id="campaign-campaignstartdate" class="form-input" value="2026-08-29">
+                                </div>
+                                <div>
+                                    <label for="campaign-campaignenddate" class="form-label">Campaign End Date</label>
+                                    <input type="date" id="campaign-campaignenddate" class="form-input" value="2026-10-29">
+                                </div>
+                                
+                                <div>
+                                    <label for="campaign-client" class="form-label">Client</label>
+                                    <select id="campaign-client" class="form-select">
                                         <option value="">Loading clients...</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label for="debtor" class="block text-sm font-medium text-gray-300">Debtor</label>
-                                    <select name="debtor" id="debtor" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500" required>
+                                    <label for="campaign-debtor" class="form-label">Debtor</label>
+                                    <select id="campaign-debtor" class="form-select">
                                         <option value="">Loading debtors...</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label for="agency" class="block text-sm font-medium text-gray-300">Agency</label>
-                                    <select name="agency" id="agency" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500" required>
+                                    <label for="campaign-agency" class="form-label">Agency</label>
+                                    <select id="campaign-agency" class="form-select">
                                         <option value="">Loading agencies...</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label for="brand" class="block text-sm font-medium text-gray-300">Brand</label>
-                                    <input type="text" name="brand" id="brand" value="World Pinball" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500" required>
+                                    <label for="campaign-brand" class="form-label">Brand</label>
+                                    <input type="text" id="campaign-brand" class="form-input" value="World Pinball">
                                 </div>
                                 <div>
-                                    <label for="pod" class="block text-sm font-medium text-gray-300">Pod</label>
-                                    <input type="text" name="pod" id="pod" value="Pod 1A" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500" required>
-                                </div>
-                                 <div>
-                                    <label for="campaignobjective" class="block text-sm font-medium text-gray-300">Campaign Objective</label>
-                                    <input type="text" name="campaignobjective" id="campaignobjective" value="Upper Funnel / Awareness" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500" required>
+                                    <label for="campaign-currency" class="form-label">Currency</label>
+                                    <input type="text" id="campaign-currency" class="form-input" value="SGD">
                                 </div>
                                 <div>
-                                    <label for="requestormarket" class="block text-sm font-medium text-gray-300">Requestor Market</label>
-                                    <input type="text" name="requestormarket" id="requestormarket" value="Singapore" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500" required>
+                                    <label for="campaign-pod" class="form-label">Pod</label>
+                                    <input type="text" id="campaign-pod" class="form-input" value="Pod 1A">
+                                </div>
+                                <div>
+                                    <label for="campaign-campaignobjective" class="form-label">Campaign Objective</label>
+                                    <input type="text" id="campaign-campaignobjective" class="form-input" value="Upper Funnel / Awareness">
+                                </div>
+                                <div>
+                                    <label for="campaign-requestormarket" class="form-label">Requestor Market</label>
+                                    <input type="text" id="campaign-requestormarket" class="form-input" value="Singapore">
+                                </div>
+                                <div>
+                                    <label for="campaign-optin" class="form-label">Opt-in</label>
+                                    <select id="campaign-optin" class="form-select">
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="campaign-porequired" class="form-label">PO Required</label>
+                                    <select id="campaign-porequired" class="form-select">
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label for="campaign-overallbudget" class="form-label">Overall Budget</label>
+                                    <input type="number" id="campaign-overallbudget" class="form-input" value="100">
+                                </div>
+                                <div>
+                                    <label for="campaign-selectedchannels" class="form-label">Selected Channels (comma-separated)</label>
+                                    <input type="text" id="campaign-selectedchannels" class="form-input" value="Twitter">
                                 </div>
                             </div>
                             
-                            <!-- Right Column -->
-                            <div class="space-y-4">
-                                <div>
-                                    <label for="requestedstartdate" class="block text-sm font-medium text-gray-300">Requested Start Date</label>
-                                    <input type="date" name="requestedstartdate" id="requestedstartdate" value="2026-07-01" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500" required>
-                                </div>
-                                <div>
-                                    <label for="campaignstartdate" class="block text-sm font-medium text-gray-300">Campaign Start Date</label>
-                                    <input type="date" name="campaignstartdate" id="campaignstartdate" value="2026-08-29" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500" required>
-                                </div>
-                                <div>
-                                    <label for="campaignenddate" class="block text-sm font-medium text-gray-300">Campaign End Date</label>
-                                    <input type="date" name="campaignenddate" id="campaignenddate" value="2026-10-29" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500" required>
-                                </div>
-                                <div>
-                                    <label for="currency" class="block text-sm font-medium text-gray-300">Currency</label>
-                                    <input type="text" name="currency" id="currency" value="SGD" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500" required>
-                                </div>
-                                <div>
-                                    <label for="overallbudget" class="block text-sm font-medium text-gray-300">Overall Budget</label>
-                                    <input type="number" name="overallbudget" id="overallbudget" value="100" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500" required>
-                                </div>
-                                <div>
-                                    <label for="optin" class="block text-sm font-medium text-gray-300">Opt-in</label>
-                                    <select name="optin" id="optin" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500" required>
-                                        <option value="No">No</option>
-                                        <option value="Yes">Yes</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="porequired" class="block text-sm font-medium text-gray-300">PO Required</label>
-                                    <select name="porequired" id="porequired" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500" required>
-                                        <option value="No">No</option>
-                                        <option value="Yes">Yes</option>
-                                    </select>
-                                </div>
-                                <div>
-                                    <label for="selectedchannels" class="block text-sm font-medium text-gray-300">Selected Channels (comma-separated)</label>
-                                    <input type="text" name="selectedchannels" id="selectedchannels" value="Twitter" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500" required>
-                                </div>
+                            <div class="p-6 border-t border-gray-700">
+                                <button type="submit" id="campaign-submit-btn" class="btn btn-primary">
+                                    Submit Campaign
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <!-- Result Section -->
+                        <div id="campaign-result" class="hidden p-6">
+                            <h3 class="text-lg font-medium text-white mb-2">Submission Result</h3>
+                            <pre id="campaign-result-pre" class="bg-gray-900 rounded-md p-4 max-h-96 overflow-auto text-sm"></pre>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== MODULE: Master Data (Template) ===== -->
+                <!-- This will be used for Demo Client and XPI Field Mapping -->
+                <div id="module-master-data" class="module hidden">
+                    <div class="bg-gray-800 shadow-xl rounded-lg">
+                        <div class="p-6 border-b border-gray-700 flex justify-between items-center">
+                            <h2 id="master-data-title" class="text-2xl font-bold text-white">Master Data</h2>
+                            <div class="space-x-2">
+                                <button id="master-data-load-btn" class="btn btn-secondary">
+                                    <span class="flex items-center">
+                                        <!-- Refresh Icon -->
+                                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m-15.357-2a8.001 8.001 0 0015.357 2m0 0H15"></path></svg>
+                                        Load Data
+                                    </span>
+                                </button>
+                                <button id="master-data-create-btn" class="btn btn-primary">
+                                    Create New
+                                </button>
                             </div>
                         </div>
-
-                        <!-- Submission Button -->
-                        <div class="mt-8 pt-6 border-t border-gray-700">
-                            <button type="submit" id="campaign-submit-button" class="w-full md:w-auto inline-flex justify-center py-2 px-6 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-900">
-                                Submit Campaign
-                            </button>
+                        
+                        <!-- Data Table -->
+                        <div class="p-6">
+                            <div id="master-data-loader" class="text-center py-10 hidden">
+                                <div class="spinner mx-auto"></div>
+                                <p class="mt-2 text-gray-400">Loading records...</p>
+                            </div>
+                            <div id="master-data-table-container" class="overflow-x-auto rounded-lg border border-gray-700">
+                                <table class="min-w-full divide-y divide-gray-700">
+                                    <thead class="bg-gray-700">
+                                        <tr id="master-data-table-head">
+                                            <!-- Headers generated by JS -->
+                                        </tr>
+                                    </thead>
+                                    <tbody id="master-data-table-body" class="divide-y divide-gray-700">
+                                        <!-- Rows generated by JS -->
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </form>
-
-                    <!-- Result Display -->
-                    <div id="campaign-result-container" class="hidden mt-6">
-                        <h3 class="text-xl font-semibold text-white mb-2">Submission Result</h3>
-                        <pre id="campaign-result-pre" class="bg-gray-800 p-4 rounded-md overflow-x-auto text-sm"></pre>
                     </div>
                 </div>
 
-                <!-- D. Demo Client Module -->
-                <div id="module-demo-client" class="module-container">
-                    <h2 class="text-3xl font-bold text-white mb-6">Master Data: Demo Client</h2>
-                    <div id="master-data-container-demo-client">
-                        <!-- Master Data Template will be initialized here -->
-                    </div>
-                </div>
+            </div> <!-- /#module-container -->
 
-                <!-- E. XPI Field Mapping Module -->
-                <div id="module-xpi-mapping" class="module-container">
-                    <h2 class="text-3xl font-bold text-white mb-6">Master Data: XPI Field Mapping</h2>
-                    <div id="master-data-container-xpi-mapping">
-                         <!-- Master Data Template will be initialized here -->
+            <!-- Developer Tool Toggle Button -->
+            <button id="dev-tool-toggle" class="fixed bottom-5 right-5 btn-icon bg-gray-700 text-blue-300 hover:bg-gray-600 focus:ring-blue-500 z-30 shadow-lg">
+                <!-- Hat Icon -->
+                <svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm6.34 15.29c-.74-1.88-2.3-3.39-4.29-4.04 1.35-.78 2.29-2.2 2.29-3.88 0-2.38-1.92-4.3-4.3-4.3S7.7 7.99 7.7 10.37c0 1.68.94 3.1 2.29 3.88-1.99.65-3.55 2.16-4.29 4.04A7.96 7.96 0 0 1 4 12c0-4.41 3.59-8 8-8s8 3.59 8 8c0 2.05-.78 3.9-2.05 5.29H18.34zM12 11.37c-1.8 0-3.3-1.4-3.3-3s1.5-3 3.3-3 3.3 1.4 3.3 3-1.5 3-3.3 3z"/></svg>
+            </button>
+
+        </main> <!-- /#main-content -->
+    </div> <!-- /#app-layout -->
+
+
+    <!-- ===== MODALS ===== -->
+
+    <!-- Master Data Create/Edit Modal -->
+    <div id="master-data-modal" class="modal hidden">
+        <div class="modal-content w-full max-w-2xl">
+            <form id="master-data-form">
+                <input type="hidden" id="master-data-id">
+                <input type="hidden" id="master-data-slug">
+                
+                <div class="modal-header">
+                    <h3 id="master-data-modal-title" class="modal-title">Record</h3>
+                    <button type="button" class="btn-icon modal-close-btn">
+                        <!-- Close icon -->
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                </div>
+                
+                <div class="modal-body">
+                    <!-- Generic form fields based on API spec -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="master-data-value" class="form-label">Value <span class="text-red-500">*</span></label>
+                            <input type="text" id="master-data-value" class="form-input" required>
+                        </div>
+                         <div>
+                            <label for="master-data-code" class="form-label">Code</label>
+                            <input type="text" id="master-data-code" class="form-input">
+                        </div>
+                        <div>
+                            <label for="master-data-fincode" class="form-label">FinCode</label>
+                            <input type="text" id="master-data-fincode" class="form-input">
+                        </div>
+                        <div>
+                            <label for="master-data-guid" class="form-label">GUID</label>
+                            <input type="text" id="master-data-guid" class="form-input">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label for="master-data-note" class="form-label">Note</label>
+                            <textarea id="master-data-note" class="form-input" rows="3"></textarea>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Generic Master Data UI Template (to be cloned) -->
-                <template id="master-data-template">
-                    <div class="bg-gray-800 p-6 rounded-lg shadow-xl">
-                        <div class="flex justify-between items-center mb-4">
-                            <button class="load-data-btn py-2 px-4 font-semibold rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-900">
-                                Load Data
-                            </button>
-                            <button class="create-new-btn py-2 px-4 font-semibold rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 focus:ring-offset-gray-900">
-                                Create New
-                            </button>
-                        </div>
-                        <div class="loading-spinner-container text-center p-6 hidden">
-                            <svg class="animate-spin h-8 w-8 text-white mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                        </div>
-                        <div class="data-table-container overflow-x-auto">
-                            <!-- Table will be injected here -->
-                        </div>
-                    </div>
-                </template>
-
-            </div>
-        </main>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
+                    <button type="submit" id="master-data-save-btn" class="btn btn-primary">Save Changes</button>
+                </div>
+            </form>
+        </div>
     </div>
     
-    <!-- Developer Tool Toggle -->
-    <button id="dev-tool-toggle" class="fixed bottom-6 right-6 bg-purple-600 hover:bg-purple-700 text-white p-3 rounded-full shadow-lg z-40 transition-transform hover:scale-110">
-        <!-- Hat Icon -->
-        <svg class="w-6 h-6" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12 2C8.686 2 6 4.686 6 8C6 9.48 6.542 10.843 7.438 11.875C7.47 11.91 7.5 11.946 7.5 12V18.35C7.5 19.46 7.96 20.48 8.75 21.18C9.54 21.88 10.72 22.18 11.8 22.06C14.19 21.8 16.5 19.6 16.5 17V12C16.5 11.946 16.53 11.91 16.562 11.875C17.458 10.843 18 9.48 18 8C18 4.686 15.314 2 12 2ZM12 4C14.209 4 16 5.791 16 8C16 9.38 15.3 10.6 14.25 11.33C14.09 11.41 14 11.58 14 11.75V17C14 18.52 12.82 19.8 11.3 19.98C10.74 20.04 10.12 19.8 9.75 19.4C9.38 19 9.5 18.42 9.5 18.35V11.75C9.5 11.58 9.41 11.41 9.25 11.33C8.2 10.6 7.5 9.38 7.5 8C7.5 5.791 9.291 4 11.5 4H12Z"/>
-        </svg>
-    </button>
+    <!-- Master Data Delete Confirm Modal -->
+    <div id="delete-confirm-modal" class="modal hidden">
+        <div class="modal-content w-full max-w-md">
+            <input type="hidden" id="delete-confirm-id">
+            <input type="hidden" id="delete-confirm-slug">
+            
+            <div class="modal-header">
+                <h3 class="modal-title">Confirm Deletion</h3>
+            </div>
+            
+            <div class="modal-body">
+                <p class="text-gray-300">Are you sure you want to delete this record? This action cannot be undone.</p>
+            </div>
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary modal-close-btn">Cancel</button>
+                <button type="button" id="delete-confirm-btn" class="btn btn-danger">Delete</button>
+            </div>
+        </div>
+    </div>
     
-    <!-- Developer Tool Overlay -->
-    <div id="dev-tool-overlay" class="fixed inset-0 bg-black bg-opacity-70 z-40 flex items-center justify-center hidden backdrop-blur-sm">
-        <div class="bg-gray-800 w-[80vw] h-[80vh] rounded-lg shadow-2xl flex flex-col">
-            <!-- Header -->
-            <div class="flex justify-between items-center p-4 border-b border-gray-700">
-                <h3 class="text-xl font-semibold text-white">Developer Tool: API Logs</h3>
+    <!-- Developer Tool Modal -->
+    <div id="dev-tool-modal" class="modal hidden">
+        <div class="modal-content w-[80vw] h-[80vh]">
+            <div class="modal-header">
+                <h3 class="modal-title">Developer Tool: API Logs</h3>
                 <div>
-                    <button id="dev-tool-purge" class_="text-gray-400 hover:text-red-500 mr-4 p-2 rounded-full hover:bg-gray-700">
+                    <button id="dev-tool-purge-btn" class="btn-icon" title="Purge Logs">
                         <!-- Rubbish Bin Icon -->
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                     </button>
-                    <button id="dev-tool-close" class="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-700">
-                        <!-- Close Icon -->
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    <button type="button" class="btn-icon modal-close-btn ml-2" title="Close">
+                        <!-- Close icon -->
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                     </button>
                 </div>
             </div>
-            <!-- Log Table -->
-            <div class="flex-1 overflow-auto p-4">
-                <table class="min-w-full text-sm text-left text-gray-300">
-                    <thead class="bg-gray-700 text-xs text-gray-300 uppercase sticky top-0">
-                        <tr>
-                            <th scope="col" class="py-3 px-4">Timestamp</th>
-                            <th scope="col" class="py-3 px-4">Status</th>
-                            <th scope="col" class="py-3 px-4">Method</th>
-                            <th scope="col" class="py-3 px-4">URL</th>
-                            <th scope="col" class="py-3 px-4">Request</th>
-                            <th scope="col" class="py-3 px-4">Response</th>
-                        </tr>
-                    </thead>
-                    <tbody id="dev-tool-log-body" class="divide-y divide-gray-700">
-                        <!-- Logs will be injected here -->
-                    </tbody>
-                </table>
-            </div>
-            <!-- Pagination (Mock) -->
-            <div class="p-4 border-t border-gray-700 text-xs text-gray-400 text-center">
-                Pagination controls (if needed)
+            <div class="modal-body p-0">
+                <div class="overflow-auto h-full">
+                    <table class="min-w-full divide-y divide-gray-700">
+                        <thead class="bg-gray-700 sticky top-0">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Timestamp</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Method</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">URL</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Request</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Response</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dev-tool-log-body" class="divide-y divide-gray-700">
+                            <!-- Logs will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
     
-    <!-- Generic Payload Modal -->
-    <div id="payload-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center hidden backdrop-blur-sm">
-        <div class="bg-gray-800 w-11/12 max-w-2xl max-h-[80vh] rounded-lg shadow-2xl flex flex-col">
-            <div class="flex justify-between items-center p-4 border-b border-gray-700">
-                <h3 id="payload-modal-title" class="text-lg font-semibold text-white">Payload</h3>
-                <button id="payload-modal-close" class="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-700">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+    <!-- Payload Viewer Modal -->
+    <div id="payload-viewer-modal" class="modal hidden" style="z-index: 50;"> <!-- Higher z-index -->
+        <div class="modal-content w-full max-w-3xl">
+            <div class="modal-header">
+                <h3 id="payload-viewer-title" class="modal-title">Payload</h3>
+                <button type="button" class="btn-icon modal-close-btn">
+                    <!-- Close icon -->
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
                 </button>
             </div>
-            <div class="flex-1 overflow-auto p-4">
-                <pre id="payload-modal-content" class="text-sm text-gray-200"></pre>
+            <div class="modal-body">
+                <pre id="payload-viewer-pre" class="bg-gray-900 text-gray-200 rounded-md p-4 max-h-[60vh] overflow-auto text-sm"></pre>
             </div>
         </div>
     </div>
 
-    <!-- Master Data Form Modal -->
-    <div id="master-data-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center hidden backdrop-blur-sm">
-        <div class="bg-gray-800 w-11/12 max-w-lg max-h-[90vh] rounded-lg shadow-2xl flex flex-col">
-            <div class="flex justify-between items-center p-4 border-b border-gray-700">
-                <h3 id="master-data-modal-title" class="text-lg font-semibold text-white">Master Data Record</h3>
-                <button id="master-data-modal-close" class="text-gray-400 hover:text-white p-2 rounded-full hover:bg-gray-700">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
-            </div>
-            <form id="master-data-form" class="flex-1 overflow-auto p-6 space-y-4">
-                <!-- Form content will be injected here -->
-            </form>
-            <div class="p-4 border-t border-gray-700 flex justify-end space-x-3">
-                 <button id="master-data-modal-cancel" type="button" class="py-2 px-4 font-semibold rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 focus:ring-offset-gray-900">
-                    Cancel
-                </button>
-                <button id="master-data-modal-save" type="submit" form="master-data-form" class="py-2 px-4 font-semibold rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 focus:ring-offset-gray-900">
-                    Save Record
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Delete Confirmation Modal -->
-    <div id="delete-confirm-modal" class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center hidden backdrop-blur-sm">
-        <div class="bg-gray-800 w-11/12 max-w-sm rounded-lg shadow-2xl p-6">
-            <h3 class="text-lg font-semibold text-white mb-2">Confirm Deletion</h3>
-            <p class="text-sm text-gray-300 mb-6">Are you sure you want to delete this record? This action cannot be undone.</p>
-            <div class="flex justify-end space-x-3">
-                <button id="delete-confirm-cancel" class="py-2 px-4 font-semibold rounded-md text-white bg-gray-600 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 focus:ring-offset-gray-900">
-                    Cancel
-                </button>
-                <button id="delete-confirm-delete" class="py-2 px-4 font-semibold rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 focus:ring-offset-gray-900">
-                    Delete
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Toast Notification -->
-    <div id="toast-notification" class="fixed top-6 right-6 bg-green-500 text-white py-3 px-5 rounded-lg shadow-lg z-50 transform translate-x-[150%] transition-transform duration-300 ease-in-out">
-        <span id="toast-message"></span>
-    </div>
-
-
-    <!-- Main Application Script -->
-    <script type(="module")>
-        // Module Configuration
+    <!-- JavaScript Application Logic -->
+    <script type="module">
+        // --- CONSTANTS & CONFIG ---
+        
         const MODULE_CONFIG = [
-            { name: "Admin", code: "MOD.A", desc: "Administrative Module", type: "Built-in", hash: "#admin" },
-            { name: "Login", code: "MOD.B", desc: "Login Module", type: "Built-in", hash: "#login" },
-            { name: "Campaign Submission", code: "MOD.C", desc: "Campaign Submission Module", type: "User-defined", hash: "#campaign-submission" },
-            { name: "Demo Client", code: "MAS.DemoCient", desc: "Master Data for Demo Client", type: "User-defined", hash: "#demo-client" },
-            { name: "XPI Field Mapping", code: "MAS.XPICFMapping", desc: "XPI Field Mapping", type: "User-defined", hash: "#xpi-mapping" },
+            { code: "MOD.A", name: "Admin", type: "Built-in", hash: "#admin" },
+            { code: "MOD.B", name: "Login", type: "Built-in", hash: "#login" },
+            { code: "MOD.C", name: "Campaign Submission", type: "User-defined", hash: "#campaign-submission" },
+            { code: "MAS.DemoCient", name: "Demo Client", type: "User-defined", hash: "#demo-client", slug: "demoxpiclients" },
+            { code: "MAS.XPICFMapping", name: "XPI Field Mapping", type: "User-defined", hash: "#xpi-field-mapping", slug: "xpicfmapping" },
         ];
         
-        const USER_DEFINED_MODULES = MODULE_CONFIG.filter(m => m.type === 'User-defined');
-
-        // --- DOM Elements ---
-        const dom = {
-            sidebar: document.getElementById('sidebar'),
-            sidebarToggleOpen: document.getElementById('sidebar-toggle-open'),
-            sidebarToggleClose: document.getElementById('sidebar-toggle-close'),
-            navLinks: document.getElementById('nav-links'),
-            userProfile: document.getElementById('user-profile'),
-            userAvatar: document.getElementById('user-avatar'),
-            userName: document.getElementById('user-name'),
-            logoutLink: document.getElementById('logout-link'),
-            mainContent: document.getElementById('main-content'),
-            modules: {
-                admin: document.getElementById('module-admin'),
-                login: document.getElementById('module-login'),
-                campaignSubmission: document.getElementById('module-campaign-submission'),
-                demoClient: document.getElementById('module-demo-client'),
-                xpiMapping: document.getElementById('module-xpi-mapping'),
-            },
-            login: {
-                authMode: document.getElementById('login-auth-mode'),
-                callbackMode: document.getElementById('login-callback-mode'),
-                loginButton: document.getElementById('login-button'),
-                resultContainer: document.getElementById('login-result'),
-                message: document.getElementById('login-message'),
-                responsePre: document.getElementById('login-response-pre'),
-                startOverButton: document.getElementById('login-start-over'),
-            },
-            admin: {
-                form: document.getElementById('admin-form'),
-                xpiBaseUrl: document.getElementById('xpiBaseUrl'),
-            },
-            campaign: {
-                form: document.getElementById('campaign-form'),
-                submitButton: document.getElementById('campaign-submit-button'),
-                resultContainer: document.getElementById('campaign-result-container'),
-                resultPre: document.getElementById('campaign-result-pre'),
-                clientSelect: document.getElementById('client'),
-                debtorSelect: document.getElementById('debtor'),
-                agencySelect: document.getElementById('agency'),
-            },
-            devTool: {
-                toggle: document.getElementById('dev-tool-toggle'),
-                overlay: document.getElementById('dev-tool-overlay'),
-                close: document.getElementById('dev-tool-close'),
-                purge: document.getElementById('dev-tool-purge'),
-                logBody: document.getElementById('dev-tool-log-body'),
-            },
-            payloadModal: {
-                modal: document.getElementById('payload-modal'),
-                title: document.getElementById('payload-modal-title'),
-                content: document.getElementById('payload-modal-content'),
-                close: document.getElementById('payload-modal-close'),
-            },
-            masterData: {
-                modal: document.getElementById('master-data-modal'),
-                title: document.getElementById('master-data-modal-title'),
-                form: document.getElementById('master-data-form'),
-                close: document.getElementById('master-data-modal-close'),
-                cancel: document.getElementById('master-data-modal-cancel'),
-                save: document.getElementById('master-data-modal-save'),
-                template: document.getElementById('master-data-template'),
-                demoClientContainer: document.getElementById('master-data-container-demo-client'),
-                xpiMappingContainer: document.getElementById('master-data-container-xpi-mapping'),
-            },
-            deleteModal: {
-                modal: document.getElementById('delete-confirm-modal'),
-                cancel: document.getElementById('delete-confirm-cancel'),
-                delete: document.getElementById('delete-confirm-delete'),
-            },
-            toast: {
-                notification: document.getElementById('toast-notification'),
-                message: document.getElementById('toast-message'),
-            }
-        };
-
-        // --- Storage & Config ---
-        const STORAGE_KEYS = {
-            CONFIG: 'xpiPortalConfig',
-            CLIENT_ID: 'xpiPortalClientId',
-            TOKEN: 'xpiPortalToken',
-            CREDENTIALS: 'xpiPortalCredentials',
-            USER_PROFILE: 'xpiPortalUserProfile',
-            API_LOGS: 'xpiPortalApiLogs',
-        };
-
         const DEFAULT_CONFIG = {
-            xpiBaseUrl: 'https://api.wrikexpi.groupm.com',
+            xpiBaseUrl: "https://api.wrikexpi.groupm.com"
         };
-
-        const getStorage = (key, defaultValue = null) => {
-            try {
-                const item = localStorage.getItem(key);
-                return item ? JSON.parse(item) : defaultValue;
-            } catch (e) {
-                console.error(`Error getting storage for key "${key}":`, e);
-                return defaultValue;
+        
+        // --- DOM ELEMENT REFERENCES ---
+        
+        const $ = (selector) => document.querySelector(selector);
+        const $$ = (selector) => document.querySelectorAll(selector);
+        
+        const dom = {
+            pageLoader: $("#page-loader"),
+            sidebar: $("#sidebar"),
+            mobileMenuBtn: $("#mobile-menu-btn"),
+            sidebarToggleBtn: $("#sidebar-toggle-btn"),
+            navLinks: $("#nav-links"),
+            userProfile: $("#user-profile"),
+            userAvatar: $("#user-avatar"),
+            userName: $("#user-name"),
+            logoutLink: $("#logout-link"),
+            moduleContainer: $("#module-container"),
+            toastContainer: $("#toast-container"),
+            devToolToggle: $("#dev-tool-toggle"),
+            // Modals
+            devToolModal: {
+                modal: $("#dev-tool-modal"),
+                logBody: $("#dev-tool-log-body"),
+                purgeBtn: $("#dev-tool-purge-btn"),
+            },
+            payloadViewerModal: {
+                modal: $("#payload-viewer-modal"),
+                title: $("#payload-viewer-title"),
+                pre: $("#payload-viewer-pre"),
+            },
+            masterDataModal: {
+                modal: $("#master-data-modal"),
+                form: $("#master-data-form"),
+                title: $("#master-data-modal-title"),
+                id: $("#master-data-id"),
+                slug: $("#master-data-slug"),
+                value: $("#master-data-value"),
+                code: $("#master-data-code"),
+                fincode: $("#master-data-fincode"),
+                guid: $("#master-data-guid"),
+                note: $("#master-data-note"),
+                saveBtn: $("#master-data-save-btn"),
+            },
+            deleteConfirmModal: {
+                modal: $("#delete-confirm-modal"),
+                id: $("#delete-confirm-id"),
+                slug: $("#delete-confirm-slug"),
+                confirmBtn: $("#delete-confirm-btn"),
+            },
+            // Modules
+            modules: {
+                login: {
+                    el: $("#module-login"),
+                    authMode: $("#login-auth-mode"),
+                    callbackMode: $("#login-callback-mode"),
+                    authBtn: $("#login-auth-btn"),
+                    loading: $("#login-callback-loading"),
+                    error: $("#login-callback-error"),
+                    errorMessage: $("#login-error-message"),
+                    errorDetails: $("#login-error-details"),
+                    startOverBtn: $("#login-start-over-btn"),
+                    success: $("#login-callback-success"),
+                    successMessage: $("#login-success-message"),
+                },
+                admin: {
+                    el: $("#module-admin"),
+                    form: $("#admin-form"),
+                    xpiBaseUrl: $("#admin-xpiBaseUrl"),
+                },
+                campaign: {
+                    el: $("#module-campaign-submission"),
+                    form: $("#campaign-form"),
+                    submitBtn: $("#campaign-submit-btn"),
+                    result: $("#campaign-result"),
+                    resultPre: $("#campaign-result-pre"),
+                    // Dropdowns
+                    client: $("#campaign-client"),
+                    debtor: $("#campaign-debtor"),
+                    agency: $("#campaign-agency"),
+                },
+                masterData: {
+                    el: $("#module-master-data"),
+                    title: $("#master-data-title"),
+                    loadBtn: $("#master-data-load-btn"),
+                    createBtn: $("#master-data-create-btn"),
+                    loader: $("#master-data-loader"),
+                    tableContainer: $("#master-data-table-container"),
+                    tableHead: $("#master-data-table-head"),
+                    tableBody: $("#master-data-table-body"),
+                },
             }
         };
 
-        const setStorage = (key, value) => {
-            try {
-                localStorage.setItem(key, JSON.stringify(value));
-            } catch (e) {
-                console.error(`Error setting storage for key "${key}":`, e);
-            }
-        };
-        
-        const getGblConfig = (key) => {
-            const config = getStorage(STORAGE_KEYS.CONFIG, DEFAULT_CONFIG);
-            return config[key] || DEFAULT_CONFIG[key];
-        };
+        // --- STATE & STORAGE UTILITIES ---
 
-        const getCredentials = () => {
-            const creds = getStorage(STORAGE_KEYS.CREDENTIALS);
-            const token = getStorage(STORAGE_KEYS.TOKEN);
-            if (!creds || !token) return null;
-            return {
-                username: creds.username,
-                password: creds.password,
-                token: token
-            };
-        };
-        
-        const isAuthenticated = () => !!getStorage(STORAGE_KEYS.TOKEN);
-        
-        const getBaseUrl = () => `${window.location.origin}${window.location.pathname}`;
-
-        // --- Utility Functions ---
-
-        const showToast = (message, isError = false, duration = 3000) => {
-            dom.toast.message.textContent = message;
-            dom.toast.notification.classList.remove(isError ? 'bg-green-500' : 'bg-red-600');
-            dom.toast.notification.classList.add(isError ? 'bg-red-600' : 'bg-green-500');
+        const storage = {
+            get: (key) => localStorage.getItem(key),
+            set: (key, value) => localStorage.setItem(key, value),
+            remove: (key) => localStorage.removeItem(key),
             
-            dom.toast.notification.classList.remove('translate-x-[150%]');
-            dom.toast.notification.classList.add('translate-x-0');
-
-            setTimeout(() => {
-                dom.toast.notification.classList.remove('translate-x-0');
-                dom.toast.notification.classList.add('translate-x-[150%]');
-            }, duration);
-        };
-        
-        const b64Encode = (str) => btoa(str);
-        
-        const getAuthHeaders = () => {
-            const creds = getCredentials();
-            if (!creds) return null;
-            
-            return {
-                basic: `Basic ${b64Encode(`${creds.username}:${creds.password}`)}`,
-                bearer: `Bearer ${creds.token}`
-            };
-        };
-
-        const hideAllModules = () => {
-            Object.values(dom.modules).forEach(module => {
-                if (module) module.style.display = 'none';
-            });
-        };
-        
-        const showModule = (moduleId) => {
-            hideAllModules();
-            if (dom.modules[moduleId]) {
-                dom.modules[moduleId].style.display = 'block';
-            } else {
-                console.error(`Module "${moduleId}" not found.`);
-            }
-        };
-
-        const showSpinner = (container, show = true) => {
-            const spinner = container.querySelector('.loading-spinner-container');
-            if (spinner) spinner.style.display = show ? 'block' : 'none';
-        };
-        
-        const renderError = (container, messageEl, preEl, buttonEl, error, response) => {
-            messageEl.textContent = error;
-            if (response) {
+            getJson: (key) => {
                 try {
-                    preEl.textContent = JSON.stringify(response, null, 2);
+                    return JSON.parse(localStorage.getItem(key));
                 } catch (e) {
-                    preEl.textContent = response;
+                    return null;
                 }
-            } else {
-                preEl.textContent = 'No response body.';
+            },
+            setJson: (key, value) => {
+                localStorage.setItem(key, JSON.stringify(value));
+            },
+            
+            getConfig: (key) => storage.get(key) || DEFAULT_CONFIG[key],
+            getCredentials: () => ({
+                username: storage.get("username"),
+                password: storage.get("password"),
+            }),
+            getToken: () => storage.get("token"),
+            getAuthHeaders: () => ({
+                basic: () => {
+                    const { username, password } = storage.getCredentials();
+                    return username && password ? `Basic ${btoa(`${username}:${password}`)}` : null;
+                },
+                bearer: () => {
+                    const token = storage.getToken();
+                    return token ? `Bearer ${token}` : null;
+                },
+            }),
+            isLoggedIn: () => !!storage.getToken() && !!storage.get("username"),
+            
+            clearCredentials: () => {
+                storage.remove("token");
+                storage.remove("username");
+                storage.remove("password");
+                storage.remove("firstName");
+                storage.remove("lastName");
+                storage.remove("avatarUrl");
+                storage.remove("clientId");
             }
-            container.classList.remove('hidden');
-            if (buttonEl) buttonEl.classList.remove('hidden');
+        };
+
+        // --- CORE UTILITIES ---
+
+        const showLoader = (show = true) => {
+            dom.pageLoader.classList.toggle("hidden", !show);
+        };
+
+        const showToast = (message, type = 'info') => {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type} animate-pulse`; // Start with pulse
+            toast.innerHTML = `<p>${message}</p>`;
+            dom.toastContainer.appendChild(toast);
+            
+            // Reflow to animate in
+            setTimeout(() => toast.classList.remove("animate-pulse"), 10); 
+            
+            setTimeout(() => {
+                toast.classList.add("opacity-0", "transition-opacity", "duration-500");
+                toast.addEventListener('transitionend', () => toast.remove());
+            }, 3000);
         };
         
-        const logApiCall = async (method, url, status, request, response) => {
-            const logs = getStorage(STORAGE_KEYS.API_LOGS, []);
+        const logApiCall = async (url, options, response, responseData, error) => {
+            const logs = storage.getJson("apiLogs") || [];
             const logEntry = {
+                id: crypto.randomUUID(),
                 timestamp: new Date().toISOString(),
-                method,
-                url,
-                status,
-                request: request || 'N/A',
-                response: response || 'N/A',
+                method: options.method || "GET",
+                url: url,
+                status: response ? response.status : (error ? "Network Error" : "Unknown"),
+                request: options.body || null,
+                response: responseData || (error ? { error: error.message } : null),
             };
-            logs.unshift(logEntry); // Add to beginning
-            setStorage(STORAGE_KEYS.API_LOGS, logs.slice(0, 100)); // Keep only last 100
-            renderDevToolLogs();
+            logs.unshift(logEntry); // Add to top
+            storage.setJson("apiLogs", logs.slice(0, 100)); // Keep max 100 logs
         };
 
-        // --- Dev Tool ---
-        const renderDevToolLogs = () => {
-            const logs = getStorage(STORAGE_KEYS.API_LOGS, []);
-            dom.devTool.logBody.innerHTML = '';
+        const makeApiRequest = async (url, options = {}, authType = 'bearer') => {
+            const fullUrl = url.startsWith('http') ? url : `${storage.getConfig("xpiBaseUrl")}${url}`;
+            const headers = { ...options.headers };
             
-            if (logs.length === 0) {
-                dom.devTool.logBody.innerHTML = `<tr><td colspan="6" class="py-4 px-6 text-center text-gray-400">No API calls logged.</td></tr>`;
-                return;
+            if (authType === 'bearer') {
+                const auth = storage.getAuthHeaders().bearer();
+                if (auth) headers['Authorization'] = auth;
+            } else if (authType === 'basic') {
+                const auth = storage.getAuthHeaders().basic();
+                if (auth) headers['Authorization'] = auth;
             }
-
-            logs.forEach((log, index) => {
-                const statusColor = log.status >= 400 ? 'text-red-400' : (log.status >= 300 ? 'text-yellow-400' : 'text-green-400');
+            
+            const fetchOptions = { ...options, headers };
+            
+            let response, responseData, error;
+            
+            try {
+                response = await fetch(fullUrl, fetchOptions);
                 
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-700/50';
-                tr.innerHTML = `
-                    <td class="py-3 px-4 text-xs text-gray-400">${new Date(log.timestamp).toLocaleString()}</td>
-                    <td class="py-3 px-4 font-medium ${statusColor}">${log.status}</td>
-                    <td class="py-3 px-4 font-medium">${log.method}</td>
-                    <td class="py-3 px-4 text-xs">${log.url}</td>
-                    <td class="py-3 px-4"><a href="#" class="text-blue-400 hover:underline" data-log-index="${index}" data-log-type="request">View</a></td>
-                    <td class="py-3 px-4"><a href="#" class="text-blue-400 hover:underline" data-log-index="${index}" data-log-type="response">View</a></td>
-                `;
-                dom.devTool.logBody.appendChild(tr);
-            });
-        };
-        
-        const showLogPayload = (index, type) => {
-            const logs = getStorage(STORAGE_KEYS.API_LOGS, []);
-            const log = logs[index];
-            if (!log) return;
-            
-            const payload = log[type];
-            dom.payloadModal.title.textContent = `${type.charAt(0).toUpperCase() + type.slice(1)} Payload for ${log.method} ${log.url}`;
-            
-            try {
-                dom.payloadModal.content.textContent = JSON.stringify(payload, null, 2);
-            } catch (e) {
-                dom.payloadModal.content.textContent = payload;
-            }
-            
-            dom.payloadModal.modal.classList.remove('hidden');
-        };
-
-        // --- Sidebar & Profile ---
-        const updateSidebar = (isLoggedIn) => {
-            if (isLoggedIn) {
-                dom.navLinks.innerHTML = USER_DEFINED_MODULES.map(module => `
-                    <a href="${module.hash}" data-hash="${module.hash}" class="nav-link flex items-center p-3 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md transition-colors">
-                        <!-- Placeholder icon -->
-                        <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        <span>${module.name}</span>
-                    </a>
-                `).join('');
-                dom.userProfile.classList.remove('hidden');
-            } else {
-                dom.navLinks.innerHTML = '';
-                dom.userProfile.classList.add('hidden');
-            }
-        };
-        
-        const updateUserProfile = () => {
-            const profile = getStorage(STORAGE_KEYS.USER_PROFILE);
-            if (profile) {
-                dom.userName.textContent = `${profile.firstName} ${profile.lastName}`;
-                dom.userAvatar.src = profile.avatarUrl;
-                dom.userAvatar.onerror = () => { dom.userAvatar.src = `https://placehold.co/40x40/4b5563/E5E7EB?text=${profile.firstName[0]}`; };
-            }
-        };
-
-        const highlightActiveLink = (hash) => {
-            document.querySelectorAll('.nav-link').forEach(link => {
-                if (link.dataset.hash === hash) {
-                    link.classList.add('bg-gray-700', 'text-white');
-                } else {
-                    link.classList.remove('bg-gray-700', 'text-white');
-                }
-            });
-        };
-        
-        const logout = () => {
-            Object.values(STORAGE_KEYS).forEach(key => localStorage.removeItem(key));
-            window.location.href = getBaseUrl();
-        };
-
-        // --- API Call Functions ---
-
-        // Generic fetch wrapper for logging and auth
-        const apiFetch = async (url, options = {}, authType = 'bearer') => {
-            const headers = new Headers(options.headers || {});
-            const authHeaders = getAuthHeaders();
-            
-            if (authType === 'bearer' && authHeaders?.bearer) {
-                headers.set('Authorization', authHeaders.bearer);
-            } else if (authType === 'basic' && authHeaders?.basic) {
-                headers.set('Authorization', authHeaders.basic);
-            }
-            
-            if (options.body) {
-                headers.set('Content-Type', 'application/json');
-            }
-            
-            options.headers = headers;
-            
-            let response, responseData, requestData;
-            try {
-                if (options.body) requestData = JSON.parse(options.body);
-            } catch (e) {
-                requestData = options.body;
-            }
-
-            try {
-                response = await fetch(url, options);
-                
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
                     responseData = await response.json();
                 } else {
                     responseData = await response.text();
                 }
-
-                logApiCall(options.method || 'GET', url, response.status, requestData, responseData);
                 
-                return { ok: response.ok, status: response.status, data: responseData };
-
-            } catch (error) {
-                console.error('API Fetch Error:', error);
-                logApiCall(options.method || 'GET', url, 'NET_ERROR', requestData, error.message);
-                return { ok: false, status: 'NET_ERROR', data: error.message };
-            }
-        };
-        
-
-        // --- Module: Login ---
-        const initLoginModule = (code) => {
-            if (code) {
-                // Callback Mode
-                dom.login.authMode.classList.add('hidden');
-                dom.login.callbackMode.classList.remove('hidden');
-                dom.login.resultContainer.classList.add('hidden');
-                handleOAuthCallback(code);
-            } else {
-                // Auth Mode
-                dom.login.authMode.classList.remove('hidden');
-                dom.login.callbackMode.classList.add('hidden');
-                dom.login.resultContainer.classList.add('hidden');
-            }
-        };
-
-        const handleLoginClick = async () => {
-            try {
-                const timestamp = new Date().getTime();
-                const random = Math.random();
-                const hash = CryptoJS.SHA256(timestamp + '' + random).toString(CryptoJS.enc.Hex);
-                const clientId = hash.slice(-7);
-                
-                setStorage(STORAGE_KEYS.CLIENT_ID, clientId);
-                
-                const redirectUri = getBaseUrl();
-                const xpiBaseUrl = getGblConfig('xpiBaseUrl');
-                const authUrl = `${xpiBaseUrl}/?accountId=3128883&redirectUri=${encodeURIComponent(redirectUri)}&client_id=${clientId}`;
-                
-                window.location.href = authUrl;
-            } catch (e) {
-                console.error('Login redirect failed:', e);
-                renderError(dom.login.resultContainer, dom.login.message, dom.login.responsePre, null, 'Failed to generate credentials. Please try again.', e.message);
-            }
-        };
-        
-        const handleOAuthCallback = async (code) => {
-            const clientId = getStorage(STORAGE_KEYS.CLIENT_ID);
-            const xpiBaseUrl = getGblConfig('xpiBaseUrl');
-
-            if (!code || !clientId) {
-                renderError(dom.login.resultContainer, dom.login.message, dom.login.responsePre, null, 'Authentication Error: Missing code or client ID. Redirecting...', 'Please wait.');
-                dom.login.callbackMode.classList.add('hidden');
-                setTimeout(() => {
-                    window.location.href = getBaseUrl();
-                }, 10000);
-                return;
-            }
-            
-            const url = `${xpiBaseUrl}/api/v1/wrikexpi/token/exchange?code=${code}&client_id=${clientId}&grant_type=authorization_code`;
-            const { ok, data } = await apiFetch(url, { method: 'GET' }, 'none');
-            
-            dom.login.callbackMode.classList.add('hidden');
-
-            if (!ok || !data.success) {
-                renderError(dom.login.resultContainer, dom.login.message, dom.login.responsePre, dom.login.startOverButton, 'Login failed: Unexpected technical error.', data);
-                return;
-            }
-            
-            // Step 1 Success: Store credentials
-            setStorage(STORAGE_KEYS.TOKEN, data.data.token);
-            setStorage(STORAGE_KEYS.CREDENTIALS, data.data.credentials);
-            
-            // Step 2: Verify credentials
-            await verifyLogin();
-        };
-
-        const verifyLogin = async () => {
-            const xpiBaseUrl = getGblConfig('xpiBaseUrl');
-            const url = `${xpiBaseUrl}/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me`;
-            
-            const { ok, data } = await apiFetch(url, { method: 'GET' }, 'basic');
-            
-            if (!ok || !data.success || !data.data || data.data.length === 0) {
-                renderError(dom.login.resultContainer, dom.login.message, dom.login.responsePre, dom.login.startOverButton, 'Login failed, we are unable to verify your account. Please try again.', data);
-                return;
-            }
-            
-            // Step 2 Success: Store profile
-            const profile = data.data[0];
-            setStorage(STORAGE_KEYS.USER_PROFILE, {
-                id: profile.id,
-                firstName: profile.firstName,
-                lastName: profile.lastName,
-                email: profile.primaryEmail,
-                avatarUrl: profile.avatarUrl,
-            });
-            
-            dom.login.resultContainer.classList.remove('hidden');
-            dom.login.message.classList.remove('text-red-400');
-            dom.login.message.classList.add('text-green-400');
-            dom.login.message.textContent = `${profile.firstName} ${profile.lastName} login successfully. Redirecting...`;
-            dom.login.responsePre.classList.add('hidden');
-            
-            // Redirect to default module
-            setTimeout(() => {
-                window.location.href = getBaseUrl() + '#campaign-submission'; // Default to campaign submission
-            }, 2000);
-        };
-
-        // --- Module: Admin ---
-        const initAdminModule = () => {
-            const config = getStorage(STORAGE_KEYS.CONFIG, DEFAULT_CONFIG);
-            dom.admin.xpiBaseUrl.value = config.xpiBaseUrl;
-        };
-
-        const handleAdminFormSubmit = (e) => {
-            e.preventDefault();
-            const newConfig = {
-                xpiBaseUrl: dom.admin.xpiBaseUrl.value,
-            };
-            setStorage(STORAGE_KEYS.CONFIG, newConfig);
-            showToast('Configuration saved successfully!');
-        };
-        
-        // --- Module: Campaign Submission ---
-        let campaignDropdownsLoaded = false;
-        const initCampaignSubmissionModule = async () => {
-            if (campaignDropdownsLoaded) return;
-            
-            dom.campaign.submitButton.disabled = true;
-            dom.campaign.submitButton.textContent = 'Loading form data...';
-            
-            const xpiBaseUrl = getGblConfig('xpiBaseUrl');
-            const clientUrl = `${xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/clients-grm-mys`;
-            const debtorUrl = `${xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/debtors-grm-mys`;
-            const agencyUrl = `${xpiBaseUrl}/api/v1/wrikexpi/v1.0/value/agencies`;
-
-            try {
-                const [clientRes, debtorRes, agencyRes] = await Promise.all([
-                    apiFetch(clientUrl, { method: 'GET' }, 'basic'),
-                    apiFetch(debtorUrl, { method: 'GET' }, 'basic'),
-                    apiFetch(agencyUrl, { method: 'GET' }, 'basic')
-                ]);
-                
-                populateDropdown(dom.campaign.clientSelect, clientRes.data?.value, 'clients');
-                populateDropdown(dom.campaign.debtorSelect, debtorRes.data?.value, 'debtors');
-                populateDropdown(dom.campaign.agencySelect, agencyRes.data?.value, 'agencies');
-
-                campaignDropdownsLoaded = true;
-                
-            } catch (error) {
-                console.error('Failed to load campaign dropdowns:', error);
-                showToast('Failed to load form data. Please refresh.', true);
-            } finally {
-                dom.campaign.submitButton.disabled = false;
-                dom.campaign.submitButton.textContent = 'Submit Campaign';
-            }
-        };
-        
-        const populateDropdown = (selectEl, data, name) => {
-            if (!data || !Array.isArray(data)) {
-                selectEl.innerHTML = `<option value="">Failed to load ${name}</option>`;
-                return;
-            }
-            if (data.length === 0) {
-                selectEl.innerHTML = `<option value="">No ${name} found</option>`;
-                return;
-            }
-            
-            selectEl.innerHTML = `<option value="">Select ${name.slice(0, -1)}</option>`; // "Select client"
-            data.forEach(item => {
-                const option = document.createElement('option');
-                option.value = item.value;
-                option.textContent = item.value;
-                selectEl.appendChild(option);
-            });
-            
-            // Set default value if it exists (e.g., 'Adidas Group' from example)
-            const defaultValue = {
-                'clients': 'Adidas Group',
-                'debtors': 'Adidas Malaysia Sdn Bhd',
-                'agencies': 'Eightbar'
-            }[name];
-            
-            if (defaultValue && data.some(item => item.value === defaultValue)) {
-                selectEl.value = defaultValue;
-            }
-        };
-
-        const handleCampaignSubmit = async (e) => {
-            e.preventDefault();
-            dom.campaign.submitButton.disabled = true;
-            dom.campaign.submitButton.textContent = 'Submitting...';
-            
-            const formData = new FormData(dom.campaign.form);
-            const payload = {
-                fields: {}
-            };
-            
-            formData.forEach((value, key) => {
-                if (['type', 'space', 'entity', 'varientId'].includes(key)) {
-                    payload[key] = (key === 'varientId') ? parseInt(value) : value;
-                } else if (key === 'selectedchannels') {
-                    payload.fields[key] = value.split(',')
-                                            .map(s => s.trim())
-                                            .filter(s => s.length > 0);
-                } else if (key === 'overallbudget') {
-                    payload.fields[key] = value; // Keep as string, API example shows "100"
-                } else {
-                    payload.fields[key] = value;
+                if (!response.ok) {
+                    error = new Error(responseData.message || responseData.error || response.statusText);
+                    throw error;
                 }
-            });
-
-            const xpiBaseUrl = getGblConfig('xpiBaseUrl');
-            const url = `${xpiBaseUrl}/api/v1/wrikexpi/campaign`;
-
-            const { ok, data } = await apiFetch(url, {
-                method: 'POST',
-                body: JSON.stringify(payload)
-            }, 'bearer');
-
-            dom.campaign.resultContainer.classList.remove('hidden');
-            try {
-                 dom.campaign.resultPre.textContent = JSON.stringify(data, null, 2);
+                
+                await logApiCall(fullUrl, fetchOptions, response, responseData, null);
+                return { ok: true, data: responseData };
+                
             } catch (err) {
-                 dom.campaign.resultPre.textContent = data;
+                error = err;
+                await logApiCall(fullUrl, fetchOptions, response, responseData, error);
+                
+                // Construct a helpful error object
+                const errorPayload = {
+                    message: error.message,
+                    status: response ? response.status : "Network Error",
+                    ...(typeof responseData === 'object' ? responseData : { details: responseData })
+                };
+                
+                return { ok: false, error: errorPayload, status: errorPayload.status };
             }
-           
-            if (ok) {
-                dom.campaign.resultPre.classList.remove('text-red-300');
-                dom.campaign.resultPre.classList.add('text-green-300');
-                showToast('Campaign submitted successfully!');
+        };
+
+        const showModule = (moduleId) => {
+            $$(".module").forEach(m => m.classList.add("hidden"));
+            const moduleEl = $(`#module-${moduleId}`);
+            if (moduleEl) {
+                moduleEl.classList.remove("hidden");
             } else {
-                dom.campaign.resultPre.classList.remove('text-green-300');
-                dom.campaign.resultPre.classList.add('text-red-300');
-                showToast('Campaign submission failed.', true);
+                console.error(`Module #${moduleId} not found.`);
+            }
+        };
+        
+        const openModal = (modal) => modal.classList.remove('hidden');
+        const closeModal = (modal) => modal.classList.add('hidden');
+        
+        // --- UI & NAVIGATION ---
+
+        const updateNav = () => {
+            dom.navLinks.innerHTML = '';
+            MODULE_CONFIG
+                .filter(m => m.type === 'User-defined')
+                .forEach(m => {
+                    const isActive = location.hash === m.hash;
+                    dom.navLinks.innerHTML += `
+                        <a href="${m.hash}" class="${isActive ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white'} group flex items-center px-2 py-2 text-sm font-medium rounded-md">
+                            ${m.name}
+                        </a>`;
+                });
+        };
+        
+        const updateUserProfile = () => {
+            if (storage.isLoggedIn()) {
+                dom.userProfile.classList.remove("hidden");
+                dom.userName.textContent = `${storage.get("firstName")} ${storage.get("lastName")}`;
+                dom.userAvatar.src = storage.get("avatarUrl") || `https://placehold.co/40x40/555/FFF?text=${storage.get("firstName")?.[0] || 'U'}`;
+            } else {
+                dom.userProfile.classList.add("hidden");
+            }
+        };
+        
+        const updateLayout = () => {
+            if (storage.isLoggedIn()) {
+                dom.sidebar.classList.remove("hidden");
+                updateUserProfile();
+                updateNav();
+            } else {
+                dom.sidebar.classList.add("hidden");
+            }
+        };
+        
+        const handleLogout = () => {
+            storage.clearCredentials();
+            updateLayout();
+            location.hash = "#login";
+        };
+        
+        // --- MODULE LOGIC ---
+
+        // ----- Login Module (MOD.B) -----
+        const initLoginModule = async (code) => {
+            const { authMode, callbackMode, authBtn, loading, error, errorMessage, errorDetails, startOverBtn, success, successMessage } = dom.modules.login;
+            
+            if (!code) {
+                // Mode 1: Authentication
+                authMode.classList.remove("hidden");
+                callbackMode.classList.add("hidden");
+                
+                authBtn.onclick = async () => {
+                    showLoader();
+                    try {
+                        const timestamp = Date.now().toString();
+                        const random = Math.random().toString();
+                        const data = new TextEncoder().encode(timestamp + random);
+                        const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+                        const hashArray = Array.from(new Uint8Array(hashBuffer));
+                        const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                        const clientId = hashHex.slice(-7);
+                        
+                        storage.set("clientId", clientId);
+                        
+                        const redirectUri = `${location.origin}${location.pathname}`;
+                        const xpiBaseUrl = storage.getConfig("xpiBaseUrl");
+                        const authUrl = `${xpiBaseUrl}/?accountId=3128883&redirectUri=${encodeURIComponent(redirectUri)}&client_id=${clientId}`;
+                        
+                        window.location.href = authUrl;
+                    } catch (err) {
+                        showLoader(false);
+                        showToast(`Error generating client ID: ${err.message}`, 'error');
+                    }
+                };
+                
+            } else {
+                // Mode 2: OAuth Callback
+                authMode.classList.add("hidden");
+                callbackMode.classList.remove("hidden");
+                loading.classList.remove("hidden");
+                error.classList.add("hidden");
+                success.classList.add("hidden");
+
+                const clientId = storage.get("clientId");
+                
+                if (!clientId || !code) {
+                    loading.classList.add("hidden");
+                    error.classList.remove("hidden");
+                    errorMessage.textContent = "Error: Missing 'code' or 'clientId'. Cannot proceed with authentication.";
+                    errorDetails.textContent = "Please try the login process again.";
+                    setTimeout(() => { location.href = location.pathname; }, 10000);
+                    return;
+                }
+                
+                // 1. Exchange code for token
+                const tokenUrl = `/api/v1/wrikexpi/token/exchange?code=${code}&client_id=${clientId}&grant_type=authorization_code`;
+                const tokenRes = await makeApiRequest(tokenUrl, { method: 'GET' }, 'none');
+                
+                if (!tokenRes.ok || !tokenRes.data.success) {
+                    loading.classList.add("hidden");
+                    error.classList.remove("hidden");
+                    errorMessage.textContent = "An error occurred during token exchange.";
+                    errorDetails.textContent = JSON.stringify(tokenRes.error || tokenRes.data, null, 2);
+                    return;
+                }
+                
+                // Store credentials
+                const { token, credentials } = tokenRes.data.data;
+                storage.set("token", token);
+                storage.set("username", credentials.username);
+                storage.set("password", credentials.password);
+
+                // 2. Verify credentials by fetching profile
+                const profileRes = await makeApiRequest('/api/v1/wrikexpi/amoeba/wrikeapi/contacts?me', { method: 'GET' }, 'basic');
+
+                if (!profileRes.ok || !profileRes.data.success || !profileRes.data.data.length) {
+                    loading.classList.add("hidden");
+                    error.classList.remove("hidden");
+                    errorMessage.textContent = "Login failed. We were unable to verify your account.";
+                    errorDetails.textContent = JSON.stringify(profileRes.error || profileRes.data, null, 2);
+                    storage.clearCredentials(); // Clear bad credentials
+                    return;
+                }
+
+                // Success!
+                const profile = profileRes.data.data[0];
+                storage.set("firstName", profile.firstName);
+                storage.set("lastName", profile.lastName);
+                storage.set("avatarUrl", profile.avatarUrl);
+                
+                loading.classList.add("hidden");
+                success.classList.remove("hidden");
+                successMessage.textContent = `${profile.firstName} ${profile.lastName} login successfully.`;
+
+                // Update UI and redirect
+                updateLayout();
+                setTimeout(() => {
+                    location.href = `${location.pathname}#campaign-submission`;
+                }, 2000);
+            }
+        };
+
+        // ----- Admin Module (MOD.A) -----
+        const initAdminModule = () => {
+            const { form, xpiBaseUrl } = dom.modules.admin;
+            xpiBaseUrl.value = storage.getConfig("xpiBaseUrl");
+            
+            form.onsubmit = (e) => {
+                e.preventDefault();
+                storage.set("xpiBaseUrl", xpiBaseUrl.value);
+                showToast("Configuration saved successfully!", "success");
+            };
+        };
+        
+        // ----- Campaign Submission Module (MOD.C) -----
+        const loadCampaignDropdown = async (selectEl, url, valueField = "value") => {
+            selectEl.innerHTML = `<option value="">Loading...</option>`;
+            const res = await makeApiRequest(url, { method: 'GET' }, 'basic');
+            if (res.ok && res.data.value) {
+                selectEl.innerHTML = `<option value="">-- Select an option --</option>`;
+                res.data.value.forEach(item => {
+                    selectEl.innerHTML += `<option value="${item[valueField]}">${item[valueField]}</option>`;
+                });
+            } else {
+                selectEl.innerHTML = `<option value="">Failed to load</option>`;
+                showToast(`Failed to load data for ${selectEl.id}`, 'error');
+            }
+        };
+        
+        const initCampaignModule = () => {
+            const { form, submitBtn, result, resultPre, client, debtor, agency } = dom.modules.campaign;
+            
+            // Load dropdowns
+            loadCampaignDropdown(client, '/api/v1/wrikexpi/v1.0/value/clients-grm-mys');
+            loadCampaignDropdown(debtor, '/api/v1/wrikexpi/v1.0/value/debtors-grm-mys');
+            loadCampaignDropdown(agency, '/api/v1/wrikexpi/v1.0/value/agencies');
+
+            form.onsubmit = async (e) => {
+                e.preventDefault();
+                submitBtn.disabled = true;
+                submitBtn.textContent = "Submitting...";
+                result.classList.add("hidden");
+                
+                try {
+                    const formData = new FormData(form);
+                    const fields = {};
+                    
+                    // Collect all form inputs
+                    for (const el of form.elements) {
+                        if (el.id && el.id.startsWith("campaign-")) {
+                            const key = el.id.replace("campaign-", "");
+                            if (el.type === 'hidden' || el.tagName === 'INPUT' || el.tagName === 'SELECT') {
+                                if (!['type', 'space', 'entity', 'varientId'].includes(key)) {
+                                    fields[key] = el.value;
+                                }
+                            }
+                        }
+                    }
+
+                    // Handle specific field types
+                    fields.selectedchannels = fields.selectedchannels.split(',')
+                        .map(s => s.trim())
+                        .filter(Boolean);
+                    fields.overallbudget = parseFloat(fields.overallbudget);
+
+                    const payload = {
+                        type: $("#campaign-type").value,
+                        space: $("#campaign-space").value,
+                        entity: $("#campaign-entity").value,
+                        varientId: parseInt($("#campaign-varientId").value),
+                        fields: fields
+                    };
+
+                    const res = await makeApiRequest('/api/v1/wrikexpi/campaign', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    }, 'bearer');
+
+                    // Show result
+                    result.classList.remove("hidden");
+                    resultPre.textContent = JSON.stringify(res.data || res.error, null, 2);
+                    
+                    if (res.ok) {
+                        resultPre.classList.remove("text-red-400");
+                        resultPre.classList.add("text-green-400");
+                        showToast("Campaign submitted successfully!", "success");
+                        form.reset(); // Reset form on success
+                        // Re-load dropdowns as reset clears them
+                        loadCampaignDropdown(client, '/api/v1/wrikexpi/v1.0/value/clients-grm-mys');
+                        loadCampaignDropdown(debtor, '/api/v1/wrikexpi/v1.0/value/debtors-grm-mys');
+                        loadCampaignDropdown(agency, '/api/v1/wrikexpi/v1.0/value/agencies');
+                    } else {
+                        resultPre.classList.remove("text-green-400");
+                        resultPre.classList.add("text-red-400");
+                        showToast(`Error: ${res.error.message}`, "error");
+                    }
+                    
+                } catch (err) {
+                    result.classList.remove("hidden");
+                    resultPre.classList.remove("text-green-400");
+                    resultPre.classList.add("text-red-400");
+                    resultPre.textContent = `Something went wrong. ${err.message}`;
+                    showToast(`Submission failed: ${err.message}`, "error");
+                } finally {
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = "Submit Campaign";
+                }
+            };
+        };
+
+        // ----- Master Data Module (Template) -----
+        let currentMasterDataSlug = null;
+
+        const renderMasterDataTable = (data, slug) => {
+            const { tableHead, tableBody } = dom.modules.masterData;
+            tableHead.innerHTML = '';
+            tableBody.innerHTML = '';
+
+            if (!data || data.length === 0) {
+                tableBody.innerHTML = `<tr><td class="p-4 text-center text-gray-400" colspan="99">No records found.</td></tr>`;
+                return;
             }
 
-            dom.campaign.submitButton.disabled = false;
-            dom.campaign.submitButton.textContent = 'Submit Campaign';
+            // Get all unique keys as headers
+            const headers = new Set(['id', 'value']); // Prioritize id and value
+            data.forEach(item => Object.keys(item).forEach(key => headers.add(key)));
+            const headerOrder = Array.from(headers);
+            
+            // Add Actions header
+            headerOrder.push('Actions');
+            
+            // Render header
+            let headHtml = '<tr>';
+            headerOrder.forEach(key => {
+                headHtml += `<th class="px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">${key}</th>`;
+            });
+            headHtml += '</tr>';
+            tableHead.innerHTML = headHtml;
+
+            // Render body
+            let bodyHtml = '';
+            data.forEach(item => {
+                bodyHtml += '<tr>';
+                headerOrder.forEach(key => {
+                    if (key === 'Actions') {
+                        bodyHtml += `
+                            <td class="px-4 py-3 whitespace-nowrap text-sm space-x-2">
+                                <button class="btn btn-secondary btn-sm master-data-edit-btn" data-record='${JSON.stringify(item)}'>Edit</button>
+                                <button class="btn btn-danger btn-sm master-data-delete-btn" data-id="${item.id}">Delete</button>
+                            </td>`;
+                    } else {
+                        const value = item[key] !== null && item[key] !== undefined ? item[key] : 'N/A';
+                        bodyHtml += `<td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${value}</td>`;
+                    }
+                });
+                bodyHtml += '</tr>';
+            });
+            tableBody.innerHTML = bodyHtml;
         };
 
-        // --- Module: Master Data (Template) ---
-        const MASTER_DATA_FIELDS = {
-            'demoxpiclients': ['id', 'value', 'note', 'fincode', 'code'],
-            'xpicfmapping': ['id', 'value', 'note', 'fincode', 'code'] // Assuming same fields
-        };
-        
-        const initMasterDataModule = (container, slug) => {
-            if (container.innerHTML !== '') return; // Already initialized
-            
-            const template = dom.masterData.template.content.cloneNode(true);
-            container.appendChild(template);
-            
-            const fields = MASTER_DATA_FIELDS[slug];
-            
-            container.querySelector('.load-data-btn').addEventListener('click', () => {
-                fetchMasterData(container, slug, fields);
-            });
-            
-            container.querySelector('.create-new-btn').addEventListener('click', () => {
-                openMasterDataModal(null, slug, fields, container);
-            });
-        };
-        
-        const fetchMasterData = async (container, slug, fields) => {
-            showSpinner(container, true);
-            const tableContainer = container.querySelector('.data-table-container');
-            tableContainer.innerHTML = '';
-            
-            const xpiBaseUrl = getGblConfig('xpiBaseUrl');
-            const url = `${xpiBaseUrl}/api/v1/wrikexpi/v1.0/record/${slug}`;
-            
-            const { ok, data } = await apiFetch(url, { method: 'GET' }, 'bearer');
-            
-            showSpinner(container, false);
+        const loadMasterData = async (slug) => {
+            const { loader, tableContainer, tableBody } = dom.modules.masterData;
+            loader.classList.remove("hidden");
+            tableContainer.classList.add("hidden");
+            tableBody.innerHTML = '';
 
-            if (!ok || !data.value) {
-                tableContainer.innerHTML = `<p class="text-red-400">Failed to load data. Error: ${data.message || 'Invalid Token'}</p>`;
-                showToast(`Failed to load ${slug} data.`, true);
+            const res = await makeApiRequest(`/api/v1/wrikexpi/v1.0/record/${slug}`, { method: 'GET' }, 'bearer');
+            
+            loader.classList.add("hidden");
+            tableContainer.classList.remove("hidden");
+
+            if (res.ok) {
+                renderMasterDataTable(res.data.value, slug);
+            } else {
+                tableBody.innerHTML = `<tr><td class="p-4 text-center text-red-500" colspan="99">Error loading data: ${res.error.message}</td></tr>`;
+                showToast(`Error loading data: ${res.error.message}`, 'error');
+            }
+        };
+
+        const openMasterDataModal = (record = null) => {
+            const { modal, form, title, id, value, code, fincode, guid, note } = dom.masterDataModal;
+            form.reset();
+            
+            if (record) {
+                // Edit mode
+                title.textContent = `Edit Record (ID: ${record.id})`;
+                id.value = record.id;
+                value.value = record.value || '';
+                code.value = record.code || '';
+                fincode.value = record.fincode || '';
+                guid.value = record.guid || '';
+                note.value = record.note || '';
+            } else {
+                // Create mode
+                title.textContent = "Create New Record";
+                id.value = '';
+            }
+            openModal(modal);
+        };
+        
+        const saveMasterData = async () => {
+            const { modal, id, slug, value, code, fincode, guid, note, saveBtn } = dom.masterDataModal;
+            const recordId = id.value;
+            const isEdit = !!recordId;
+            const dataSlug = currentMasterDataSlug;
+            
+            if (!value.value) {
+                showToast("The 'value' field is mandatory.", 'error');
                 return;
             }
             
-            renderMasterDataTable(container, slug, fields, data.value);
-        };
-        
-        const renderMasterDataTable = (container, slug, fields, records) => {
-            const tableContainer = container.querySelector('.data-table-container');
-            if (records.length === 0) {
-                 tableContainer.innerHTML = `<p class="text-gray-400 text-center">No records found.</p>`;
-                 return;
-            }
-            
-            const table = document.createElement('table');
-            table.className = "min-w-full text-sm text-left text-gray-300";
-            
-            // Header
-            const thead = document.createElement('thead');
-            thead.className = "bg-gray-700 text-xs text-gray-300 uppercase";
-            let headerHtml = '<tr>';
-            fields.forEach(field => {
-                if(field !== 'id') headerHtml += `<th scope="col" class="py-3 px-4">${field}</th>`;
-            });
-            headerHtml += '<th scope="col" class="py-3 px-4 text-right">Actions</th></tr>';
-            thead.innerHTML = headerHtml;
-            
-            // Body
-            const tbody = document.createElement('tbody');
-            tbody.className = "divide-y divide-gray-700";
-            records.forEach(record => {
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-gray-700/50';
-                let rowHtml = '';
-                fields.forEach(field => {
-                    if(field !== 'id') rowHtml += `<td class="py-3 px-4">${record[field] || 'N/A'}</td>`;
-                });
-                rowHtml += `
-                    <td class="py-3 px-4 text-right space-x-2">
-                        <button class="edit-btn text-blue-400 hover:text-blue-300" data-id="${record.id}">Edit</button>
-                        <button class="delete-btn text-red-400 hover:text-red-300" data-id="${record.id}">Delete</button>
-                    </td>
-                `;
-                tr.innerHTML = rowHtml;
-                
-                // Add event listeners for edit/delete
-                tr.querySelector('.edit-btn').addEventListener('click', () => {
-                    openMasterDataModal(record, slug, fields, container);
-                });
-                tr.querySelector('.delete-btn').addEventListener('click', () => {
-                    openDeleteConfirmModal(record.id, slug, fields, container);
-                });
-                
-                tbody.appendChild(tr);
-            });
-            
-            table.appendChild(thead);
-            table.appendChild(tbody);
-            tableContainer.innerHTML = '';
-            tableContainer.appendChild(table);
-        };
-        
-        const openMasterDataModal = (record, slug, fields, container) => {
-            const isEditMode = !!record;
-            dom.masterData.title.textContent = isEditMode ? `Edit Record (ID: ${record.id})` : 'Create New Record';
-            dom.masterData.form.innerHTML = ''; // Clear form
-            
-            let formHtml = '';
-            fields.forEach(field => {
-                if (field === 'id' && isEditMode) {
-                    formHtml += `<input type="hidden" name="id" value="${record.id}">`;
-                } else if (field !== 'id') {
-                    const value = record ? (record[field] || '') : '';
-                    const isRequired = field === 'value';
-                    formHtml += `
-                        <div>
-                            <label for="md-${field}" class="block text-sm font-medium text-gray-300">${field}</label>
-                            <input type="text" name="${field}" id="md-${field}" value="${value}" 
-                                   class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm text-gray-200 focus:border-blue-500 focus:ring-blue-500"
-                                   ${isRequired ? 'required' : ''}>
-                        </div>
-                    `;
-                }
-            });
-            dom.masterData.form.innerHTML = formHtml;
-            
-            // Re-bind save button
-            const saveButtonClone = dom.masterData.save.cloneNode(true);
-            dom.masterData.save.parentNode.replaceChild(saveButtonClone, dom.masterData.save);
-            dom.masterData.save = saveButtonClone;
-            
-            dom.masterData.form.onsubmit = (e) => {
-                e.preventDefault();
-                handleMasterDataSave(record, slug, fields, container);
-            };
-            
-            dom.masterData.modal.classList.remove('hidden');
-        };
+            saveBtn.disabled = true;
+            saveBtn.textContent = "Saving...";
 
-        const handleMasterDataSave = async (record, slug, fields, container) => {
-            const isEditMode = !!record;
-            const formData = new FormData(dom.masterData.form);
-            const xpiBaseUrl = getGblConfig('xpiBaseUrl');
+            const odataContext = `${storage.getConfig("xpiBaseUrl")}/api/v1/v1.0/${dataSlug}`;
             
             const payload = {
-                "@odata.context": `https://api.wrikexpi.groupm.com/api/v1/v1.0/${slug}`
+                "@odata.context": odataContext,
+                value: value.value,
+                code: code.value || null,
+                fincode: fincode.value || null,
+                guid: guid.value || null,
+                note: note.value || null,
             };
-            
-            formData.forEach((value, key) => {
-                payload[key] = value;
-            });
-            
-            const url = `${xpiBaseUrl}/api/v1/wrikexpi/v1.0/record/${slug}`;
-            const method = isEditMode ? 'PATCH' : 'POST';
-            
-            const { ok, data } = await apiFetch(url, {
-                method: method,
-                body: JSON.stringify(payload)
-            }, 'bearer');
-            
-            if (ok) {
-                showToast(`Record ${isEditMode ? 'updated' : 'created'} successfully!`);
-                dom.masterData.modal.classList.add('hidden');
-                fetchMasterData(container, slug, fields); // Refresh data
+
+            let res;
+            if (isEdit) {
+                payload.id = recordId;
+                res = await makeApiRequest(`/api/v1/wrikexpi/v1.0/record/${dataSlug}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }, 'bearer');
             } else {
-                showToast(`Failed to save record: ${data.message || 'Error'}`, true);
+                res = await makeApiRequest(`/api/v1/wrikexpi/v1.0/record/${dataSlug}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                }, 'bearer');
+            }
+
+            saveBtn.disabled = false;
+            saveBtn.textContent = "Save Changes";
+
+            if (res.ok) {
+                showToast(`Record ${isEdit ? 'updated' : 'created'} successfully!`, 'success');
+                closeModal(modal);
+                loadMasterData(dataSlug); // Refresh table
+            } else {
+                showToast(`Error: ${res.error.message}`, 'error');
             }
         };
 
-        const openDeleteConfirmModal = (id, slug, fields, container) => {
-            dom.deleteModal.modal.classList.remove('hidden');
-            
-            // Re-bind delete button
-            const deleteButtonClone = dom.deleteModal.delete.cloneNode(true);
-            dom.deleteModal.delete.parentNode.replaceChild(deleteButtonClone, dom.deleteModal.delete);
-            dom.deleteModal.delete = deleteButtonClone;
-            
-            dom.deleteModal.delete.onclick = () => {
-                performDelete(id, slug, fields, container);
-            };
+        const openDeleteConfirm = (id) => {
+            const { modal, id: modalId, slug } = dom.deleteConfirmModal;
+            modalId.value = id;
+            openModal(modal);
+        };
+
+        const deleteMasterData = async () => {
+            const { modal, id, confirmBtn } = dom.deleteConfirmModal;
+            const recordId = id.value;
+            const dataSlug = currentMasterDataSlug;
+
+            confirmBtn.disabled = true;
+            confirmBtn.textContent = "Deleting...";
+
+            const res = await makeApiRequest(`/api/v1/wrikexpi/v1.0/record/${dataSlug}/${recordId}`, {
+                method: 'DELETE'
+            }, 'bearer');
+
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = "Delete";
+
+            if (res.ok) {
+                showToast("Record deleted successfully!", 'success');
+                closeModal(modal);
+                loadMasterData(dataSlug); // Refresh table
+            } else {
+                showToast(`Error: ${res.error.message}`, 'error');
+            }
         };
         
-        const performDelete = async (id, slug, fields, container) => {
-            const xpiBaseUrl = getGblConfig('xpiBaseUrl');
-            const url = `${xpiBaseUrl}/api/v1/wrikexpi/v1.0/record/${slug}/${id}`;
+        const initMasterDataModule = (slug, title) => {
+            currentMasterDataSlug = slug;
+            const { el, title: titleEl, loadBtn, createBtn, tableBody } = dom.modules.masterData;
             
-            const { ok, data } = await apiFetch(url, { method: 'DELETE' }, 'bearer');
+            titleEl.textContent = title;
+            showModule('master-data');
             
-            dom.deleteModal.modal.classList.add('hidden');
+            // Clear table on module switch
+            tableBody.innerHTML = '<tr><td class="p-4 text-center text-gray-400" colspan="99">Click "Load Data" to begin.</td></tr>';
             
-            if (ok) {
-                showToast('Record deleted successfully!');
-                fetchMasterData(container, slug, fields); // Refresh data
-            } else {
-                 showToast(`Failed to delete record: ${data.message || 'Error'}`, true);
+            // Attach event listeners (only once)
+            if (!loadBtn.dataset.listener) {
+                loadBtn.dataset.listener = 'true';
+                loadBtn.onclick = () => loadMasterData(currentMasterDataSlug);
+                createBtn.onclick = () => openMasterDataModal(null);
+                
+                // Event delegation for table buttons
+                el.onclick = (e) => {
+                    if (e.target.matches('.master-data-edit-btn')) {
+                        const record = JSON.parse(e.target.dataset.record);
+                        openMasterDataModal(record);
+                    }
+                    if (e.target.matches('.master-data-delete-btn')) {
+                        openDeleteConfirm(e.target.dataset.id);
+                    }
+                };
+                
+                dom.masterDataModal.form.onsubmit = (e) => {
+                    e.preventDefault();
+                    saveMasterData();
+                };
+
+                dom.deleteConfirmModal.confirmBtn.onclick = deleteMasterData;
             }
+            
+            // Automatically load data for convenience
+            loadMasterData(slug);
         };
 
-        // --- Router ---
-        const AppRouter = () => {
-            const hash = window.location.hash || '';
-            const params = new URLSearchParams(window.location.search);
+        // ----- Developer Tool -----
+        const openPayloadViewer = (title, payload) => {
+            const { modal, title: titleEl, pre } = dom.payloadViewerModal;
+            titleEl.textContent = title;
+            try {
+                pre.textContent = JSON.stringify(JSON.parse(payload), null, 2);
+            } catch (e) {
+                pre.textContent = payload || "No Data";
+            }
+            openModal(modal);
+        };
+        
+        const renderDevTool = () => {
+            const { logBody } = dom.devToolModal;
+            const logs = storage.getJson("apiLogs") || [];
+            logBody.innerHTML = '';
+            
+            if (logs.length === 0) {
+                logBody.innerHTML = `<tr><td class="p-4 text-center text-gray-400" colspan="6">No API calls logged.</td></tr>`;
+                return;
+            }
+            
+            logs.forEach(log => {
+                const statusColor = log.status >= 400 ? 'text-red-400' : (log.status >= 200 && log.status < 300 ? 'text-green-400' : 'text-yellow-400');
+                
+                const row = document.createElement('tr');
+                row.className = "hover:bg-gray-700";
+                row.innerHTML = `
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-400">${new Date(log.timestamp).toLocaleTimeString()}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm font-medium ${statusColor}">${log.status}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm text-gray-300">${log.method}</td>
+                    <td class="px-4 py-3 text-sm text-gray-300 truncate" style="max-width: 20vw;" title="${log.url}">${log.url}</td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm"><a href="#" class="text-blue-400 hover:underline" data-payload-type="Request" data-log-id="${log.id}">View</a></td>
+                    <td class="px-4 py-3 whitespace-nowrap text-sm"><a href="#" class="text-blue-400 hover:underline" data-payload-type="Response" data-log-id="${log.id}">View</a></td>
+                `;
+                
+                row.querySelectorAll('a[data-log-id]').forEach(link => {
+                    link.onclick = (e) => {
+                        e.preventDefault();
+                        const type = e.target.dataset.payloadType;
+                        const logData = logs.find(l => l.id === log.id);
+                        const payload = type === 'Request' ? logData.request : logData.response;
+                        openPayloadViewer(`${type} Payload for ${log.method}`, payload);
+                    };
+                });
+                
+                logBody.appendChild(row);
+            });
+        };
+        
+        const initDevTool = () => {
+            dom.devToolToggle.onclick = () => {
+                renderDevTool();
+                openModal(dom.devToolModal.modal);
+            };
+            dom.devToolModal.purgeBtn.onclick = () => {
+                storage.setJson("apiLogs", []);
+                renderDevTool();
+                showToast("API logs purged!", "info");
+            };
+        };
+
+        // --- ROUTING & INITIALIZATION ---
+
+        const handleRouting = () => {
+            const hash = location.hash || '#';
+            const params = new URLSearchParams(location.search);
             const code = params.get('code');
             
-            // Close mobile sidebar on navigation
-            dom.sidebar.classList.add('-translate-x-full');
-            dom.sidebar.classList.remove('translate-x-0');
-
+            if (!storage.isLoggedIn() && !code && hash !== '#admin') {
+                location.hash = '#login';
+            }
+            
+            // Clear search params after reading code
+            if (code) {
+                history.replaceState(null, '', location.pathname + '#login');
+            }
+            
+            updateNav(); // Highlight active link
+            
+            // Built-in routes
             if (hash === '#admin') {
                 showModule('admin');
                 initAdminModule();
                 return;
             }
-            
-            if (code) {
+            if (hash === '#login' || code) {
                 showModule('login');
-                initLoginModule(code);
+                initLoginModule(code); // Pass code if present
                 return;
             }
             
-            if (isAuthenticated()) {
-                updateSidebar(true);
-                updateUserProfile();
-                
-                let targetModule = 'campaignSubmission'; // Default
-                let targetHash = '#campaign-submission';
-
-                if (hash === '#demo-client') {
-                    targetModule = 'demoClient';
-                    targetHash = '#demo-client';
-                    initMasterDataModule(dom.masterData.demoClientContainer, 'demoxpiclients');
-                } else if (hash === '#xpi-mapping') {
-                    targetModule = 'xpiMapping';
-                    targetHash = '#xpi-mapping';
-                    initMasterDataModule(dom.masterData.xpiMappingContainer, 'xpicfmapping');
-                } else {
-                    // Default to campaign submission
-                    targetModule = 'campaignSubmission';
-                    targetHash = '#campaign-submission';
-                    initCampaignSubmissionModule();
+            // Authenticated routes
+            if (!storage.isLoggedIn()) {
+                return; // Guard clause
+            }
+            
+            const moduleDef = MODULE_CONFIG.find(m => m.hash === hash);
+            
+            if (moduleDef && moduleDef.type === 'User-defined') {
+                if (moduleDef.slug) {
+                    // This is a master data module
+                    initMasterDataModule(moduleDef.slug, moduleDef.name);
+                } else if (moduleDef.hash === '#campaign-submission') {
+                    showModule('campaign-submission');
+                    initCampaignModule();
                 }
-
-                if(window.location.hash !== targetHash) {
-                    window.location.hash = targetHash; // Set hash if not correct
-                }
-                
-                showModule(targetModule);
-                highlightActiveLink(targetHash);
-
             } else {
-                // Not authenticated
-                updateSidebar(false);
-                showModule('login');
-                initLoginModule(null);
+                // Default to campaign submission if logged in and no valid hash
+                location.hash = '#campaign-submission';
             }
         };
-        
-        // --- Event Listeners ---
-        const initEventListeners = () => {
-            // Sidebar Toggles
-            dom.sidebarToggleOpen.addEventListener('click', () => {
-                dom.sidebar.classList.remove('-translate-x-full');
-                dom.sidebar.classList.add('translate-x-0');
-            });
-            dom.sidebarToggleClose.addEventListener('click', () => {
-                dom.sidebar.classList.add('-translate-x-full');
-                dom.sidebar.classList.remove('translate-x-0');
-            });
-            
-            // Logout
-            dom.logoutLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                logout();
-            });
-            
-            // Routing
-            window.addEventListener('hashchange', AppRouter);
-            
-            // Login
-            dom.login.loginButton.addEventListener('click', handleLoginClick);
-            dom.login.startOverButton.addEventListener('click', () => {
-                window.location.href = getBaseUrl();
-            });
-            
-            // Admin
-            dom.admin.form.addEventListener('submit', handleAdminFormSubmit);
-            
-            // Campaign
-            dom.campaign.form.addEventListener('submit', handleCampaignSubmit);
 
-            // Dev Tool
-            dom.devTool.toggle.addEventListener('click', () => {
-                dom.devTool.overlay.classList.toggle('hidden');
-            });
-            dom.devTool.close.addEventListener('click', () => {
-                dom.devTool.overlay.classList.add('hidden');
-            });
-            dom.devTool.purge.addEventListener('click', () => {
-                setStorage(STORAGE_KEYS.API_LOGS, []);
-                renderDevToolLogs();
-                showToast('API logs cleared.');
-            });
-            dom.devTool.logBody.addEventListener('click', (e) => {
-                if (e.target.tagName === 'A' && e.target.dataset.logIndex) {
-                    e.preventDefault();
-                    showLogPayload(e.target.dataset.logIndex, e.target.dataset.logType);
-                }
+        const initializeApp = () => {
+            // Set default config if not present
+            if (!storage.get("xpiBaseUrl")) {
+                storage.set("xpiBaseUrl", DEFAULT_CONFIG.xpiBaseUrl);
+            }
+            
+            // Attach global event listeners
+            dom.logoutLink.onclick = (e) => { e.preventDefault(); handleLogout(); };
+            dom.mobileMenuBtn.onclick = () => dom.sidebar.classList.toggle("hidden");
+            dom.sidebarToggleBtn.onclick = () => dom.sidebar.classList.toggle("hidden");
+            
+            // Attach modal close listeners
+            $$(".modal-close-btn").forEach(btn => {
+                btn.onclick = () => closeModal(btn.closest(".modal"));
             });
             
-            // Payload Modal
-            dom.payloadModal.close.addEventListener('click', () => {
-                dom.payloadModal.modal.classList.add('hidden');
-            });
-            
-            // Master Data Modal
-            dom.masterData.close.addEventListener('click', () => {
-                dom.masterData.modal.classList.add('hidden');
-            });
-            dom.masterData.cancel.addEventListener('click', () => {
-                dom.masterData.modal.classList.add('hidden');
-            });
+            // Close payload viewer modal
+            dom.payloadViewerModal.modal.querySelector('.modal-close-btn').onclick = ()_ => {
+                closeModal(dom.payloadViewerModal.modal);
+            };
 
-            // Delete Confirm Modal
-            dom.deleteModal.cancel.addEventListener('click', () => {
-                dom.deleteModal.modal.classList.add('hidden');
-            });
+            // Init Dev Tool
+            initDevTool();
+
+            // Handle routing on load and hash change
+            window.addEventListener('hashchange', handleRouting);
+            
+            // Initial setup
+            updateLayout();
+            handleRouting();
         };
 
-        // --- App Initialization ---
-        document.addEventListener('DOMContentLoaded', () => {
-            initEventListeners();
-            AppRouter(); // Initial route
-        });
-        
+        // Start the app
+        document.addEventListener('DOMContentLoaded', initializeApp);
+
     </script>
 </body>
 </html>
+
