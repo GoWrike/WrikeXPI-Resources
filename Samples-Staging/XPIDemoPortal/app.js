@@ -73,7 +73,7 @@
                 globalSpinner: document.getElementById('global-spinner')
             };
 
-            // 2. Apply dynamic Tailwind styles
+            // 2. Apply dynamic Tailwind styles (MODERN THEME)
             App.theme.applyStyles();
 
             // 3. Initialize core components
@@ -85,61 +85,61 @@
         },
 
         // =================================================================
-        //  THEME & STYLING ENGINE
+        //  THEME & STYLING ENGINE (*** NEW MODERN STYLES ***)
         // =================================================================
         theme: {
             /**
              * applyStyles
              * Replaces placeholder CSS classes with full Tailwind strings.
-             * This fulfills the specific implementation note from the instructions.
              */
             applyStyles: function() {
                 const styles = {
                     // Layout
                     'styled-form-container': 'bg-gray-800 p-6 md:p-8 rounded-lg shadow-xl max-w-4xl mx-auto',
                     'styled-card': 'bg-gray-800 rounded-lg shadow-lg overflow-hidden',
-                    'styled-sidebar': 'bg-gray-800 text-gray-200 w-64',
+                    'styled-sidebar': 'bg-gray-800 text-gray-200 w-64 border-r border-gray-700/50',
                     'styled-sidebar-header-title': 'opacity-100',
+                    'styled-form-title': 'text-2xl font-semibold text-white mb-6 pb-2 border-b border-gray-700',
                     
                     // Buttons
-                    'styled-btn-primary': 'bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed',
-                    'styled-btn-secondary': 'bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed',
-                    'styled-btn-danger': 'bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md transition duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed',
-                    'styled-icon-btn': 'p-2 rounded-full text-gray-400 hover:bg-gray-700 hover:text-white transition duration-200 focus:outline-none focus:ring-2 focus:ring-gray-500',
-                    'styled-dev-tool-btn': 'bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-500',
-                    'styled-tag': 'bg-blue-500 text-white text-sm font-medium px-2 py-1 rounded-full flex items-center gap-1',
-                    'styled-tag-remove': 'cursor-pointer text-blue-100 hover:text-white font-bold',
+                    'styled-btn-primary': 'bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg',
+                    'styled-btn-secondary': 'bg-gray-600 hover:bg-gray-700 text-white font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm hover:shadow-md',
+                    'styled-btn-danger': 'bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-5 rounded-lg transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg',
+                    'styled-icon-btn': 'p-2 rounded-full text-gray-400 hover:bg-gray-700 hover:text-white transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800',
+                    'styled-dev-tool-btn': 'bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900',
+                    'styled-tag': 'bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-full flex items-center gap-2',
+                    'styled-tag-remove': 'cursor-pointer text-blue-100 hover:text-white font-bold transition-colors duration-150',
 
                     // Forms
-                    'styled-label': 'block text-sm font-medium text-gray-300 mb-1',
-                    'styled-input': 'bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 placeholder-gray-400',
-                    'styled-select': 'bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 placeholder-gray-400 disabled:opacity-50',
+                    'styled-label': 'block text-sm font-medium text-gray-400 mb-1.5',
+                    'styled-input': 'bg-gray-700 border border-gray-600 text-white text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 placeholder-gray-500 transition duration-200',
+                    'styled-select': 'bg-gray-700 border border-gray-600 text-white text-sm rounded-md focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 placeholder-gray-500 transition duration-200 disabled:opacity-50',
 
                     // Tables
                     'styled-table': 'w-full text-sm text-left text-gray-300',
-                    'styled-table-header': 'text-xs text-gray-400 uppercase bg-gray-700',
-                    'styled-table-cell': 'px-6 py-3',
-                    'styled-table-action-btn': 'font-medium text-blue-400 hover:text-blue-300 mr-3',
+                    'styled-table-header': 'text-xs text-gray-400 uppercase bg-gray-700/50',
+                    'styled-table-cell': 'px-6 py-4 whitespace-nowrap',
+                    'styled-table-action-btn': 'font-medium text-blue-400 hover:text-blue-300 mr-4 transition-colors duration-150',
 
                     // Modals
-                    'styled-modal-backdrop': 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-[70] p-4',
-                    'styled-modal-dialog': 'bg-gray-800 rounded-lg shadow-xl w-full max-w-2xl overflow-hidden',
-                    'styled-modal-title': 'text-lg font-semibold text-white',
+                    'styled-modal-backdrop': 'fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[70] p-4',
+                    'styled-modal-dialog': 'bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl border border-gray-700',
+                    'styled-modal-title': 'text-xl font-semibold text-white',
                     
                     // Misc
-                    'styled-nav-link': 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 group',
-                    'styled-nav-link-active': 'bg-blue-600 text-white',
-                    'styled-pre': 'bg-gray-900 text-gray-200 p-4 rounded-md overflow-auto text-sm',
-                    'styled-pre-error': 'bg-red-900 bg-opacity-50 border border-red-700 text-red-200 p-4 rounded-md overflow-auto text-sm',
-                    'styled-spinner': 'w-12 h-12 border-4 border-blue-400 border-t-transparent rounded-full animate-spin'
+                    'styled-nav-link': 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 ease-in-out group focus:outline-none focus:ring-2 focus:ring-blue-500',
+                    'styled-nav-link-active': 'bg-blue-600 text-white shadow-inner',
+                    'styled-pre': 'bg-gray-900 border border-gray-700 text-gray-200 p-4 rounded-lg overflow-auto text-sm',
+                    'styled-pre-error': 'bg-red-900/20 border border-red-700/50 text-red-200 p-4 rounded-lg overflow-auto text-sm',
+                    'styled-spinner': 'w-10 h-10 border-4 border-blue-400 border-t-transparent rounded-full animate-spin'
                 };
 
                 for (const [placeholder, tailwindString] of Object.entries(styles)) {
                     document.querySelectorAll(`.${placeholder}`).forEach(el => {
-                        // Add Tailwind classes and remove the placeholder
-                        // This preserves other classes on the element, as requested
-                        el.classList.add(...tailwindString.split(' '));
-                        el.classList.remove(placeholder);
+                        // Preserve any existing non-placeholder classes
+                        const existingClasses = Array.from(el.classList).filter(c => c !== placeholder);
+                        // Apply new classes
+                        el.className = [...existingClasses, ...tailwindString.split(' ')].join(' ');
                     });
                 }
             }
@@ -277,7 +277,7 @@
                                 <!-- Simple icon placeholder -->
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-earmark-text flex-shrink-0" viewBox="0 0 16 16">
                                     <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5"/>
-                                    <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zM4 1a1 1 0 0 1 1-1h4.5v3.5A1.5 1.5 0 0 0 11 6V2.5L14 5.5V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>
+                                    <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zM4 1a1 1 0 0 1 1-1h4.5v3.5A1.5 1.5 0 0 0 11 6V2.5L14 5.5V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1 1z"/>
                                 </svg>
                                 <span class="ml-3 transition-opacity duration-200">${mod.name}</span>
                             </a>
@@ -327,18 +327,23 @@
                 toast.className = `p-4 rounded-lg shadow-lg ${colors[type]}`;
                 // Basic animation fallback
                 toast.style.opacity = '0';
-                toast.style.transition = 'opacity 0.5s ease';
+                toast.style.transform = 'translateX(100%)';
+                toast.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
                 
                 toast.innerHTML = `<p>${message}</p>`;
                 
                 document.getElementById('toast-container').appendChild(toast);
                 
                 // Fade in
-                setTimeout(() => { toast.style.opacity = '1'; }, 10);
+                setTimeout(() => { 
+                    toast.style.opacity = '1';
+                    toast.style.transform = 'translateX(0)';
+                }, 10);
                 
                 // Fade out
                 setTimeout(() => {
                     toast.style.opacity = '0';
+                    toast.style.transform = 'translateX(100%)';
                     toast.addEventListener('transitionend', () => toast.remove());
                 }, 3000);
             },
@@ -727,7 +732,7 @@
                 logs.forEach(log => {
                     try {
                         const row = document.createElement('tr');
-                        row.className = 'border-b border-gray-700 hover:bg-gray-700';
+                        row.className = 'border-b border-gray-700 hover:bg-gray-700/50 transition-colors duration-150';
                         
                         let status = 'N/A';
                         let statusClass = 'text-gray-400';
@@ -888,7 +893,7 @@
                 }
                 
                 // Hide all other modules
-                App.elements.mainContent.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+                App.elements.mainContent.querySelectorAll('section[data-module-id]').forEach(s => s.classList.add('hidden'));
                 
                 // Show the target module
                 view.classList.remove('hidden');
@@ -1081,10 +1086,11 @@
                     container.innerHTML = '';
                     this.tags.forEach(tag => {
                         const tagEl = document.createElement('span');
-                        tagEl.className = 'styled-tag bg-blue-500 text-white text-sm font-medium px-2 py-1 rounded-full flex items-center gap-1'; // Ensure styles are applied
+                        // Apply styles directly since it's dynamic
+                        tagEl.className = 'styled-tag bg-blue-600 text-white text-sm font-medium px-3 py-1 rounded-full flex items-center gap-2';
                         tagEl.innerHTML = `
                             ${tag}
-                            <span class="styled-tag-remove cursor-pointer text-blue-100 hover:text-white font-bold" data-tag-value="${tag}">&times;</span>
+                            <span class="styled-tag-remove cursor-pointer text-blue-100 hover:text-white font-bold transition-colors duration-150" data-tag-value="${tag}">&times;</span>
                         `;
                         
                         tagEl.querySelector('.styled-tag-remove').addEventListener('click', (e) => {
@@ -1204,7 +1210,7 @@
                     
                     records.forEach(record => {
                         const row = document.createElement('tr');
-                        row.className = 'border-b border-gray-700 hover:bg-gray-700';
+                        row.className = 'hover:bg-gray-700/50 transition-colors duration-150';
                         
                         let cells = '';
                         config.fields.forEach(field => {
@@ -1376,3 +1382,4 @@
     document.addEventListener('DOMContentLoaded', App.init);
 
 })();
+

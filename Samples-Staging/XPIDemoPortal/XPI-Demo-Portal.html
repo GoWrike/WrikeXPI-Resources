@@ -51,7 +51,7 @@
         </nav>
         
         <!-- Main Content Area -->
-        <main id="main-content" class="flex-1 overflow-y-auto p-8">
+        <main id="main-content" class="flex-1 overflow-y-auto p-4 md:p-8">
             <!-- Modules will be injected here -->
         </main>
     </div>
@@ -68,7 +68,7 @@
 
     <!-- Developer Tool Toggle -->
     <button id="dev-tool-toggle" class="styled-dev-tool-btn fixed bottom-5 right-5 z-[60]">
-        <!-- Bootstrap Icon: person-fill-gear (replaces hat for better BS icon availability) -->
+        <!-- Bootstrap Icon: person-fill-gear -->
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-fill-gear" viewBox="0 0 16 16">
             <path d="M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0m-9 8c0 1 1 1 1 1h5.256A4.5 4.5 0 0 1 8 12.5a4.5 4.5 0 0 1 1.544-3.393Q8.844 9.002 8 9c-5 0-6 3-6 4m9.886-3.54c.18-.613 1.048-.613 1.229 0l.043.148a.64.64 0 0 0 .921.382l.136-.074c.561-.306 1.175.308.87.869l-.075.136a.64.64 0 0 0 .382.92l.149.045c.612.18.612 1.048 0 1.229l-.15.043a.64.64 0 0 0-.38.921l.074.136c.305.561-.309 1.175-.87.87l-.136-.075a.64.64 0 0 0-.92.382l-.045.149c-.18.612-1.048.612-1.229 0l-.043-.148a.64.64 0 0 0-.921-.382l-.136.074c-.561.306-1.175-.308-.87-.869l.075-.136a.64.64 0 0 0-.382-.92l-.148-.045c-.613-.18-.613-1.048 0-1.229l.148-.043a.64.64 0 0 0 .382-.921l-.074-.136c-.306-.561.308-1.175.869-.87l.136.075a.64.64 0 0 0 .92-.382zM14 12.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0"/>
         </svg>
@@ -76,9 +76,9 @@
     
     <!-- Developer Tool Modal -->
     <div id="dev-tool-modal" class="styled-modal-backdrop hidden">
-        <div class="styled-modal-dialog w-[80vw] h-[80vh] flex flex-col">
+        <div class="styled-modal-dialog w-[80vw] max-h-[80vh] flex flex-col">
             <!-- Modal Header -->
-            <div class="flex justify-between items-center p-4 border-b border-gray-700">
+            <div class="flex-shrink-0 flex justify-between items-center p-4 border-b border-gray-700">
                 <h3 class="styled-modal-title">Developer Tool: API Logs</h3>
                 <div>
                     <button id="dev-tool-purge" class="styled-icon-btn mr-2">
@@ -121,9 +121,9 @@
     
     <!-- Payload Viewer Modal -->
     <div id="payload-modal" class="styled-modal-backdrop hidden">
-        <div class="styled-modal-dialog w-1/2 flex flex-col">
+        <div class="styled-modal-dialog w-1/2 max-h-[80vh] flex flex-col">
             <!-- Modal Header -->
-            <div class="flex justify-between items-center p-4 border-b border-gray-700">
+            <div class="flex-shrink-0 flex justify-between items-center p-4 border-b border-gray-700">
                 <h3 id="payload-modal-title" class="styled-modal-title">Payload</h3>
                 <button id="payload-modal-close" class="styled-icon-btn">
                     <!-- Bootstrap Icon: x-lg -->
@@ -148,7 +148,7 @@
             </div>
             <!-- Modal Body -->
             <div class="p-6">
-                <p id="confirm-modal-body">Are you sure?</p>
+                <p id="confirm-modal-body" class="text-gray-300">Are you sure?</p>
             </div>
             <!-- Modal Footer -->
             <div class="p-4 border-t border-gray-700 flex justify-end space-x-3">
@@ -167,7 +167,7 @@
         <section data-module-id="MOD.A" class="styled-form-container">
             <h2 class="styled-form-title">Admin Configuration</h2>
             <form id="admin-form">
-                <div class="space-y-4">
+                <div class="space-y-6">
                     <div>
                         <label for="xpiBaseUrl" class="styled-label">XPI Base URL</label>
                         <input type="text" id="xpiBaseUrl" class="styled-input w-full">
@@ -181,7 +181,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="mt-6 flex justify-end">
+                <div class="mt-8 flex justify-end">
                     <button type="submit" class="styled-btn-primary">Save Configuration</button>
                 </div>
             </form>
@@ -190,9 +190,9 @@
     
     <!-- Template: Login - Auth (MOD.B) -->
     <template id="template-login-auth">
-        <section data-module-id="MOD.B" class="styled-form-container text-center">
+        <section data-module-id="MOD.B" class="styled-form-container text-center max-w-md">
             <h2 class="styled-form-title">Welcome to XPI Portal</h2>
-            <p class="mb-6 text-gray-400">Please log in to continue.</p>
+            <p class="mb-8 text-gray-400">Please log in to continue.</p>
             <button id="login-auth-btn" class="styled-btn-primary w-full max-w-xs mx-auto">
                 Login &amp; Authenticate
             </button>
@@ -201,12 +201,12 @@
     
     <!-- Template: Login - Callback (MOD.B) -->
     <template id="template-login-callback">
-        <section data-module-id="MOD.B" class="styled-form-container text-center">
+        <section data-module-id="MOD.B" class="styled-form-container text-center max-w-lg">
             <h2 class="styled-form-title">Authenticating...</h2>
             <div class="flex justify-center items-center my-8">
                 <div class="styled-spinner"></div>
             </div>
-            <p id="login-callback-message" class="text-gray-400">Please wait while we verify your credentials.</p>
+            <p id="login-callback-message" class="text-gray-300">Please wait while we verify your credentials.</p>
             
             <!-- Error Display -->
             <div id="login-callback-error" class="hidden mt-6 text-left">
@@ -229,9 +229,9 @@
                 <input type="hidden" name="entity" value="Campaign">
                 <input type="hidden" name="varientId" value="1">
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
                     <!-- Left Column -->
-                    <div class="space-y-4">
+                    <div class="space-y-5">
                         <div>
                             <label for="campaignname" class="styled-label">Campaign Name</label>
                             <input type="text" id="campaignname" name="campaignname" class="styled-input w-full" value="World Pinball Day 7000">
@@ -269,7 +269,7 @@
                     </div>
                     
                     <!-- Right Column -->
-                    <div class="space-y-4">
+                    <div class="space-y-5">
                         <div>
                             <label for="requestedstartdate" class="styled-label">Requested Start Date</label>
                             <input type="date" id="requestedstartdate" name="requestedstartdate" class="styled-input w-full" value="2026-07-01">
@@ -320,7 +320,7 @@
                         <div id="selectedchannels-tags" class="flex flex-wrap gap-2">
                             <!-- Tags injected here -->
                         </div>
-                        <input type="text" id="selectedchannels-input" class="flex-grow bg-transparent border-none outline-none p-1" placeholder="Type a channel and press Enter...">
+                        <input type="text" id="selectedchannels-input" class="flex-grow bg-transparent border-none outline-none p-1 text-white" placeholder="Type a channel and press Enter...">
                     </div>
                 </div>
 
@@ -333,8 +333,8 @@
             </form>
             
             <!-- Result Display -->
-            <div id="campaign-result" class="hidden mt-6">
-                <h3 class="styled-form-title text-lg">Submission Result</h3>
+            <div id="campaign-result" class="hidden mt-8">
+                <h3 class="text-xl font-semibold text-white mb-4">Submission Result</h3>
                 <pre class="styled-pre"></pre>
             </div>
         </section>
@@ -343,7 +343,7 @@
     <!-- Template: Master Data (Generic) -->
     <template id="template-master-data">
         <section class="styled-form-container max-w-6xl">
-            <div class="flex justify-between items-center mb-6">
+            <div class="flex flex-col md:flex-row justify-between md:items-center mb-6 gap-4">
                 <h2 class="styled-form-title" id="master-data-title">Master Data Management</h2>
                 <div>
                     <button id="master-data-load" class="styled-btn-secondary mr-2">Load Data</button>
@@ -352,12 +352,12 @@
             </div>
             
             <!-- Data Table -->
-            <div class="overflow-x-auto styled-card">
+            <div class="overflow-x-auto styled-card border border-gray-700">
                 <table class="styled-table min-w-full">
                     <thead class="styled-table-header" id="master-data-thead">
                         <!-- Header injected by JS -->
                     </thead>
-                    <tbody id="master-data-tbody">
+                    <tbody id="master-data-tbody" class="divide-y divide-gray-700">
                         <tr>
                             <td colspan="100%" class="p-4 text-center text-gray-400">
                                 Click "Load Data" to fetch records.
@@ -369,11 +369,11 @@
             
             <!-- Master Data C/U Modal -->
             <div id="master-data-modal" class="styled-modal-backdrop hidden">
-                <div class="styled-modal-dialog max-w-2xl">
+                <div class="styled-modal-dialog max-w-2xl max-h-[90vh] flex flex-col">
                     <form id="master-data-form">
                         <input type="hidden" id="master-data-id" name="id">
                         <!-- Modal Header -->
-                        <div class="flex justify-between items-center p-4 border-b border-gray-700">
+                        <div class="flex-shrink-0 flex justify-between items-center p-4 border-b border-gray-700">
                             <h3 id="master-data-modal-title" class="styled-modal-title">Create/Edit Record</h3>
                             <button type="button" id="master-data-modal-close" class="styled-icon-btn">
                                 <!-- Bootstrap Icon: x-lg -->
@@ -383,13 +383,13 @@
                             </button>
                         </div>
                         <!-- Modal Body -->
-                        <div class="p-6">
-                            <div id="master-data-form-fields" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="p-6 overflow-y-auto">
+                            <div id="master-data-form-fields" class="grid grid-cols-1 md:grid-cols-2 gap-x-5 gap-y-5">
                                 <!-- Form fields injected by JS -->
                             </div>
                         </div>
                         <!-- Modal Footer -->
-                        <div class="p-4 border-t border-gray-700 flex justify-end space-x-3">
+                        <div class="flex-shrink-0 p-4 border-t border-gray-700 flex justify-end space-x-3">
                             <button type="button" id="master-data-modal-cancel" class="styled-btn-secondary">Cancel</button>
                             <button type="submit" id="master-data-modal-save" class="styled-btn-primary">Save Changes</button>
                         </div>
@@ -402,3 +402,4 @@
 
 </body>
 </html>
+

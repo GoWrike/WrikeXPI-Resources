@@ -14,6 +14,7 @@ body {
 .styled-card {}
 .styled-sidebar {}
 .styled-sidebar-header-title {}
+.styled-form-title {} /* New placeholder for titles */
 
 /* Buttons */
 .styled-btn-primary {}
@@ -46,3 +47,4 @@ body {
 .styled-pre {}
 .styled-pre-error {}
 .styled-spinner {}
+
