@@ -515,7 +515,11 @@ const App = (function() {
             dom.userAvatar = document.getElementById('user-avatar');
             dom.logoutLink = document.getElementById('logout-link');
 
-            dom.toggleBtn.addEventListener('click', toggle);
+            if (dom.toggleBtn) {
+                dom.toggleBtn.addEventListener('click', toggle);
+            } else {
+                console.error('CRITICAL: Sidebar toggle button #sidebar-toggle-btn not found.');
+            }
             dom.logoutLink.addEventListener('click', (e) => {
                 e.preventDefault();
                 Auth.logout();
@@ -1158,3 +1162,4 @@ const App = (function() {
     return {};
 
 })();
+
