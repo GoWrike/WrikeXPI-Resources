@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XPI Portal</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Custom Stylesheet (for placeholder classes) -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- App Logic -->
+    <script src="app.js" defer></script>
+</head>
+<body class="font-inter bg-gray-900 text-gray-100 antialiased">
+
+    <!-- Main App Layout -->
+    <div class="flex h-screen overflow-hidden">
+        
+        <!-- Navigation Sidebar -->
+        <nav id="nav-sidebar" class="styled-sidebar flex-shrink-0 transition-all duration-300 overflow-y-auto">
+            <div class="flex flex-col h-full">
+                <!-- Sidebar Header (Toggle) -->
+                <div class="p-4 flex items-center justify-between">
+                    <span class="styled-sidebar-header-title text-xl font-bold transition-opacity duration-200">XPI Portal</span>
+                    <button id="nav-toggle-btn" class="styled-icon-btn">
+                        <!-- Bootstrap Icon: list -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                            <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                        </svg>
+                    </button>
+                </div>
+                
+                <!-- Nav Links (Populated by JS) -->
+                <div id="nav-links" class="flex-grow space-y-2 px-4">
+                    <!-- Links will be injected here -->
+                </div>
+                
+                <!-- User Profile (Bottom) -->
+                <div id="user-profile" class="p-4 border-t border-gray-700 transition-opacity duration-200">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </nav>
+        
+        <!-- Main Content Area -->
+        <main id="main-content" class="flex-1 overflow-y-auto p-8">
+            <!-- Modules will be injected here -->
+        </main>
+    </div>
+
+    <!-- Global Spinner -->
+    <div id="global-spinner" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-[90] hidden">
+        <div class="styled-spinner"></div>
+    </div>
+    
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 space-y-3 z-[100]">
+        <!-- Toasts injected here -->
+    </div>
+
+    <!-- Developer Tool Toggle -->
+    <button id="dev-tool-toggle" class="styled-dev-tool-btn fixed bottom-5 right-5 z-[60]">
+        <!-- Bootstrap Icon: person-fill-gear (replaces hat for better BS icon availability) -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-fill-gear" viewBox="0 0 16 16">
+            <path d="M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0m-9 8c0 1 1 1 1 1h5.256A4.5 4.5 0 0 1 8 12.5a4.5 4.5 0 0 1 1.544-3.393Q8.844 9.002 8 9c-5 0-6 3-6 4m9.886-3.54c.18-.613 1.048-.613 1.229 0l.043.148a.64.64 0 0 0 .921.382l.136-.074c.561-.306 1.175.308.87.869l-.075.136a.64.64 0 0 0 .382.92l.149.045c.612.18.612 1.048 0 1.229l-.15.043a.64.64 0 0 0-.38.921l.074.136c.305.561-.309 1.175-.87.87l-.136-.075a.64.64 0 0 0-.92.382l-.045.149c-.18.612-1.048.612-1.229 0l-.043-.148a.64.64 0 0 0-.921-.382l-.136.074c-.561.306-1.175-.308-.87-.869l.075-.136a.64.64 0 0 0-.382-.92l-.148-.045c-.613-.18-.613-1.048 0-1.229l.148-.043a.64.64 0 0 0 .382-.921l-.074-.136c-.306-.561.308-1.175.869-.87l.136.075a.64.64 0 0 0 .92-.382zM14 12.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0"/>
+        </svg>
+    </button>
+    
+    <!-- Developer Tool Modal -->
+    <div id="dev-tool-modal" class="styled-modal-backdrop hidden">
+        <div class="styled-modal-dialog w-[80vw] h-[80vh] flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center p-4 border-b border-gray-700">
+                <h3 class="styled-modal-title">Developer Tool: API Logs</h3>
+                <div>
+                    <button id="dev-tool-purge" class="styled-icon-btn mr-2">
+                        <!-- Bootstrap Icon: trash -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                            <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+                            <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+                        </svg>
+                    </button>
+                    <button id="dev-tool-close" class="styled-icon-btn">
+                        <!-- Bootstrap Icon: x-lg -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <!-- Modal Body (Table) -->
+            <div class="p-4 flex-grow overflow-auto">
+                <div class="overflow-x-auto">
+                    <table class="styled-table min-w-full">
+                        <thead class="styled-table-header">
+                            <tr>
+                                <th>Timestamp</th>
+                                <th>Status</th>
+                                <th>Method</th>
+                                <th>URL</th>
+                                <th>Request</th>
+                                <th>Response</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dev-tool-log-body">
+                            <!-- Logs injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Payload Viewer Modal -->
+    <div id="payload-modal" class="styled-modal-backdrop hidden">
+        <div class="styled-modal-dialog w-1/2 flex flex-col">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center p-4 border-b border-gray-700">
+                <h3 id="payload-modal-title" class="styled-modal-title">Payload</h3>
+                <button id="payload-modal-close" class="styled-icon-btn">
+                    <!-- Bootstrap Icon: x-lg -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                    </svg>
+                </button>
+            </div>
+            <!-- Modal Body (Payload) -->
+            <div class="p-4 flex-grow overflow-auto">
+                <pre id="payload-modal-content" class="styled-pre"></pre>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Generic Confirmation Modal -->
+    <div id="confirm-modal" class="styled-modal-backdrop hidden">
+        <div class="styled-modal-dialog max-w-md">
+            <!-- Modal Header -->
+            <div class="flex justify-between items-center p-4 border-b border-gray-700">
+                <h3 id="confirm-modal-title" class="styled-modal-title">Confirm Action</h3>
+            </div>
+            <!-- Modal Body -->
+            <div class="p-6">
+                <p id="confirm-modal-body">Are you sure?</p>
+            </div>
+            <!-- Modal Footer -->
+            <div class="p-4 border-t border-gray-700 flex justify-end space-x-3">
+                <button id="confirm-modal-cancel" class="styled-btn-secondary">Cancel</button>
+                <button id="confirm-modal-ok" class="styled-btn-danger">Confirm</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- =================================== -->
+    <!--           MODULE TEMPLATES            -->
+    <!-- =================================== -->
+    
+    <!-- Template: Admin (MOD.A) -->
+    <template id="template-admin">
+        <section data-module-id="MOD.A" class="styled-form-container">
+            <h2 class="styled-form-title">Admin Configuration</h2>
+            <form id="admin-form">
+                <div class="space-y-4">
+                    <div>
+                        <label for="xpiBaseUrl" class="styled-label">XPI Base URL</label>
+                        <input type="text" id="xpiBaseUrl" class="styled-input w-full">
+                    </div>
+                    <div>
+                        <label for="xpiBaseUrlSuggestions" class="styled-label">Suggestions</label>
+                        <select id="xpiBaseUrlSuggestions" class="styled-select w-full">
+                            <option value="">Select a suggestion...</option>
+                            <option value="https://api.wrikexpi.groupm.com">https://api.wrikexpi.groupm.com</option>
+                            <option value="https://xpi-api.gowrike.space/">https://xpi-api.gowrike.space/</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end">
+                    <button type="submit" class="styled-btn-primary">Save Configuration</button>
+                </div>
+            </form>
+        </section>
+    </template>
+    
+    <!-- Template: Login - Auth (MOD.B) -->
+    <template id="template-login-auth">
+        <section data-module-id="MOD.B" class="styled-form-container text-center">
+            <h2 class="styled-form-title">Welcome to XPI Portal</h2>
+            <p class="mb-6 text-gray-400">Please log in to continue.</p>
+            <button id="login-auth-btn" class="styled-btn-primary w-full max-w-xs mx-auto">
+                Login &amp; Authenticate
+            </button>
+        </section>
+    </template>
+    
+    <!-- Template: Login - Callback (MOD.B) -->
+    <template id="template-login-callback">
+        <section data-module-id="MOD.B" class="styled-form-container text-center">
+            <h2 class="styled-form-title">Authenticating...</h2>
+            <div class="flex justify-center items-center my-8">
+                <div class="styled-spinner"></div>
+            </div>
+            <p id="login-callback-message" class="text-gray-400">Please wait while we verify your credentials.</p>
+            
+            <!-- Error Display -->
+            <div id="login-callback-error" class="hidden mt-6 text-left">
+                <pre class="styled-pre-error"></pre>
+                <button id="login-start-over-btn" class="styled-btn-secondary w-full mt-4">
+                    Start Over
+                </button>
+            </div>
+        </section>
+    </template>
+
+    <!-- Template: Campaign Submission (MOD.C) -->
+    <template id="template-campaign-submission">
+        <section data-module-id="MOD.C" class="styled-form-container max-w-4xl">
+            <h2 class="styled-form-title">Campaign Submission</h2>
+            <form id="campaign-form">
+                <!-- Hidden Fields -->
+                <input type="hidden" name="type" value="Campaign Request">
+                <input type="hidden" name="space" value="GRM-MYS-GMN">
+                <input type="hidden" name="entity" value="Campaign">
+                <input type="hidden" name="varientId" value="1">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Left Column -->
+                    <div class="space-y-4">
+                        <div>
+                            <label for="campaignname" class="styled-label">Campaign Name</label>
+                            <input type="text" id="campaignname" name="campaignname" class="styled-input w-full" value="World Pinball Day 7000">
+                        </div>
+                        <div>
+                            <label for="client" class="styled-label">Client</label>
+                            <select id="client" name="client" class="styled-select w-full" disabled>
+                                <option>Loading...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="debtor" class="styled-label">Debtor</label>
+                            <select id="debtor" name="debtor" class="styled-select w-full" disabled>
+                                <option>Loading...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="agency" class="styled-label">Agency</label>
+                            <select id="agency" name="agency" class="styled-select w-full" disabled>
+                                <option>Loading...</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="brand" class="styled-label">Brand</label>
+                            <input type="text" id="brand" name="brand" class="styled-input w-full" value="World Pinball">
+                        </div>
+                        <div>
+                            <label for="pod" class="styled-label">Pod</label>
+                            <input type="text" id="pod" name="pod" class="styled-input w-full" value="Pod 1A">
+                        </div>
+                        <div>
+                            <label for="campaignobjective" class="styled-label">Campaign Objective</label>
+                            <input type="text" id="campaignobjective" name="campaignobjective" class="styled-input w-full" value="Upper Funnel / Awareness">
+                        </div>
+                    </div>
+                    
+                    <!-- Right Column -->
+                    <div class="space-y-4">
+                        <div>
+                            <label for="requestedstartdate" class="styled-label">Requested Start Date</label>
+                            <input type="date" id="requestedstartdate" name="requestedstartdate" class="styled-input w-full" value="2026-07-01">
+                        </div>
+                        <div>
+                            <label for="campaignstartdate" class="styled-label">Campaign Start Date</label>
+                            <input type="date" id="campaignstartdate" name="campaignstartdate" class="styled-input w-full" value="2026-08-29">
+                        </div>
+                        <div>
+                            <label for="campaignenddate" class="styled-label">Campaign End Date</label>
+                            <input type="date" id="campaignenddate" name="campaignenddate" class="styled-input w-full" value="2026-10-29">
+                        </div>
+                        <div>
+                            <label for="currency" class="styled-label">Currency</label>
+                            <input type="text" id="currency" name="currency" class="styled-input w-full" value="SGD">
+                        </div>
+                        <div>
+                            <label for="overallbudget" class="styled-label">Overall Budget</label>
+                            <input type="number" id="overallbudget" name="overallbudget" class="styled-input w-full" value="100">
+                        </div>
+                        <div>
+                            <label for="requestormarket" class="styled-label">Requestor Market</label>
+                            <input type="text" id="requestormarket" name="requestormarket" class="styled-input w-full" value="Singapore">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label for="optin" class="styled-label">Opt-in</label>
+                                <select id="optin" name="optin" class="styled-select w-full">
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="porequired" class="styled-label">PO Required</label>
+                                <select id="porequired" name="porequired" class="styled-select w-full">
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Selected Channels (Tag Input) -->
+                <div class="mt-6">
+                    <label for="selectedchannels-input" class="styled-label">Selected Channels</label>
+                    <div class="styled-input w-full flex flex-wrap items-center gap-2 p-2">
+                        <div id="selectedchannels-tags" class="flex flex-wrap gap-2">
+                            <!-- Tags injected here -->
+                        </div>
+                        <input type="text" id="selectedchannels-input" class="flex-grow bg-transparent border-none outline-none p-1" placeholder="Type a channel and press Enter...">
+                    </div>
+                </div>
+
+                <!-- Form Actions -->
+                <div class="mt-8 flex justify-end">
+                    <button type="submit" id="campaign-submit-btn" class="styled-btn-primary">
+                        Submit Campaign
+                    </button>
+                </div>
+            </form>
+            
+            <!-- Result Display -->
+            <div id="campaign-result" class="hidden mt-6">
+                <h3 class="styled-form-title text-lg">Submission Result</h3>
+                <pre class="styled-pre"></pre>
+            </div>
+        </section>
+    </template>
+    
+    <!-- Template: Master Data (Generic) -->
+    <template id="template-master-data">
+        <section class="styled-form-container max-w-6xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="styled-form-title" id="master-data-title">Master Data Management</h2>
+                <div>
+                    <button id="master-data-load" class="styled-btn-secondary mr-2">Load Data</button>
+                    <button id="master-data-create" class="styled-btn-primary">Create New</button>
+                </div>
+            </div>
+            
+            <!-- Data Table -->
+            <div class="overflow-x-auto styled-card">
+                <table class="styled-table min-w-full">
+                    <thead class="styled-table-header" id="master-data-thead">
+                        <!-- Header injected by JS -->
+                    </thead>
+                    <tbody id="master-data-tbody">
+                        <tr>
+                            <td colspan="100%" class="p-4 text-center text-gray-400">
+                                Click "Load Data" to fetch records.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Master Data C/U Modal -->
+            <div id="master-data-modal" class="styled-modal-backdrop hidden">
+                <div class="styled-modal-dialog max-w-2xl">
+                    <form id="master-data-form">
+                        <input type="hidden" id="master-data-id" name="id">
+                        <!-- Modal Header -->
+                        <div class="flex justify-between items-center p-4 border-b border-gray-700">
+                            <h3 id="master-data-modal-title" class="styled-modal-title">Create/Edit Record</h3>
+                            <button type="button" id="master-data-modal-close" class="styled-icon-btn">
+                                <!-- Bootstrap Icon: x-lg -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        <!-- Modal Body -->
+                        <div class="p-6">
+                            <div id="master-data-form-fields" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Form fields injected by JS -->
+                            </div>
+                        </div>
+                        <!-- Modal Footer -->
+                        <div class="p-4 border-t border-gray-700 flex justify-end space-x-3">
+                            <button type="button" id="master-data-modal-cancel" class="styled-btn-secondary">Cancel</button>
+                            <button type="submit" id="master-data-modal-save" class="styled-btn-primary">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+        </section>
+    </template>
+
+</body>
+</html>

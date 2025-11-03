@@ -1,0 +1,48 @@
+/* This file is intentionally minimal. 
+  It defines the *placeholder* classes that app.js will find and replace 
+  with the full Tailwind utility strings on load.
+*/
+
+body {
+    font-family: 'Inter', sans-serif;
+}
+
+/* --- Placeholder Classes --- */
+
+/* Layout */
+.styled-form-container {}
+.styled-card {}
+.styled-sidebar {}
+.styled-sidebar-header-title {}
+
+/* Buttons */
+.styled-btn-primary {}
+.styled-btn-secondary {}
+.styled-btn-danger {}
+.styled-icon-btn {}
+.styled-dev-tool-btn {}
+.styled-tag {}
+.styled-tag-remove {}
+
+/* Forms */
+.styled-label {}
+.styled-input {}
+.styled-select {}
+
+/* Tables */
+.styled-table {}
+.styled-table-header {}
+.styled-table-cell {}
+.styled-table-action-btn {}
+
+/* Modals */
+.styled-modal-backdrop {}
+.styled-modal-dialog {}
+.styled-modal-title {}
+
+/* Misc */
+.styled-nav-link {}
+.styled-nav-link-active {}
+.styled-pre {}
+.styled-pre-error {}
+.styled-spinner {}
