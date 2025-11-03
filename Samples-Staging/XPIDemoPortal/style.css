@@ -1,50 +1,22 @@
-/* This file is intentionally minimal. 
-  It defines the *placeholder* classes that app.js will find and replace 
-  with the full Tailwind utility strings on load.
+/* styles.css
+  This file is intentionally minimal. 
+  All primary styling is applied dynamically via Tailwind CSS classes in app.js 
+  to meet the project's specific implementation requirements.
+  
+  We only define the loading spinner animation here.
 */
 
-body {
-    font-family: 'Inter', sans-serif;
+.styled-spinner {
+  border: 4px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: #6366F1; /* Corresponds to indigo-500 */
+  width: 40px;
+  height: 40px;
+  animation: spin 1s linear infinite;
 }
 
-/* --- Placeholder Classes --- */
-
-/* Layout */
-.styled-form-container {}
-.styled-card {}
-.styled-sidebar {}
-.styled-sidebar-header-title {}
-.styled-form-title {} /* New placeholder for titles */
-
-/* Buttons */
-.styled-btn-primary {}
-.styled-btn-secondary {}
-.styled-btn-danger {}
-.styled-icon-btn {}
-.styled-dev-tool-btn {}
-.styled-tag {}
-.styled-tag-remove {}
-
-/* Forms */
-.styled-label {}
-.styled-input {}
-.styled-select {}
-
-/* Tables */
-.styled-table {}
-.styled-table-header {}
-.styled-table-cell {}
-.styled-table-action-btn {}
-
-/* Modals */
-.styled-modal-backdrop {}
-.styled-modal-dialog {}
-.styled-modal-title {}
-
-/* Misc */
-.styled-nav-link {}
-.styled-nav-link-active {}
-.styled-pre {}
-.styled-pre-error {}
-.styled-spinner {}
-
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
