@@ -503,27 +503,32 @@ const App = (function() {
     // === Sidebar Module ===
     const Sidebar = (function() {
         let isExpanded = true;
-        let dom = {};
+        let dom = {}; // Cache
+
+        // Helper to get and cache a DOM element
+        function getEl(id) {
+            if (!dom[id]) {
+                dom[id] = document.getElementById(id);
+                if (!dom[id]) {
+                    console.error(`Failed to find element #${id}`);
+                }
+            }
+            return dom[id];
+        }
 
         function init() {
-            dom.sidebar = document.getElementById('sidebar');
-            dom.toggleBtn = document.getElementById('sidebar-toggle-btn');
-            dom.logo = document.getElementById('sidebar-logo');
-            dom.navLinks = document.getElementById('sidebar-nav-links');
-            dom.userProfile = document.getElementById('user-profile');
-            dom.userName = document.getElementById('user-name');
-            dom.userAvatar = document.getElementById('user-avatar');
-            dom.logoutLink = document.getElementById('logout-link');
-
-            if (dom.toggleBtn) {
-                dom.toggleBtn.addEventListener('click', toggle);
-            } else {
-                console.error('CRITICAL: Sidebar toggle button #sidebar-toggle-btn not found.');
+            const toggleBtn = getEl('sidebar-toggle-btn');
+            if (toggleBtn) {
+                toggleBtn.addEventListener('click', toggle);
             }
-            dom.logoutLink.addEventListener('click', (e) => {
-                e.preventDefault();
-                Auth.logout();
-            });
+            
+            const logoutLink = getEl('logout-link');
+            if (logoutLink) {
+                logoutLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    Auth.logout();
+                });
+            }
 
             buildNav();
             if (Auth.isLoggedIn()) {
@@ -532,8 +537,11 @@ const App = (function() {
         }
 
         function buildNav() {
+            const navLinks = getEl('sidebar-nav-links');
+            if (!navLinks) return;
+
             const userModules = MODULE_CONFIG.filter(m => m.type === 'User-defined');
-            dom.navLinks.innerHTML = userModules.map(m => `
+            navLinks.innerHTML = userModules.map(m => `
                 <li>
                     <a href="${m.hash}" class="styled-nav-link" data-hash="${m.hash}">
                         <span class="nav-link-text">${m.name}</span>
@@ -547,33 +555,53 @@ const App = (function() {
 
         function updateProfile(user) {
             if (user) {
-                dom.userName.textContent = `${user.firstName} ${user.lastName}`;
-                dom.userAvatar.src = user.avatarUrl;
-                dom.userAvatar.onerror = () => { dom.userAvatar.src = `https://placehold.co/40x40/667eea/ffffff?text=${user.firstName.charAt(0)}`; };
-                dom.userProfile.classList.remove('hidden');
+                const userName = getEl('user-name');
+                const userAvatar = getEl('user-avatar');
+                const userProfile = getEl('user-profile');
+
+                if (userName) userName.textContent = `${user.firstName} ${user.lastName}`;
+                if (userAvatar) {
+                    userAvatar.src = user.avatarUrl;
+                    userAvatar.onerror = () => { userAvatar.src = `https://placehold.co/40x40/667eea/ffffff?text=${user.firstName.charAt(0)}`; };
+                }
+                if (userProfile) userProfile.classList.remove('hidden');
             }
         }
 
         function toggle() {
             isExpanded = !isExpanded;
-            dom.sidebar.classList.toggle('styled-sidebar-hidden');
-            dom.sidebar.classList.toggle('styled-sidebar');
+            
+            const sidebar = getEl('sidebar');
+            const logo = getEl('sidebar-logo');
+            const userProfile = getEl('user-profile');
+            const navLinks = getEl('sidebar-nav-links');
+
+            if (!sidebar || !logo || !userProfile || !navLinks) {
+                console.error("Missing critical sidebar elements for toggle.");
+                return;
+            }
+
+            sidebar.classList.toggle('styled-sidebar-hidden');
+            sidebar.classList.toggle('styled-sidebar');
             
             if (isExpanded) {
-                dom.logo.textContent = 'XPI';
-                dom.logo.classList.remove('opacity-0');
-                dom.userProfile.classList.remove('opacity-0');
-                dom.navLinks.querySelectorAll('.nav-link-text').forEach(el => el.classList.remove('hidden'));
+                logo.textContent = 'XPI';
+                logo.classList.remove('opacity-0');
+                userProfile.classList.remove('opacity-0');
+                navLinks.querySelectorAll('.nav-link-text').forEach(el => el.classList.remove('hidden'));
             } else {
-                dom.logo.textContent = 'X';
-                dom.logo.classList.add('opacity-0');
-                dom.userProfile.classList.add('opacity-0');
-                dom.navLinks.querySelectorAll('.nav-link-text').forEach(el => el.classList.add('hidden'));
+                logo.textContent = 'X';
+                logo.classList.add('opacity-0');
+                userProfile.classList.add('opacity-0');
+                navLinks.querySelectorAll('.nav-link-text').forEach(el => el.classList.add('hidden'));
             }
         }
 
         function updateActive(hash) {
-            dom.navLinks.querySelectorAll('a').forEach(link => {
+            const navLinks = getEl('sidebar-nav-links');
+            if (!navLinks) return;
+
+            navLinks.querySelectorAll('a').forEach(link => {
                 link.classList.remove('styled-nav-link-active');
                 link.classList.add('styled-nav-link');
                 if (link.dataset.hash === hash) {
@@ -1162,4 +1190,5 @@ const App = (function() {
     return {};
 
 })();
+
 
