@@ -381,13 +381,15 @@
                 }
             });
 
+            // For create, use POST; for edit, use PATCH
+            let method = 'POST';
+
             if (isEditing) {
                 payload.id = id;
+                method = 'PATCH';
             }
             
             const url = `${baseUrl}api/v1/wrikexpi/v1.0/record/${currentSlug}`;
-            // Use POST for both create and update, as per user request
-            const method = 'POST';
             
             try {
                 await App.Api.fetchWithLogs(url, {
