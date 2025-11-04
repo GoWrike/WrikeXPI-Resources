@@ -70,8 +70,8 @@ const App = (function() {
     const Styling = (function() {
         const STYLE_MAP = {
             'styled-body': 'bg-gray-900 text-gray-100',
-            'styled-sidebar': 'w-64 bg-gray-800 flex flex-col h-full transition-all duration-300',
-            'styled-sidebar-hidden': 'w-20 bg-gray-800 flex flex-col h-full transition-all duration-300',
+            'styled-sidebar': 'w-64 bg-gray-800 flex flex-col h-full transition-all duration-300 z-30',
+            'styled-sidebar-hidden': 'w-20 bg-gray-800 flex flex-col h-full transition-all duration-300 z-30',
             'styled-main-content': 'flex-1 h-full bg-gray-900 transition-all duration-300',
             'styled-btn-icon': 'p-2 rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500',
             'styled-user-profile': 'p-4 border-t border-gray-700 flex items-center',
@@ -87,8 +87,8 @@ const App = (function() {
             'styled-btn-danger': 'px-5 py-3 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition duration-150 disabled:opacity-50',
             'styled-pre-error': 'p-4 bg-red-900 bg-opacity-50 border border-red-700 text-red-200 rounded-lg text-left text-sm overflow-x-auto',
             'styled-pre-success': 'p-4 bg-gray-700 border border-gray-600 text-gray-100 rounded-lg text-left text-sm overflow-x-auto',
-            'styled-modal-backdrop': 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-40 p-4',
-            'styled-modal-dialog': 'bg-gray-800 rounded-xl shadow-2xl p-6 z-50 w-full flex flex-col',
+            'styled-modal-backdrop': 'fixed inset-0 bg-black bg-opacity-75 z-40',
+            'styled-modal-dialog': 'bg-gray-800 rounded-xl shadow-2xl p-6 z-50 w-full flex flex-col fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
             'styled-table': 'min-w-full divide-y divide-gray-700',
             'styled-table-header': 'bg-gray-700',
             'styled-table-th': 'px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider',
@@ -261,14 +261,12 @@ const App = (function() {
         
         function showModal(modalElement) {
             modalBackdrop.classList.remove('hidden');
-            modalBackdrop.classList.add('flex');
             modalElement.classList.remove('hidden');
             modalElement.classList.add('flex');
         }
 
         function hideModal(modalElement) {
             modalBackdrop.classList.add('hidden');
-            modalBackdrop.classList.remove('flex');
             modalElement.classList.add('hidden');
             modalElement.classList.remove('flex');
         }
@@ -1190,5 +1188,4 @@ const App = (function() {
     return {};
 
 })();
-
 
