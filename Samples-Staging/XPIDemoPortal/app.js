@@ -579,20 +579,29 @@ const App = (function() {
                 return;
             }
 
-            sidebar.classList.toggle('styled-sidebar-hidden');
-            sidebar.classList.toggle('styled-sidebar');
+            // sidebar.classList.toggle('styled-sidebar-hidden');
+            // sidebar.classList.toggle('styled-sidebar');
             
             if (isExpanded) {
+                sidebar.classList.remove('styled-sidebar-hidden');
+                sidebar.classList.add('styled-sidebar');
+
                 logo.textContent = 'XPI';
                 logo.classList.remove('opacity-0');
                 userProfile.classList.remove('opacity-0');
                 navLinks.querySelectorAll('.nav-link-text').forEach(el => el.classList.remove('hidden'));
             } else {
+                sidebar.classList.remove('styled-sidebar');
+                sidebar.classList.add('styled-sidebar-hidden');
+
                 logo.textContent = 'X';
                 logo.classList.add('opacity-0');
                 userProfile.classList.add('opacity-0');
                 navLinks.querySelectorAll('.nav-link-text').forEach(el => el.classList.add('hidden'));
             }
+
+            // CRITICAL: Re-apply styles to replace the placeholder we just added.
+            Styling.apply();
         }
 
         function updateActive(hash) {
@@ -1015,117 +1024,7 @@ const App = (function() {
                 const baseUrl = Config.get('xpiBaseUrl');
                 const token = Auth.getToken();
                 const url = `${baseUrl}api/v1/wrikexpi/v1.0/record/${currentSlug}`;
-                
-                const response = await Api.fetchWithLogs(url, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                
-                currentData = response.value || [];
-                renderTable();
-                
-            } catch (error) {
-                console.error('Failed to load master data:', error);
-                UI.showToast('Failed to load data.', 'error');
-                dom.tableBody.innerHTML = '';
-                dom.noData.classList.remove('hidden');
-            } finally {
-                UI.hideSpinner();
-            }
-        }
-        
-        function renderTable() {
-            dom.tableBody.innerHTML = '';
-            if (currentData.length === 0) {
-                dom.noData.classList.remove('hidden');
-                return;
-            }
-            
-            currentData.forEach(item => {
-                const tr = document.createElement('tr');
-                tr.className = 'border-b border-gray-700 hover:bg-gray-700';
-                
-                let rowHtml = '';
-                currentSchema.fields.forEach(field => {
-                    const value = item[field.id] || (item[field.label] !== undefined ? item[field.label] : null); // Handle "CF Name"
-                    rowHtml += `<td class="styled-table-td">${value || 'N/A'}</td>`;
-                });
-                
-                rowHtml += `
-                    <td class="styled-table-td space-x-2">
-                        <button class="styled-btn-secondary !px-2 !py-1 text-xs" data-id="${item.id}">Edit</button>
-                        <button class="styled-btn-danger !px-2 !py-1 text-xs" data-id="${item.id}">Delete</button>
-                    </td>
-                `;
-                tr.innerHTML = rowHtml;
-                
-                // Bind row buttons
-                tr.querySelector('.styled-btn-secondary').addEventListener('click', (e) => {
-                    const itemToEdit = currentData.find(d => d.id === e.target.dataset.id);
-                    showEditModal(itemToEdit);
-                });
-                tr.querySelector('.styled-btn-danger').addEventListener('click', (e) => {
-                    showDeleteModal(e.target.dataset.id);
-                });
-                
-                dom.tableBody.appendChild(tr);
-            });
-            Styling.apply(); // Style new buttons
-        }
-
-        function showEditModal(item) {
-            modalTitle.textContent = item ? `Edit ${currentSchema.title}` : `Create ${currentSchema.title}`;
-            modalIdField.value = item ? item.id : '';
-            
-            modalFormFields.innerHTML = '';
-            currentSchema.fields.forEach(field => {
-                if (field.readonly && item) { // Only show read-only for existing items
-                    modalFormFields.innerHTML += `
-                        <div class="mb-4">
-                            <label class="styled-label">${field.label}</label>
-                            <input type="text" class="styled-input bg-gray-600" value="${item[field.id] || ''}" readonly>
-                        </div>
-                    `;
-                } else if (!field.readonly) {
-                    const isRequired = field.required ? 'required' : '';
-                    const value = item ? (item[field.id] || (item[field.label] !== undefined ? item[field.label] : '')) : '';
-                    modalFormFields.innerHTML += `
-                        <div class="mb-4">
-                            <label for="md-field-${field.id}" class="styled-label">${field.label}</label>
-                            <input type="text" id="md-field-${field.id}" name="${field.id || field.label}" class="styled-input" value="${value}" ${isRequired}>
-                        </div>
-                    `;
-                }
-            });
-            Styling.apply();
-            UI.showModal(modal);
-        }
-
-        async function saveData() {
-            UI.showSpinner();
-            const id = modalIdField.value;
-            const isEditing = !!id;
-            
-            const baseUrl = Config.get('xpiBaseUrl');
-            // Use dynamic OData context based on URL, as per spec
-            const odataContext = `${baseUrl}api/v1/wrikexpi/v1.0/record/${currentSlug}`; 
-
-            const payload = {
-                "@odata.context": odataContext
-            };
-
-            const formData = new FormData(modalForm);
-            currentSchema.fields.forEach(field => {
-                if (!field.readonly) {
-                    payload[field.id || field.label] = formData.get(field.id || field.label);
-                }
-            });
-
-            if (isEditing) {
-                payload.id = id;
-            }
-            
-            const url = `${baseUrl}api/v1/wrikexpi/v1.0/record/${currentSlug}`;
-            const method = isEditing ? 'PATCH' : 'POST';
+            const method = 'POST'; // Always use POST as requested
             
             try {
                 await Api.fetchWithLogs(url, {
@@ -1188,4 +1087,5 @@ const App = (function() {
     return {};
 
 })();
+
 
