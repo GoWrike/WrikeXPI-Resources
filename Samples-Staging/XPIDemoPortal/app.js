@@ -20,6 +20,7 @@ const App = {};
         { code: 'MOD.C', name: 'Campaign Submission', hash: '#campaign-submission', type: 'User-defined', icon: 'campaign' },
         { code: 'MAS.DemoCient', name: 'Demo Client', hash: '#demo-client', type: 'User-defined', icon: 'clients' },
         { code: 'MAS.XPICFMapping', name: 'XPI Field Mapping', hash: '#xpi-cf-mapping', type: 'User-defined', icon: 'mapping' },
+        { code: 'MAS.Agencies', name: 'Agencies', hash: '#agencies', type: 'User-defined', icon: 'mapping' },
         { code: 'MOD.A', name: 'Admin', hash: '#admin', type: 'Built-in', icon: 'admin' },
         { code: 'MOD.B', name: 'Login', hash: '#login', type: 'Built-in', icon: 'login' },
     ];
@@ -44,6 +45,11 @@ const App = {};
                 { id: 'CF Name', label: 'CF Name' }, // Handle spaces in key
             ],
             odataContext: 'https://api.wrikexpi.groupm.com/api/v1/v1.0/xpicfmapping' // Example, will use dynamic URL
+        },
+        'agencies': {
+            title: 'Agencies',
+            fields: [
+                { id: 'value', label: 'Value', required: true }],
         }
     };
 
