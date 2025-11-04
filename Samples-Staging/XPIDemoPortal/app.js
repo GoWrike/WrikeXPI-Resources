@@ -432,15 +432,15 @@ const App = {};
             switch (hash) {
                 case '#campaign-submission':
                     document.getElementById('module-campaign-submission').classList.remove('hidden');
-                    initModule('campaign-submission', App.CampaignModule.init);
+                    initModule('campaign-submission', App.CampaignModule.init, false);
                     break;
                 case '#demo-client':
                     document.getElementById('module-master-data').classList.remove('hidden');
-                    initModule('demo-client', () => App.MasterData.init('demoxpiclients'));
+                    initModule('demo-client', () => App.MasterData.init('demoxpiclients'), true);
                     break;
                 case '#xpi-cf-mapping':
                     document.getElementById('module-master-data').classList.remove('hidden');
-                    initModule('xpi-cf-mapping', () => App.MasterData.init('xpicfmapping'));
+                    initModule('xpi-cf-mapping', () => App.MasterData.init('xpicfmapping'), true);
                     break;
                 default:
                     window.location.hash = '#campaign-submission';
@@ -452,8 +452,8 @@ const App = {};
         document.querySelectorAll('.module-container').forEach(mod => mod.classList.add('hidden'));
     }
 
-    function initModule(moduleName, initFn) {
-        if (!App.state.initializedModules.has(moduleName)) {
+    function initModule(moduleName, initFn, force = false) {
+        if (force || !App.state.initializedModules.has(moduleName)) {
             console.log(`Lazily initializing module: ${moduleName}`);
             try {
                 initFn();
@@ -756,4 +756,3 @@ const App = {};
         console.log('XPI Portal initialized.');
     }
 })(App);
-

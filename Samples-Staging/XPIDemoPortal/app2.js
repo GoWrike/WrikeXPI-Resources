@@ -226,12 +226,8 @@
 
 
         function init(slug) {
-            // Reset module state for re-initialization
-            dom = {};
-            currentData = [];
-            currentInstance = null;
-            
-            currentSlug = slug;
+            if (currentSlug === slug && currentInstance) return; // Already initialized with this slug
+             currentSlug = slug;
             currentSchema = App.MASTER_DATA_SCHEMAS[slug];
             if (!currentSchema) {
                 console.error(`No schema found for slug: ${slug}`);
@@ -452,4 +448,3 @@
 // This listener in app2.js ensures all core and module scripts are loaded
 // before starting the application.
 document.addEventListener('DOMContentLoaded', App.init);
-
