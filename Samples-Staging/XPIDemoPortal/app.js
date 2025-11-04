@@ -443,6 +443,10 @@ const App = {};
                     document.getElementById('module-master-data').classList.remove('hidden');
                     initModule('xpi-cf-mapping', () => App.MasterData.init('xpicfmapping'), true);
                     break;
+                case '#agencies':
+                    document.getElementById('module-master-data').classList.remove('hidden');
+                    initModule('agencies', () => App.MasterData.init('agencies'), true);
+                    break;
                 default:
                     window.location.hash = '#campaign-submission';
             }
