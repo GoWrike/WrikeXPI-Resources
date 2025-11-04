@@ -17,11 +17,11 @@ const App = {};
 
     // --- Constants ---
     App.MODULE_CONFIG = [
-        { code: 'MOD.C', name: 'Campaign Submission', hash: '#campaign-submission', type: 'User-defined' },
-        { code: 'MAS.DemoCient', name: 'Demo Client', hash: '#demo-client', type: 'User-defined' },
-        { code: 'MAS.XPICFMapping', name: 'XPI Field Mapping', hash: '#xpi-cf-mapping', type: 'User-defined' },
-        { code: 'MOD.A', name: 'Admin', hash: '#admin', type: 'Built-in' },
-        { code: 'MOD.B', name: 'Login', hash: '#login', type: 'Built-in' },
+        { code: 'MOD.C', name: 'Campaign Submission', hash: '#campaign-submission', type: 'User-defined', icon: 'campaign' },
+        { code: 'MAS.DemoCient', name: 'Demo Client', hash: '#demo-client', type: 'User-defined', icon: 'clients' },
+        { code: 'MAS.XPICFMapping', name: 'XPI Field Mapping', hash: '#xpi-cf-mapping', type: 'User-defined', icon: 'mapping' },
+        { code: 'MOD.A', name: 'Admin', hash: '#admin', type: 'Built-in', icon: 'admin' },
+        { code: 'MOD.B', name: 'Login', hash: '#login', type: 'Built-in', icon: 'login' },
     ];
     
     App.MASTER_DATA_SCHEMAS = {
@@ -62,6 +62,7 @@ const App = {};
         'styled-user-profile': 'p-4 border-t border-gray-700 flex items-center',
         'styled-nav-link': 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white',
         'styled-nav-link-active': 'flex items-center p-3 rounded-lg bg-indigo-600 text-white font-semibold shadow-lg',
+        'styled-nav-icon': 'w-6 h-6 flex-shrink-0',
         'styled-h2': 'text-3xl font-bold text-white mb-6',
         'styled-form-card': 'bg-gray-800 p-6 sm:p-8 rounded-xl shadow-2xl',
         'styled-label': 'block text-sm font-medium text-gray-300 mb-2',
@@ -473,6 +474,13 @@ const App = {};
     let isExpanded = true;
     let dom = {};
 
+    const ICON_MAP = {
+        'campaign': `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-send" viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z"/></svg>`,
+        'clients': `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16"><path d="M15 14v1H1v-1l.5-1a.5.5 0 0 1 .5-1H6a.5.5 0 0 1 .5.5c0 .253.189.463.43.59a.5.5 0 0 0 .44 0c.24-.127.43-.337.43-.59a.5.5 0 0 1 .5-.5h3.5a.5.5 0 0 1 .5 1l.5 1ZM11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M4 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm-2 7a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1H2v-1Z"/></svg>`,
+        'mapping': `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-diagram-3" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6v1H14a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 2 7h5.5V6A1.5 1.5 0 0 1 6 4.5v-1zM8.5 5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1zM0 11.5A1.5 1.5 0 0 1 1.5 10h1A1.5 1.5 0 0 1 4 11.5v1A1.5 1.5 0 0 1 2.5 14h-1A1.5 1.5 0 0 1 0 12.5v-1zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1zm4.5.5A1.5 1.5 0 0 1 7.5 10h1a1.5 1.5 0 0 1 1.5 1.5v1A1.5 1.5 0 0 1 8.5 14h-1A1.5 1.5 0 0 1 6 12.5v-1zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1zm4.5.5a1.5 1.5 0 0 1 1.5-1.5h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5v-1zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1z"/></svg>`,
+        'default': `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/></svg>`
+    };
+
     function getEl(id) {
         if (!dom[id]) {
             dom[id] = document.getElementById(id);
@@ -511,7 +519,8 @@ const App = {};
         navLinks.innerHTML = userModules.map(m => `
             <li>
                 <a href="${m.hash}" class="styled-nav-link" data-hash="${m.hash}">
-                    <span class="nav-link-text">${m.name}</span>
+                    <span class="styled-nav-icon">${ICON_MAP[m.icon] || ICON_MAP['default']}</span>
+                    <span class="nav-link-text ml-3">${m.name}</span>
                 </a>
             </li>
         `).join('');

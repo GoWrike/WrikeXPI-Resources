@@ -251,7 +251,7 @@
             </div>
             
             <div class="overflow-x-auto">
-                <table class="styled-table">
+                <table class="styled-table table-fixed">
                     <thead class="styled-table-header">
                         <tr data-template-id="table-head">
                             <!-- Headers populated by JS -->
@@ -294,6 +294,20 @@
         </div>
     </div>
     
+    <!-- Modal: Payload Viewer -->
+    <div id="modal-payload-viewer" class="styled-modal-dialog max-w-4xl w-full hidden">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-xl font-semibold text-white">Payload Viewer</h3>
+            <button id="payload-viewer-close-btn" class="styled-btn-icon -mr-2">
+                <!-- Bootstrap Icon: x-lg -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                </svg>
+            </button>
+        </div>
+        <pre id="payload-viewer-content" class="max-h-[70vh] overflow-auto"></pre>
+    </div>
+
     <!-- Developer Tool Toggle -->
     <button id="dev-tool-toggle" class="fixed bottom-5 right-5 styled-btn-icon !bg-indigo-600 !text-white z-50 shadow-lg">
         <!-- Bootstrap Icon: mortarboard-fill -->
@@ -341,22 +355,6 @@
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
-
-    <!-- Modal: Payload Viewer -->
-    <div id="modal-payload-viewer" class="styled-modal-dialog w-[70vw] h-[70vh] max-w-6xl hidden z-[995]">
-        <div class="flex justify-between items-center mb-4 flex-shrink-0">
-            <h3 class="text-xl font-semibold text-white">Payload Viewer</h3>
-            <button id="payload-viewer-close-btn" class="styled-btn-icon -mr-2">
-                <!-- Bootstrap Icon: x-lg -->
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-                </svg>
-            </button>
-        </div>
-        <div class="flex-grow overflow-auto bg-gray-900 rounded-lg">
-            <pre id="payload-viewer-content" class="p-4 text-sm"></pre>
         </div>
     </div>
 
