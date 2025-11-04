@@ -386,7 +386,7 @@
             let url = `${baseUrl}api/v1/wrikexpi/v1.0/record/${currentSlug}`;
 
             if (isEditing) {
-                payload.id = id;
+                //payload.id = id;
                 url += `/${id}`;
                 method = 'PATCH';
             }
