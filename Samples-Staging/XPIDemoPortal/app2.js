@@ -383,13 +383,13 @@
 
             // For create, use POST; for edit, use PATCH
             let method = 'POST';
+            let url = `${baseUrl}api/v1/wrikexpi/v1.0/record/${currentSlug}`;
 
             if (isEditing) {
                 payload.id = id;
+                url += `/${id}`;
                 method = 'PATCH';
             }
-            
-            const url = `${baseUrl}api/v1/wrikexpi/v1.0/record/${currentSlug}`;
             
             try {
                 await App.Api.fetchWithLogs(url, {
