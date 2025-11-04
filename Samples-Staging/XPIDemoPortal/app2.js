@@ -226,6 +226,11 @@
 
 
         function init(slug) {
+            // Reset module state for re-initialization
+            dom = {};
+            currentData = [];
+            currentInstance = null;
+            
             currentSlug = slug;
             currentSchema = App.MASTER_DATA_SCHEMAS[slug];
             if (!currentSchema) {
@@ -447,3 +452,4 @@
 // This listener in app2.js ensures all core and module scripts are loaded
 // before starting the application.
 document.addEventListener('DOMContentLoaded', App.init);
+
