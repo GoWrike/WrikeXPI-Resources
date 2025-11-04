@@ -43,7 +43,7 @@
         <!-- Sidebar Navigation -->
         <nav id="sidebar" class="styled-sidebar h-full">
             <!-- Sidebar Header -->
-            <div class="flex items-center justify-between p-4 h-16 border-b border-gray-700">
+            <div class="flex items-center justify-center md:justify-between p-4 h-16 border-b border-gray-700">
                 <span id="sidebar-logo" class="text-2xl font-bold text-white transition-opacity duration-300">XPI</span>
                 <button id="sidebar-toggle-btn" class="styled-btn-icon">
                     <!-- Bootstrap Icon: list -->
@@ -251,7 +251,7 @@
             </div>
             
             <div class="overflow-x-auto">
-                <table class="styled-table table-fixed">
+                <table class="styled-table">
                     <thead class="styled-table-header">
                         <tr data-template-id="table-head">
                             <!-- Headers populated by JS -->
@@ -295,8 +295,8 @@
     </div>
     
     <!-- Modal: Payload Viewer -->
-    <div id="modal-payload-viewer" class="styled-modal-dialog w-[70vw] h-[70vh] max-w-6xl hidden z-[995]">
-        <div class="flex justify-between items-center mb-4 flex-shrink-0">
+    <div id="modal-payload-viewer" class="styled-modal-dialog max-w-4xl w-full hidden">
+        <div class="flex justify-between items-center mb-4">
             <h3 class="text-xl font-semibold text-white">Payload Viewer</h3>
             <button id="payload-viewer-close-btn" class="styled-btn-icon -mr-2">
                 <!-- Bootstrap Icon: x-lg -->
@@ -305,9 +305,7 @@
                 </svg>
             </button>
         </div>
-        <div class="flex-grow overflow-auto bg-gray-900 rounded-lg">
-            <pre id="payload-viewer-content" class="p-4 text-sm"></pre>
-        </div>
+        <pre id="payload-viewer-content" class="max-h-[70vh] overflow-auto"></pre>
     </div>
 
     <!-- Developer Tool Toggle -->
