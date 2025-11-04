@@ -655,7 +655,7 @@ const App = {};
             url,
             method,
             status: 'Pending...',
-            request: options.body ? JSON.parse(options.body) : null,
+            request: options.body || null,
             response: null
         };
         saveLogs(logs);

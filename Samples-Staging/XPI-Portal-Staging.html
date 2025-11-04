@@ -310,7 +310,7 @@
             <!-- Data Table -->
             <div class="md-table-container bg-gray-800 rounded-lg shadow-xl overflow-hidden hidden">
                 <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-gray-700">
+                    <table class="min-w-full divide-y divide-gray-700 table-fixed">
                         <thead class="bg-gray-700">
                             <!-- Headers dynamically inserted by JS -->
                         </thead>
@@ -1009,9 +1009,8 @@
                     if (contentType && contentType.includes('application/json')) {
                         responseData = await responseToParse.json();
                     } else {
-                        responseData = await responseToParse.text();
                     }
-                    logEntry.responsePayload = responseData;
+                    logEntry.responsePayload = JSON.parse(JSON.stringify(responseData));
 
                 } catch (error) {
                     console.error("API Fetch Error:", error);

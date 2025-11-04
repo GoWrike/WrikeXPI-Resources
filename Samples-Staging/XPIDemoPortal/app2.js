@@ -257,7 +257,7 @@
             currentSchema.fields.forEach(field => {
                 headerRow.innerHTML += `<th class="styled-table-th">${field.label}</th>`;
             });
-            headerRow.innerHTML += `<th class="styled-table-th">Actions</th>`;
+            headerRow.innerHTML += `<th class="styled-table-th text-right">Actions</th>`;
             dom.tableHead.appendChild(headerRow);
             
             dom.loadBtn.addEventListener('click', loadData);
@@ -315,8 +315,7 @@
                 });
                 
                 rowHtml += `
-                    <td class="styled-table-td space-x-2">
-                        <button class="styled-btn-secondary !px-2 !py-1 text-xs" data-id="${item.id}">Edit</button>
+                    <td class="styled-table-td space-x-2ary !px-2 !py-1 text-xs" data-id="${item.id}">Edit</button>
                         <button class="styled-btn-danger !px-2 !py-1 text-xs" data-id="${item.id}">Delete</button>
                     </td>
                 `;
