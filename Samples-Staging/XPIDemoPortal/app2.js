@@ -253,12 +253,11 @@
             
             dom.title.textContent = currentSchema.title;
             
-            const headerRow = document.createElement('tr');
+            dom.tableHead.innerHTML = ''; // Clear existing content
             currentSchema.fields.forEach(field => {
-                headerRow.innerHTML += `<th class="styled-table-th">${field.label}</th>`;
+                dom.tableHead.innerHTML += `<th class="styled-table-th">${field.label}</th>`;
             });
-            headerRow.innerHTML += `<th class="styled-table-th text-right">Actions</th>`;
-            dom.tableHead.appendChild(headerRow);
+            dom.tableHead.innerHTML += `<th class="styled-table-th text-right">Actions</th>`;
             
             dom.loadBtn.addEventListener('click', loadData);
             dom.createBtn.addEventListener('click', () => showEditModal(null));
