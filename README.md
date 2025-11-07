@@ -15,3 +15,4 @@ This section includes versions of the samples currently under development or con
 
 *   **XPI Demo Portal**: An enhanced portal for demonstrating advanced WrikeXPI API features in a staging environment. [View Demo Portal](Samples-Staging/XPIDemoPortal/XPI-Demo-Portal.html)
 *   **OAuth Test Page (Staging)**: A dedicated OAuth testing page for development and staging purposes. [View Staging Test Page](Samples-Staging/OAuth-TestPage-Staging.html)
+*   **Task Viewer (Staging)**: A simple viewer to display task details by permalink, now integrated into the XPI Demo Portal.

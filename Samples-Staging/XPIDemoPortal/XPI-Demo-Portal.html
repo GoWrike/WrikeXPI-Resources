@@ -229,6 +229,27 @@
                     <pre id="campaign-result-pre" class="hidden mt-6"></pre>
                 </div>
 
+                <!-- Module: Task Viewer -->
+                <div id="module-task-viewer" class="module-container hidden">
+                    <h2 class="styled-h2">Task Viewer</h2>
+                    <div class="styled-form-card max-w-4xl">
+                        <form id="task-viewer-form" class="flex items-end gap-4 mb-8">
+                            <div class="flex-grow">
+                                <label for="task-viewer-permalink" class="styled-label">Task Permalink or ID</label>
+                                <input type="text" id="task-viewer-permalink" class="styled-input" placeholder="e.g., https://app-eu.wrike.com/open.htm?id=123456789 or 123456789">
+                            </div>
+                            <button type="submit" class="styled-btn-primary h-12">Load Task</button>
+                        </form>
+
+                        <div id="task-viewer-content-area" class="border-t border-gray-700 pt-6 min-h-[200px]">
+                            <div class="text-center text-gray-400 py-10">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-box-arrow-in-up-right mx-auto mb-4" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M6.364 13.5a.5.5 0 0 0 .5.5H13.5a1.5 1.5 0 0 0 1.5-1.5v-7a.5.5 0 0 0-1 0v7a.5.5 0 0 1-.5.5h-6.636a.5.5 0 0 0-.5.5"/><path fill-rule="evenodd" d="M11 5.5a.5.5 0 0 0 .5-.5V2.707l-4.146 4.147a.5.5 0 0 0 .708.708L12 3.707V5.5a.5.5 0 0 0 1 0V2.5a.5.5 0 0 0-.5-.5H9a.5.5 0 0 0 0 1h1.293L6.146 7.646a.5.5 0 0 0 .708.708z"/></svg>
+                                Please enter a task permalink or ID to view its details.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Module: Master Data -->
                 <div id="module-master-data" class="module-container hidden">
                     <!-- This content will be replaced by the template -->
