@@ -765,6 +765,93 @@ const App = {};
     App.DevTool = { init, logRequest, logResponse };
 })(App);
 
+// === Task Viewer Module ===
+(function(App) {
+    let dom = {};
+
+    function init() {
+        dom.form = document.getElementById('task-viewer-form');
+        dom.permalinkInput = document.getElementById('task-viewer-permalink');
+        dom.contentArea = document.getElementById('task-viewer-content-area');
+
+        if (!dom.form) return; // Already initialized
+
+        dom.form.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const permalink = dom.permalinkInput.value.trim();
+            if (permalink) {
+                fetchTask(permalink);
+            }
+        });
+    }
+
+    function showLoading() {
+        dom.contentArea.innerHTML = `
+            <div class="p-12 flex flex-col items-center justify-center text-gray-400">
+                <div class="animate-spin h-10 w-10 text-indigo-500" role="status">
+                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+                <span class="mt-4 text-lg font-medium">Loading Task Details...</span>
+            </div>`;
+    }
+
+    function displayError(title, message) {
+        dom.contentArea.innerHTML = `
+            <div class="p-8 bg-red-900/50 border border-red-700 rounded-lg">
+                <h3 class="text-xl font-semibold text-white">${title}</h3>
+                <p class="mt-2 text-red-200">${message}</p>
+            </div>`;
+    }
+
+    function displayContent(title, descriptionHtml) {
+        dom.contentArea.innerHTML = `
+            <h3 class="text-2xl font-bold text-white mb-4 pb-4 border-b border-gray-700">${title}</h3>
+            <div class="prose prose-lg prose-invert max-w-none">${descriptionHtml || '<p>No description provided.</p>'}</div>
+        `;
+        // Disable any checkboxes in the rendered HTML for a read-only view
+        dom.contentArea.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.disabled = true);
+    }
+
+    async function fetchTask(permalinkOrId) {
+        showLoading();
+        const token = App.Auth.getToken();
+        if (!token) {
+            displayError('Authentication Error', 'No authentication token found. Please log in.');
+            return;
+        }
+
+        // Determine if it's a full permalink or just an ID
+        let permalink = permalinkOrId;
+        if (/^\d+$/.test(permalinkOrId)) { // It's just an ID
+            permalink = `https://app-eu.wrike.com/open.htm?id=${permalinkOrId}`;
+        }
+
+        const url = `${App.Config.get('xpiBaseUrl')}api/v1/wrikexpi/amoeba/wrikeapi/tasks?permalink=${encodeURIComponent(permalink)}&fields=[description]`;
+
+        try {
+            const response = await App.Api.fetchWithLogs(url, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.success && response.data && response.data.length > 0) {
+                const task = response.data[0];
+                displayContent(task.title, task.description);
+            } else {
+                throw new Error(response.message || 'API response was successful, but no task data was found.');
+            }
+        } catch (error) {
+            console.error('Task Viewer fetch error:', error);
+            const errorMessage = typeof error === 'object' ? (error.message || JSON.stringify(error)) : error.toString();
+            displayError('Failed to Load Task', `There was a problem retrieving the task details. (Error: ${errorMessage})`);
+        }
+    }
+
+    App.TaskViewerModule = { init };
+})(App);
+
 // === Main App Init ===
 (function(App) {
     App.init = function() {
