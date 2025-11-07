@@ -110,11 +110,12 @@
     <script type="module">
         // --- CONFIGURATION ---
         
-        // IMPORTANT: This token is hardcoded as requested.
-        // In a real-world application, this should be handled via a secure auth flow (e.g., OAuth2).
-        // This token is valid until: Saturday, November 1, 2025 5:12:26 AM GMT
-        const API_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0aWQiOiJiMzM0NjBmZC0xNWZiLTQ0ZjEtYmFlOC1iMzViZTZiN2FiNzIiLCJlbmMiOiJleUpoYkdjaU9pSklVekkxTmlJc0luUjVjQ0k2SWtwWFZDSjkuZXlKa1pXc2lPaUkzYjBka1YxTkNiVGR3V0VSWWJtbExVVkpRV0VFMVdtVnRWelZuYnpKcFFVeFljbVZZUm1VMEsxTnZQU0lzSW1saGRDSTZNVGMyTWpNME16VTVPQ3dpWlhod0lqb3hOelkwT1RNMU5UazRmUS5CU3ZwQUlDSzBLOVd3cUJJNjVzUGdKVUszc25HWnZHSU1MRTF2cTJSSnhzIiwiaWF0IjoxNzYyMzQzNTk4LCJleHAiOjE3NjQ5MzU1OTh9.Xjq4uNwty0-tPUEzH1BmkO9WpC6iOuAfbpYqa_yFfq4';
         const API_BASE_URL = 'https://xpi-api.gowrike.space/api/v1/wrikexpi/amoeba/wrikeapi';
+
+        // --- STORAGE HELPER ---
+        const getSessionStorage = (key, defaultValue = null) => {
+            return sessionStorage.getItem(key) || defaultValue;
+        };
 
         // --- UI HELPER FUNCTIONS ---
 
@@ -191,11 +192,17 @@
             const permalink = `https://app-eu.wrike.com/open.htm?id=${taskId}`;
             const url = `${API_BASE_URL}/tasks?permalink=${encodeURIComponent(permalink)}&fields=[description]`;
 
+            const apiToken = getSessionStorage('XPIApp_token');
+            if (!apiToken) {
+                displayError('Authentication Error', 'No authentication token found. Please log in through the main portal.');
+                return;
+            }
+
             try {
                 const response = await fetch(url, {
                     method: 'GET',
                     headers: {
-                        'Authorization': `Bearer ${API_TOKEN}`,
+                        'Authorization': `Bearer ${apiToken}`,
                         'Content-Type': 'application/json'
                     }
                 });
