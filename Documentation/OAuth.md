@@ -31,12 +31,9 @@ The XPI OAuth mechanism is similar to standard OAuth, with a few simplifications
 
 The app redirects the user to the XPI OAuth page:
 
-```
+``` url
 https://api.wrikexpi.groupm.com/?accountId=3128883&redirect_uri=https://gowrike.github.io/WrikeXPI-Resources/Samples/WrikeXPI-Campaign.html&client_id=123JJ2Z
 ```
-
-<details>
-<summary>Parameters</summary>
 
 | Parameter    | Remark                                              |
 |:------------ |:---------------------------------------------------|
@@ -44,13 +41,11 @@ https://api.wrikexpi.groupm.com/?accountId=3128883&redirect_uri=https://gowrike.
 | redirect_uri | URL to redirect to after user authentication       |
 | client_id    | App's client id                                    |
 
-</details>
-
 ### Step 2: Redirect to Wrike OAuth
 
 User is redirected to Wrike's OAuth page:
 
-```
+``` url
 https://login.wrike.com/oauth2/authorize/v4?client_id=9B0xiXqV_eu&response_type=code&state=&redirect_uri=https://api.wrikexpi.groupm.com/api/v1/wrikexpi/token/callback&accountId=3128883
 ```
 
@@ -61,7 +56,7 @@ https://login.wrike.com/oauth2/authorize/v4?client_id=9B0xiXqV_eu&response_type=
 
 User is redirected to the original `redirect_uri` with the authorization code:
 
-```
+``` url
 https://gowrike.github.io/WrikeXPI-Resources/Samples/WrikeXPI-Campaign.html?code=1Jqehg333igk
 ```
 
@@ -71,7 +66,7 @@ https://gowrike.github.io/WrikeXPI-Resources/Samples/WrikeXPI-Campaign.html?code
 
 The app calls the XPI token endpoint:
 
-```
+``` bash
 GET https://api.wrikexpi.groupm.com/[token-endpoint]
   client_id=<client_id>
   grant_type=authorization_code
@@ -82,32 +77,22 @@ GET https://api.wrikexpi.groupm.com/[token-endpoint]
 
 ## Parameters Reference
 
-<details>
-<summary>Click to expand</summary>
-
 | Parameter    | Description                                  |
 |:------------ |:---------------------------------------------|
 | client_id    | App's client id                              |
 | grant_type   | Must be `authorization_code`                 |
 | code         | Authorization code received in previous step |
 
-</details>
-
 ---
 
 ## Example Requests & Responses
 
-<details>
-<summary>Example Token Response</summary>
-
-```
+``` json
 {
   "access_token": "2YotnFZFEjr1zCsicMWpAA",
   "app_username": "ETAETE_raj@groupm.com",
   "app_password": "wejiji2h43i33424"
 }
 ```
-
-</details>
 
 ---
