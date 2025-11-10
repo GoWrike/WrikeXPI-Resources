@@ -1,103 +1,63 @@
-# Wrike Custom Connector for Power Automate
+# Wrike API Connector for Power Automate
 
-This document provides instructions on how to set up and use the custom connector for the Wrike API within Microsoft Power Automate. This connector acts as a wrapper around the Wrike REST API, allowing you to integrate Wrike's capabilities into your automated workflows. [5, 10]
+This directory contains the necessary definition files to create a custom connector for the Wrike API within Microsoft Power Automate. A custom connector acts as a wrapper around the Wrike REST API, allowing you to integrate Wrike's project management capabilities directly into your automated workflows.
 
-## Introduction
+## Files in This Directory
 
-Wrike is a powerful work management platform that helps teams organize, track, and collaborate on projects. This custom Power Automate connector enables you to interact with your Wrike account to perform actions such as creating tasks, retrieving project data, and more, directly from your Power Automate flows.
+This folder provides multiple OpenAPI (formerly Swagger) definition files. You only need to import **one** of these into Power Automate to create the connector.
 
-## Prerequisites
+*   **[WrikeAPI-PAO-Connector.json](WrikeAPI-PAO-Connector.json)**
+    *   **Format**: JSON
+    *   **Description**: This is the primary, custom-crafted OpenAPI definition created by the WPP Wrike Global Team. It is tailored for specific integration needs and may represent a curated subset of the full Wrike API.
 
-Before you begin, ensure you have the following:
+*   **[WrikeAPI-PAO-Connector.yaml](WrikeAPI-PAO-Connector.yaml)**
+    *   **Format**: YAML
+    *   **Description**: This is the YAML version of the custom-crafted connector. It is functionally identical to the JSON file and is provided as an alternative format preference.
 
-*   A Wrike account (a free trial or a paid plan). [14]
-*   A Microsoft Power Automate subscription. [8]
-*   Permissions to create a custom connector in your Power Automate environment.
-*   The files provided in this folder.
+*   **[WrikeAPI-Native-PAO-Connector.yaml](WrikeAPI-Native-PAO-Connector.yaml)**
+    *   **Format**: YAML
+    *   **Description**: This connector definition is based on the complete, officially published Wrike API v4 specification. It offers a more comprehensive set of actions that directly correspond to the native API.
 
-## Files in This Folder
+### Which File Should I Use?
 
-This repository contains the necessary files to create the custom connector. [2]
+*   For most standard use cases within the team, start with **`WrikeAPI-PAO-Connector.json`**.
+*   If you require an API endpoint that is not available in the custom-crafted version, use **`WrikeAPI-Native-PAO-Connector.yaml`**.
+*   The YAML files are provided as alternatives if your tooling or preference is for YAML over JSON.
 
-1.  `apiDefinition.swagger.json`: This is the OpenAPI 2.0 (formerly Swagger) definition file that describes the Wrike API endpoints, operations, and data structures. [9, 11] Power Automate uses this file to generate the connector's interface.
-2.  `script.csx`: A C# script file that can be used to add custom logic to transform API requests and responses. [3, 10] This is useful for handling complex data transformations that are not easily managed by standard Power Automate expressions.
-3.  `icon.png`: The icon file that will be used to represent the custom connector in the Power Automate UI. [2]
+## How to Use
 
-## Setup and Installation
-
-Follow these steps to create and configure the Wrike custom connector.
+To use these files, you need to create a new custom connector in your Power Automate environment.
 
 ### Step 1: Create an API App in Wrike
 
-To authenticate with the Wrike API, you need to create an API application in your Wrike account to get a `Client ID` and `Client Secret`.
+Before creating the connector, you must register an application within Wrike to obtain a `Client ID` and `Client Secret`.
 
-1.  Log in to your Wrike account and navigate to the **Apps & Integrations** section. [14]
-2.  Go to the Wrike Developers Portal and create a new app. [13]
-3.  Give your application a name (e.g., "Power Automate Connector").
-4.  You will need to provide a **Redirect URI** later. For now, you can use a placeholder like `https://global.consent.azure-apim.net/redirect`. You will update this later.
-5.  Once the app is created, take note of the **Client ID** and **Client Secret**. You will need these in the next steps. [13, 14]
+1.  Log in to Wrike and navigate to the **Apps & Integrations** section.
+2.  Open the Wrike Developers Portal and create a new app.
+3.  Set the **Redirect URI** to the value that Power Automate will provide you in the next steps. A common placeholder to use initially is `https://global.consent.azure-apim.net/redirect`.
+4.  Once the app is created, securely copy the **Client ID** and **Client Secret**.
 
-### Step 2: Create the Custom Connector in Power Automate
+### Step 2: Import the Connector in Power Automate
 
-1.  Navigate to Power Automate.
-2.  In the left-hand navigation pane, go to **Data > Custom Connectors**. [4]
-3.  In the top-right corner, click **New custom connector** and select **Import an OpenAPI file**. [4]
-4.  Enter a name for your connector, such as "Wrike Custom Connector".
-5.  Click the **Import** button and upload the `apiDefinition.swagger.json` file from this folder.
-6.  Click **Continue**.
+1.  Navigate to **Power Automate**.
+2.  In the left-hand menu, go to **Data > Custom connectors**.
+3.  In the top right corner, click **New custom connector** and select **Import an OpenAPI file**.
+4.  Give your connector a name (e.g., "Wrike API Custom") and upload your chosen file (`.json` or `.yaml`) from this folder.
+5.  Click **Continue**.
 
-### Step 3: Configure General Information
+### Step 3: Configure the Connector
 
-1.  On the **General** tab, you can upload the `icon.png` file by clicking the upload icon.
-2.  Set the **Icon background color** to a color of your choice (e.g., Wrike's brand color).
-3.  The **Scheme** should be `HTTPS`, and the **Host** should be pre-filled from the swagger file (e.g., `www.wrike.com`).
-4.  Click **Security**.
+1.  **General Tab**: The API host and base URL will be pre-filled from the definition file (e.g., `app-eu.wrike.com` and `/api/v4`). You can upload an icon for the connector here.
+2.  **Security Tab**:
+    *   Select **OAuth 2.0** as the Authentication type.
+    *   Choose `Wrike` as the Identity Provider. If it's not listed, use `Generic Oauth 2`.
+    *   Enter the **Client ID** and **Client Secret** you obtained from Wrike.
+    *   Set the **Authorization URL** to `https://login.wrike.com/oauth2/authorize/v4`.
+    *   Set the **Token URL** and **Refresh URL** to `https://login.wrike.com/oauth2/token`.
+    *   The **Redirect URL** will now be generated by Power Automate. Copy this URL and paste it into the **Redirect URI** field of your app in the Wrike Developers Portal.
+3.  **Definition Tab**: Review the actions (API endpoints) that have been imported from the file. You can adjust summaries, descriptions, and visibility here.
+4.  **Create Connector**: Click the **Create connector** button at the top.
 
-### Step 4: Configure Security
+### Step 4: Test the Connector
 
-1.  On the **Security** tab, select **OAuth 2.0** as the authentication type. [15]
-2.  Under **OAuth 2.0**, configure the following settings:
-    *   **Identity Provider**: `Generic Oauth 2`
-    *   **Client id**: Paste the `Client ID` you obtained from your Wrike app.
-    *   **Client secret**: Paste the `Client Secret` you obtained from your Wrike app.
-    *   **Authorization URL**: `https://login.wrike.com/oauth2/authorize/v4`
-    *   **Token URL**: `https://login.wrike.com/oauth2/token`
-    *   **Refresh URL**: `https://login.wrike.com/oauth2/token`
-    *   **Scope**: Leave this blank for now, or add scopes as needed based on the Wrike API documentation.
-3.  After filling in these details, the **Redirect URL** will be generated. Copy this URL.
-4.  Go back to your Wrike app configuration and update the **Redirect URI** with the URL you just copied.
-5.  Click **Definition**.
-
-### Step 5: Review the Definition
-
-The **Definition** tab shows all the actions and triggers defined in the `apiDefinition.swagger.json` file. You can review them to ensure they are correctly configured. You can also add or modify actions here if needed.
-
-### Step 6: (Optional) Add Custom Code
-
-If your connector requires custom data transformations, you can use the `script.csx` file.
-
-1.  Go to the **Code** tab. [3]
-2.  If it's not already enabled, toggle the **Code Enabled** switch to on.
-3.  Copy the contents of the `script.csx` file and paste them into the code editor.
-4.  Click **Create connector**.
-
-### Step 7: Test the Connector
-
-1.  Go to the **Test** tab.
-2.  Click **New connection**.
-3.  A pop-up window will appear asking you to authorize the connector to access your Wrike account. Sign in and grant access.
-4.  Once the connection is created, you can select an operation from the list, provide the required parameters, and click **Test operation** to verify that the connector is working correctly.
-
-## How to Use the Connector
-
-Once the custom connector is created and tested, you can use it in any of your Power Automate flows.
-
-1.  Create a new flow or edit an existing one.
-2.  Add a new step and search for your custom connector by the name you provided (e.g., "Wrike Custom Connector").
-3.  You will see a list of actions defined in your connector. Select the action you want to use.
-4.  If you haven't already, you will be prompted to create a connection by signing in to your Wrike account.
-5.  Fill in the required parameters for the action and continue building your flow.
-
-## Disclaimer
-
-This is an unofficial connector for the Wrike API and is not supported by Wrike or Microsoft. Use it at your own risk. For any issues or questions, please refer to the Wrike API documentation or open an issue in this repository.
+After creating the connector, go to the **Test** tab. Create a new connection, which will prompt you to log in to Wrike and authorize the application. Once connected, you can test the various actions to ensure they are working correctly.

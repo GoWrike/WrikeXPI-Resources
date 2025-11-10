@@ -1,7 +1,6 @@
 ## Documentation
 
-This section contains documentation related to the WrikeXPI project.
-*   **OAuth Mechanism**: Detailed explanation of the OAuth flow. [View OAuth Docs](Documentation/OAuth.md)
+This section contains documentation related to the WrikeXPI project. [View](Documentation/README.md)
 
 ## PowerAutomate Online Connectors
 
