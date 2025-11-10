@@ -89,9 +89,15 @@ GET https://api.wrikexpi.groupm.com/[token-endpoint]
 
 ``` json
 {
-  "access_token": "2YotnFZFEjr1zCsicMWpAA",
-  "app_username": "ETAETE_raj@groupm.com",
-  "app_password": "wejiji2h43i33424"
+    "success": true,
+    "data": {
+        "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.....z-Hyxb_LJQpKnk",
+        "credentials": {
+            "username": "IEAC7PRT-username@wppmedia.com",
+            "password": "|}UyoQD-S^CmwVoSwS#x}Lni6.6#>)ZRi=Km9$^aEg^)LSH}",
+            "message": "IMPORTANT: Save these credentials. They will only be shown once."
+        }
+    }
 }
 ```
 

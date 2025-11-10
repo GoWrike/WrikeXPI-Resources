@@ -201,6 +201,7 @@
     App.MasterData = (function() {
         let currentSlug = null;
         let currentSchema = null;
+        let masterDataType = 'record'; // Default to 'record'
         let currentData = [];
         let dom = {};
         let currentInstance = null; // The cloned template node
@@ -229,6 +230,7 @@
             if (currentSlug === slug && currentInstance) return; // Already initialized with this slug
              currentSlug = slug;
             currentSchema = App.MASTER_DATA_SCHEMAS[slug];
+            masterDataType = currentSchema.type || 'record';
             if (!currentSchema) {
                 console.error(`No schema found for slug: ${slug}`);
                 return;
@@ -277,7 +279,7 @@
             try {
                 const baseUrl = App.Config.get('xpiBaseUrl');
                 const token = App.Auth.getToken();
-                const url = `${baseUrl}api/v1/wrikexpi/v1.0/record/${currentSlug}`;
+                const url = `${baseUrl}api/v1/wrikexpi/v1.0/${masterDataType}/${currentSlug}`;
                 
                 const response = await App.Api.fetchWithLogs(url, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -368,7 +370,7 @@
             const isEditing = !!id;
             
             const baseUrl = App.Config.get('xpiBaseUrl');
-            const odataContext = `${baseUrl}api/v1/wrikexpi/v1.0/record/${currentSlug}`; 
+            const odataContext = `${baseUrl}api/v1/wrikexpi/v1.0/${masterDataType}/${currentSlug}`; 
 
             const payload = {
                 "@odata.context": odataContext
@@ -383,7 +385,7 @@
 
             // For create, use POST; for edit, use PATCH
             let method = 'POST';
-            let url = `${baseUrl}api/v1/wrikexpi/v1.0/record/${currentSlug}`;
+            let url = `${baseUrl}api/v1/wrikexpi/v1.0/${masterDataType}/${currentSlug}`;
 
             if (isEditing) {
                 //payload.id = id;
@@ -423,7 +425,7 @@
             App.UI.hideModal(deleteModal);
             try {
                 const baseUrl = App.Config.get('xpiBaseUrl');
-                const url = `${baseUrl}api/v1/wrikexpi/v1.0/record/${currentSlug}/${id}`;
+                const url = `${baseUrl}api/v1/wrikexpi/v1.0/${masterDataType}/${currentSlug}/${id}`;
                 
                 await App.Api.fetchWithLogs(url, {
                     method: 'DELETE',
