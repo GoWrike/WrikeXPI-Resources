@@ -3,6 +3,7 @@
 ---
 
 ## Table of Contents
+
 - [Overview](#overview)
 - [OAuth Flow Steps](#oauth-flow-steps)
   - [Step 1: App Initiates OAuth](#step-1-app-initiates-oauth)
@@ -17,7 +18,9 @@
 ## Overview
 
 The XPI OAuth mechanism is similar to standard OAuth, with a few simplifications:
+
 - Only `client_id` is required (no `client_secret` for now).
+
 - The user experiences two redirects: first from Wrike to the XPI landing page, then to the app's callback URL.
 
 ---
