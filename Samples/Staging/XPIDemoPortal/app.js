@@ -51,6 +51,7 @@ const App = {};
             title: 'Agencies',
             fields: [
                 { id: 'value', label: 'Value', required: true }],
+            type: "value"
         }
     };
 
