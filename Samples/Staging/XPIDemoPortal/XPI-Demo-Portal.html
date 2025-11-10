@@ -86,8 +86,15 @@
                                 </datalist>
                                 <p class="text-xs text-gray-400 mt-2">Set the base URL for all XPI API calls.</p>
                             </div>
-                            <button type="submit" class="styled-btn-primary">Save Configuration</button>
+                            <div class="flex items-center gap-4">
+                                <button type="submit" class="styled-btn-primary">Save Configuration</button>
+                            </div>
                         </form>
+                        <div class="border-t border-gray-700 mt-6 pt-6">
+                            <label class="styled-label">Vault Synchronization</label>
+                            <p class="text-xs text-gray-400 mt-2 mb-4">If you are experiencing issues with secrets or credentials, you can trigger a manual resynchronization of the Vault keys with the XPI backend.</p>
+                            <button type="button" id="resync-vault-keys-btn" class="styled-btn-secondary">Resync Vault Keys</button>
+                        </div>
                     </div>
                 </div>
 

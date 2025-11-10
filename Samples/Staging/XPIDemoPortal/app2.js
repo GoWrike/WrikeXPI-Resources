@@ -10,6 +10,7 @@
         function init() {
             dom.form = document.getElementById('admin-form');
             dom.urlInput = document.getElementById('config-xpiBaseUrl');
+            dom.resyncBtn = document.getElementById('resync-vault-keys-btn');
             
             dom.urlInput.value = App.Config.get('xpiBaseUrl');
             
@@ -18,6 +19,37 @@
                 App.Config.set('xpiBaseUrl', dom.urlInput.value);
                 App.UI.showToast('Configuration saved successfully!', 'success');
             });
+
+            dom.resyncBtn.addEventListener('click', handleResync);
+        }
+
+        async function handleResync() {
+            App.UI.showSpinner();
+            dom.resyncBtn.disabled = true;
+            try {
+                const baseUrl = App.Config.get('xpiBaseUrl');
+                // The user request specifies the endpoint is /sync-secrets relative to the base URL.
+                const url = new URL('sync-secrets', baseUrl).href;
+                const token = App.Auth.getToken();
+
+                const response = await App.Api.fetchWithLogs(url, {
+                    method: 'GET',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+
+                if (response.success) {
+                    App.UI.showToast(response.message, 'success');
+                } else {
+                    App.UI.showToast("There's some error, please contact Wrike Global team for assistant.", 'error');
+                }
+            } catch (error) {
+                App.UI.showToast("There's some error, please contact Wrike Global team for assistant.", 'error');
+            } finally {
+                App.UI.hideSpinner();
+                dom.resyncBtn.disabled = false;
+            }
         }
         return { init };
     })();
