@@ -179,13 +179,27 @@
                 'campaign-objective': 'campaignobjective',
                 'campaign-start-date': 'campaignstartdate',
                 'campaign-end-date': 'campaignenddate',
-                'agency': 'agency'
+                'agency': 'agency',
+                'requested-start-date': 'requestedstartdate',
+                'requestor-market': 'requestormarket',
+                'pod': 'pod',
+                'currency': 'currency',
+                'overall-budget': 'overallbudget',
+                'opt-in': 'optin',
+                'po-required': 'porequired'
             };
 
             for (const [jsonKey, formName] of Object.entries(fieldMap)) {
                 if (pendingPrefillData[jsonKey] && dom.form.elements[formName]) {
                     dom.form.elements[formName].value = pendingPrefillData[jsonKey];
                 }
+            }
+
+            // Handle selected channels (tags)
+            if (pendingPrefillData['selected-channels'] && Array.isArray(pendingPrefillData['selected-channels'])) {
+                // Replace default tags with the prefilled ones
+                tags = [...pendingPrefillData['selected-channels']];
+                renderTags();
             }
         }
         
@@ -214,7 +228,7 @@
                     type: formData.get('type'),
                     space: formData.get('space'),
                     entity: formData.get('entity'),
-                    varientId: parseInt(formData.get('varientId'), 10),
+                    variantId: parseInt(formData.get('variantId'), 10),
                     fields: {}
                 };
                 
