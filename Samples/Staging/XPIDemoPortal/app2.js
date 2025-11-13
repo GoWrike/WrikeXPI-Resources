@@ -483,3 +483,297 @@
 // This listener in app2.js ensures all core and module scripts are loaded
 // before starting the application.
 document.addEventListener('DOMContentLoaded', App.init);
+
+// === Module: Campaigns ===
+(function(App) {
+    App.CampaignsModule = (function() {
+        // --- Constants and State ---
+        const CAMPAIGN_STORAGE_KEY = 'xpi_campaigns';
+        let campaigns = [];
+        let currentEditCampaignId = null;
+        let dom = {};
+        let currentInstance = null;
+
+        // --- Modal Elements (shared) ---
+        let modal, modalTitle, modalForm, modalFormFields, modalCancelBtn;
+        let deleteModal, deleteConfirmBtn, deleteCancelBtn;
+
+        function cacheDOMElements() {
+            dom.moduleContainer = document.getElementById('module-campaign');
+            modal = document.getElementById('modal-master-data');
+            modalTitle = document.getElementById('master-data-modal-title');
+            modalForm = document.getElementById('master-data-form');
+            modalFormFields = document.getElementById('master-data-form-fields');
+            modalCancelBtn = document.getElementById('master-data-cancel-btn');
+            deleteModal = document.getElementById('modal-delete-confirm');
+            deleteConfirmBtn = document.getElementById('delete-confirm-btn');
+            deleteCancelBtn = document.getElementById('delete-cancel-btn');
+        }
+
+        // --- Initialization ---
+        function init() {
+            if (!dom.moduleContainer) {
+                cacheDOMElements();
+            }
+            seedSampleData();
+            loadCampaigns();
+            renderCampaignListView();
+        }
+
+        function loadCampaigns() {
+            campaigns = App.Storage.local.getObject(CAMPAIGN_STORAGE_KEY) || [];
+        }
+
+        function saveCampaigns() {
+            App.Storage.local.setObject(CAMPAIGN_STORAGE_KEY, campaigns);
+        }
+
+        // --- UI Rendering ---
+        function renderCampaignListView() {
+            const template = document.getElementById('master-data-template').content.cloneNode(true);
+            currentInstance = template;
+
+            currentInstance.querySelector('[data-template-id="title"]').textContent = 'Campaigns';
+            currentInstance.querySelector('p').textContent = 'Manage marketing campaigns and their channels.';
+
+            const tableHead = currentInstance.querySelector('[data-template-id="table-head"]');
+            const headers = ['Campaign Name', 'Client', 'Start Date', 'End Date', 'Budget', 'Actions'];
+            tableHead.innerHTML = headers.map(h => `<th class="styled-table-th">${h}</th>`).join('');
+
+            const tableBody = currentInstance.querySelector('[data-template-id="table-body"]');
+            tableBody.innerHTML = '';
+
+            if (campaigns.length > 0) {
+                campaigns.forEach(campaign => {
+                    const row = document.createElement('tr');
+                    row.className = 'styled-table-row';
+                    row.innerHTML = `
+                        <td class="styled-table-td">${campaign.campaignName || ''}</td>
+                        <td class="styled-table-td">${campaign.client || ''}</td>
+                        <td class="styled-table-td">${campaign.campaignStartDate || ''}</td>
+                        <td class="styled-table-td">${campaign.campaignEndDate || ''}</td>
+                        <td class="styled-table-td">${campaign.campaignCurrency || ''} ${campaign.budget || ''}</td>
+                        <td class="styled-table-td">
+                            <div class="flex items-center gap-2">
+                                <button class="styled-btn-icon edit-btn" data-id="${campaign.id}" title="Edit">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16"><path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/><path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/></svg>
+                                </button>
+                                <button class="styled-btn-icon !text-red-400 hover:!text-red-300 delete-btn" data-id="${campaign.id}" title="Delete">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            } else {
+                currentInstance.querySelector('[data-template-id="no-data"]').classList.remove('hidden');
+            }
+
+            dom.moduleContainer.innerHTML = '';
+            dom.moduleContainer.appendChild(currentInstance);
+
+            // Add event listeners
+            dom.moduleContainer.querySelector('[data-template-id="create-btn"]').addEventListener('click', handleCreateClick);
+            dom.moduleContainer.querySelector('[data-template-id="load-btn"]').addEventListener('click', init);
+            dom.moduleContainer.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', handleEditClick));
+            dom.moduleContainer.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', handleDeleteClick));
+            App.Styling.apply();
+        }
+
+        function renderCampaignForm(campaign = {}) {
+            currentEditCampaignId = campaign.id || null;
+            modalTitle.textContent = campaign.id ? 'Edit Campaign' : 'Create New Campaign';
+
+            const fields = [
+                { id: 'campaignName', label: 'Campaign Name', required: true, value: campaign.campaignName },
+                { id: 'campaignObjective', label: 'Campaign Objective', value: campaign.campaignObjective },
+                { id: 'campaignStartDate', label: 'Campaign Start Date', type: 'date', value: campaign.campaignStartDate },
+                { id: 'campaignEndDate', label: 'Campaign End Date', type: 'date', value: campaign.campaignEndDate },
+                { id: 'client', label: 'Client', value: campaign.client },
+                { id: 'brand', label: 'Brand', value: campaign.brand },
+                { id: 'debtor', label: 'Debtor', value: campaign.debtor },
+                { id: 'agency', label: 'Agency', value: campaign.agency },
+                { id: 'campaignCurrency', label: 'Campaign Currency', value: campaign.campaignCurrency || 'USD' },
+                { id: 'budget', label: 'Budget', type: 'number', value: campaign.budget },
+            ];
+
+            modalFormFields.innerHTML = fields.map(f => `
+                <div>
+                    <label for="campaign-form-${f.id}" class="styled-label">${f.label}</label>
+                    <input type="${f.type || 'text'}" id="campaign-form-${f.id}" name="${f.id}" class="styled-input" value="${f.value || ''}" ${f.required ? 'required' : ''}>
+                </div>
+            `).join('');
+
+            // --- Channels Section ---
+            const channelsContainer = document.createElement('div');
+            channelsContainer.className = 'md:col-span-2 border-t border-gray-700 mt-6 pt-6';
+            channelsContainer.innerHTML = `
+                <h4 class="text-lg font-semibold text-white mb-4">Channels</h4>
+                <div id="channels-list" class="space-y-3 mb-4"></div>
+                <button type="button" id="add-channel-btn" class="styled-btn-secondary">Add Channel</button>
+            `;
+            modalFormFields.appendChild(channelsContainer);
+
+            renderChannels(campaign.channels || []);
+
+            document.getElementById('add-channel-btn').addEventListener('click', () => {
+                const channelsList = document.getElementById('channels-list');
+                const newChannel = { id: `new_${Date.now()}`, name: '', type: 'Biddable', budget: 0 };
+                channelsList.appendChild(createChannelInputRow(newChannel));
+            });
+
+            App.Styling.apply();
+            App.UI.showModal(modal);
+        }
+
+        function createChannelInputRow(channel) {
+            const div = document.createElement('div');
+            div.className = 'grid grid-cols-10 gap-2 items-center channel-row';
+            div.dataset.channelId = channel.id;
+            div.innerHTML = `
+                <div class="col-span-4">
+                    <input type="text" placeholder="Channel Name" class="styled-input channel-name" value="${channel.name || ''}">
+                </div>
+                <div class="col-span-3">
+                    <select class="styled-select channel-type">
+                        <option value="Biddable" ${channel.type === 'Biddable' ? 'selected' : ''}>Biddable</option>
+                        <option value="Non-Biddable" ${channel.type === 'Non-Biddable' ? 'selected' : ''}>Non-Biddable</option>
+                    </select>
+                </div>
+                <div class="col-span-2">
+                    <input type="number" placeholder="Budget" class="styled-input channel-budget" value="${channel.budget || ''}">
+                </div>
+                <div class="col-span-1 text-right">
+                    <button type="button" class="styled-btn-icon !text-red-400 hover:!text-red-300 remove-channel-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg>
+                    </button>
+                </div>
+            `;
+            div.querySelector('.remove-channel-btn').addEventListener('click', () => div.remove());
+            return div;
+        }
+
+        function renderChannels(channels = []) {
+            const channelsList = document.getElementById('channels-list');
+            channelsList.innerHTML = '';
+            channels.forEach(channel => {
+                channelsList.appendChild(createChannelInputRow(channel));
+            });
+        }
+
+        // --- Event Handlers ---
+        function handleCreateClick() {
+            renderCampaignForm();
+        }
+
+        function handleEditClick(e) {
+            const campaignId = e.currentTarget.dataset.id;
+            const campaign = campaigns.find(c => c.id === campaignId);
+            if (campaign) {
+                renderCampaignForm(campaign);
+            }
+        }
+
+        function handleDeleteClick(e) {
+            const campaignId = e.currentTarget.dataset.id;
+            showDeleteModal(() => {
+                campaigns = campaigns.filter(c => c.id !== campaignId);
+                saveCampaigns();
+                init();
+                App.UI.hideModal(deleteModal);
+                App.UI.showToast('Campaign deleted successfully.', 'success');
+            });
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            const formData = new FormData(modalForm);
+            const campaignData = Object.fromEntries(formData.entries());
+
+            // Collect channel data
+            const channelRows = modalForm.querySelectorAll('.channel-row');
+            campaignData.channels = Array.from(channelRows).map(row => ({
+                id: row.dataset.channelId.startsWith('new_') ? crypto.randomUUID() : row.dataset.channelId,
+                name: row.querySelector('.channel-name').value,
+                type: row.querySelector('.channel-type').value,
+                budget: parseFloat(row.querySelector('.channel-budget').value) || 0,
+            }));
+
+            if (currentEditCampaignId) {
+                const index = campaigns.findIndex(c => c.id === currentEditCampaignId);
+                if (index !== -1) {
+                    campaigns[index] = { ...campaigns[index], ...campaignData, id: currentEditCampaignId };
+                }
+            } else {
+                campaignData.id = crypto.randomUUID();
+                campaigns.push(campaignData);
+            }
+
+            saveCampaigns();
+            init();
+            App.UI.hideModal(modal);
+            App.UI.showToast(`Campaign ${currentEditCampaignId ? 'updated' : 'created'} successfully.`, 'success');
+        }
+
+        function showDeleteModal(onConfirm) {
+            App.UI.showModal(deleteModal);
+            // Clone and replace to remove old listeners
+            const newConfirmBtn = deleteConfirmBtn.cloneNode(true);
+            deleteConfirmBtn.parentNode.replaceChild(newConfirmBtn, deleteConfirmBtn);
+            newConfirmBtn.addEventListener('click', onConfirm);
+        }
+
+        // --- Global Event Listeners for this module ---
+        // We need to make sure these don't conflict with MasterData module
+        // The router will initialize the correct module, which will then set its own handlers.
+        // When switching modules, the new module's init should take precedence.
+        modalForm.addEventListener('submit', (e) => {
+            if (App.state.initializedModules.has('campaigns') && window.location.hash === '#campaigns') {
+                handleFormSubmit(e);
+            }
+        });
+        modalCancelBtn.addEventListener('click', () => {
+            if (App.state.initializedModules.has('campaigns') && window.location.hash === '#campaigns') {
+                App.UI.hideModal(modal);
+            }
+        });
+        deleteCancelBtn.addEventListener('click', () => {
+            if (App.state.initializedModules.has('campaigns') && window.location.hash === '#campaigns') {
+                App.UI.hideModal(deleteModal);
+            }
+        });
+
+        // --- Sample Data Seeding ---
+        function seedSampleData() {
+            if (!App.Storage.local.getObject(CAMPAIGN_STORAGE_KEY)) {
+                const sampleCampaigns = [
+                    {
+                        id: crypto.randomUUID(),
+                        campaignName: 'Summer Sale 2026', campaignObjective: 'Increase Sales', campaignStartDate: '2026-06-01', campaignEndDate: '2026-08-31',
+                        client: 'Global Retail Inc.', brand: 'SunSeeker Apparel', debtor: 'Global Retail Finance', agency: 'Creative Solutions',
+                        campaignCurrency: 'USD', budget: 50000,
+                        channels: [
+                            { id: crypto.randomUUID(), name: 'Facebook Ads', type: 'Biddable', budget: 15000 },
+                            { id: crypto.randomUUID(), name: 'Google Search', type: 'Biddable', budget: 25000 },
+                            { id: crypto.randomUUID(), name: 'Content Marketing', type: 'Non-Biddable', budget: 10000 }
+                        ]
+                    },
+                    {
+                        id: crypto.randomUUID(),
+                        campaignName: 'Product Launch Q4', campaignObjective: 'Brand Awareness', campaignStartDate: '2026-10-01', campaignEndDate: '2026-12-31',
+                        client: 'Tech Innovators LLC', brand: 'GadgetPro', debtor: 'Tech Innovators Finance', agency: 'Future Forward Agency',
+                        campaignCurrency: 'EUR', budget: 120000,
+                        channels: [
+                            { id: crypto.randomUUID(), name: 'YouTube Pre-roll', type: 'Biddable', budget: 60000 },
+                            { id: crypto.randomUUID(), name: 'Influencer Outreach', type: 'Non-Biddable', budget: 40000 }
+                        ]
+                    }
+                ];
+                App.Storage.local.setObject(CAMPAIGN_STORAGE_KEY, sampleCampaigns);
+            }
+        }
+
+        return { init };
+    })();
+})(App);

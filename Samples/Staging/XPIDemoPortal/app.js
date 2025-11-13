@@ -21,6 +21,7 @@ const App = {};
         { code: 'MAS.DemoCient', name: 'Demo Client', hash: '#demo-client', type: 'User-defined', icon: 'clients' },
         { code: 'MAS.XPICFMapping', name: 'XPI Field Mapping', hash: '#xpi-cf-mapping', type: 'User-defined', icon: 'mapping' },
         { code: 'MAS.Agencies', name: 'Agencies', hash: '#agencies', type: 'User-defined', icon: 'mapping' },
+        { code: 'MOD.Campaign', name: 'Campaigns', hash: '#campaigns', type: 'User-defined', icon: 'megaphone' },
         { code: 'MOD.V', name: 'Task Viewer', hash: '#task-viewer', type: 'User-defined', icon: 'viewer' },
         { code: 'MOD.A', name: 'Admin', hash: '#admin', type: 'Built-in', icon: 'admin' },
         { code: 'MOD.B', name: 'Login', hash: '#login', type: 'Built-in', icon: 'login' },
@@ -455,6 +456,10 @@ const App = {};
                     document.getElementById('module-master-data').classList.remove('hidden');
                     initModule('agencies', () => App.MasterData.init('agencies'), true);
                     break;
+                case '#campaigns':
+                    document.getElementById('module-campaign').classList.remove('hidden');
+                    initModule('campaigns', App.CampaignsModule.init, false);
+                    break;
                 case '#task-viewer':
                     document.getElementById('module-task-viewer').classList.remove('hidden');
                     initModule('task-viewer', App.TaskViewerModule.init, false);
@@ -492,6 +497,7 @@ const App = {};
 
     const ICON_MAP = {
         'campaign': `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-send" viewBox="0 0 16 16"><path d="M15.854.146a.5.5 0 0 1 .11.54l-5.819 14.547a.75.75 0 0 1-1.329.124l-3.178-4.995L.643 7.184a.75.75 0 0 1 .124-1.33L15.314.037a.5.5 0 0 1 .54.11ZM6.636 10.07l2.761 4.338L14.13 2.576 6.636 10.07Zm6.787-8.201L1.591 6.602l4.339 2.76 7.494-7.493Z"/></svg>`,
+        'megaphone': `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-megaphone-fill" viewBox="0 0 16 16"><path d="M13 2.5a1.5 1.5 0 0 1 3 0v11a1.5 1.5 0 0 1-3 0zm-1 .724c-2.067.95-4.539 1.481-7 1.656v6.237a25 25 0 0 1-1.088.085c-.053-.002-.107-.004-.16-.006H4c-.72 0-1.554.135-2.22.404.16.04.324.079.49.114.164.036.332.068.503.095l.353.05a1 1 0 0 0 .728-.184l.38-.329a1 1 0 0 0-.115-.152l-.662-.551a.5.5 0 0 1 .33-1.003l.82.164a1 1 0 0 0 .986-.803l.255-1.435a.5.5 0 0 1 .916-.034l.256 1.436a1 1 0 0 0 .986.803l.82-.164a.5.5 0 0 1 .33 1.003l-.662.551a1 1 0 0 0-.115.152l.38.329a1 1 0 0 0 .728.184l.353-.05a12.7 12.7 0 0 0 .503-.095 4.9 4.9 0 0 0 .49-.114c-.666-.269-1.5-.404-2.22-.404h-.16c-.053.002-.107.004-.16.006a25 25 0 0 1-1.088-.085z"/></svg>`,
         'clients': `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16"><path d="M15 14v1H1v-1l.5-1a.5.5 0 0 1 .5-1H6a.5.5 0 0 1 .5.5c0 .253.189.463.43.59a.5.5 0 0 0 .44 0c.24-.127.43-.337.43-.59a.5.5 0 0 1 .5-.5h3.5a.5.5 0 0 1 .5 1l.5 1ZM11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M4 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm-2 7a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1H2v-1Z"/></svg>`,
         'mapping': `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-diagram-3" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6v1H14a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 2 7h5.5V6A1.5 1.5 0 0 1 6 4.5v-1zM8.5 5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1zM0 11.5A1.5 1.5 0 0 1 1.5 10h1A1.5 1.5 0 0 1 4 11.5v1A1.5 1.5 0 0 1 2.5 14h-1A1.5 1.5 0 0 1 0 12.5v-1zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1zm4.5.5A1.5 1.5 0 0 1 7.5 10h1a1.5 1.5 0 0 1 1.5 1.5v1A1.5 1.5 0 0 1 8.5 14h-1A1.5 1.5 0 0 1 6 12.5v-1zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1zm4.5.5a1.5 1.5 0 0 1 1.5-1.5h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5v-1zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1z"/></svg>`,
         'viewer': `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/></svg>`,
