@@ -17,7 +17,7 @@ const App = {};
 
     // --- Constants ---
     App.MODULE_CONFIG = [
-        { code: 'MOD.C', name: 'Campaign Submission', hash: '#campaign-submission', type: 'User-defined', icon: 'campaign' },
+        { code: 'MOD.C', name: 'Wrike Campaign Submission', hash: '#campaign-submission', type: 'User-defined', icon: 'campaign' },
         { code: 'MAS.DemoCient', name: 'Demo Client', hash: '#demo-client', type: 'User-defined', icon: 'clients' },
         { code: 'MAS.XPICFMapping', name: 'XPI Field Mapping', hash: '#xpi-cf-mapping', type: 'User-defined', icon: 'mapping' },
         { code: 'MAS.Agencies', name: 'Agencies', hash: '#agencies', type: 'User-defined', icon: 'mapping' },
@@ -442,7 +442,7 @@ const App = {};
             switch (hash) {
                 case '#campaign-submission':
                     document.getElementById('module-campaign-submission').classList.remove('hidden');
-                    initModule('campaign-submission', App.CampaignModule.init, false);
+                    initModule('campaign-submission', App.SubmitWrikeCampaign.init, false);
                     break;
                 case '#demo-client':
                     document.getElementById('module-master-data').classList.remove('hidden');

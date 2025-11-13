@@ -65,9 +65,9 @@
     })();
 })(App);
 
-// === Module: Campaign Submission ===
+// === Module: Submit Wrike Campaign ===
 (function(App) {
-    App.CampaignModule = (function() {
+    App.SubmitWrikeCampaign = (function() {
         let dom = {};
         let tags = ['Twitter']; // Default tag
 
