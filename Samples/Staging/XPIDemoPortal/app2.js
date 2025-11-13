@@ -560,7 +560,6 @@
         // --- Initialization ---
         function init() {
             cacheDOMElements();
-            seedSampleData();
             loadCampaigns();
             renderCampaignListView();
             setupModalEventListeners(); // Setup listeners once when the module is initialized
@@ -578,6 +577,13 @@
         function renderCampaignListView() {
             const template = document.getElementById('master-data-template').content.cloneNode(true);
             const currentInstance = template;
+
+            // Add "Reload Seed Data" button dynamically
+            const buttonContainer = currentInstance.querySelector('[data-template-id="load-btn"]').parentNode;
+            const seedBtn = document.createElement('button');
+            seedBtn.textContent = 'Reload Seed Data';
+            seedBtn.className = 'styled-btn-secondary mr-2';
+            buttonContainer.insertBefore(seedBtn, currentInstance.querySelector('[data-template-id="load-btn"]'));
 
             currentInstance.querySelector('[data-template-id="title"]').textContent = 'Campaigns';
             currentInstance.querySelector('p').textContent = 'Manage marketing campaigns and their channels.';
@@ -620,6 +626,7 @@
             // Add event listeners
             dom.moduleContainer.querySelector('[data-template-id="create-btn"]').addEventListener('click', handleCreateClick);
             dom.moduleContainer.querySelector('[data-template-id="load-btn"]').addEventListener('click', init);
+            seedBtn.addEventListener('click', handleReloadSeedData);
             dom.moduleContainer.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', handleEditClick));
             dom.moduleContainer.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', handleDeleteClick));
             App.Styling.apply();
@@ -736,6 +743,15 @@
             });
         }
 
+        function handleReloadSeedData() {
+            if (confirm('Are you sure you want to reload the seed data? This will overwrite all current campaign data.')) {
+                seedSampleData(true); // Force seeding
+                loadCampaigns();
+                renderCampaignListView();
+                App.UI.showToast('Seed data reloaded successfully.', 'success');
+            }
+        }
+
         function handleFormSubmit(e) {
             e.preventDefault();
             const formData = new FormData(modalForm);
@@ -793,18 +809,18 @@
         }
 
         // --- Sample Data Seeding ---
-        function seedSampleData() {
-            if (!App.Storage.local.getObject(CAMPAIGN_STORAGE_KEY)) {
+        function seedSampleData(force = false) {
+            if (force || !App.Storage.local.getObject(CAMPAIGN_STORAGE_KEY)) {
                 const sampleCampaigns = [
                     {
                         id: crypto.randomUUID(),
-                        campaignName: 'Summer Sale 2026', campaignObjective: 'Increase Sales', campaignStartDate: '2026-06-01', campaignEndDate: '2026-08-31',
-                        client: 'Global Retail Inc.', brand: 'SunSeeker Apparel', debtor: 'Global Retail Finance', agency: 'Creative Solutions',
+                        campaignName: 'Keep Running 2026', campaignObjective: 'Full Funnel', campaignStartDate: '2026-06-01', campaignEndDate: '2026-08-31',
+                        client: 'Adidas Group', brand: 'Skyrockeer', debtor: 'Adidas Malaysia Sdn Bhd', agency: 'Eightbar',
                         campaignCurrency: 'USD', budget: 50000,
                         channels: [
-                            { id: crypto.randomUUID(), name: 'Facebook Ads', type: 'Biddable', budget: 15000 },
-                            { id: crypto.randomUUID(), name: 'Google Search', type: 'Biddable', budget: 25000 },
-                            { id: crypto.randomUUID(), name: 'Content Marketing', type: 'Non-Biddable', budget: 10000 }
+                            { id: crypto.randomUUID(), name: 'Twitter', type: 'Biddable', budget: 15000 },
+                            { id: crypto.randomUUID(), name: 'Video (Youtube)', type: 'Biddable', budget: 25000 },
+                            { id: crypto.randomUUID(), name: 'Programmatic (DV360, TTD)', type: 'Biddable', budget: 10000 }
                         ]
                     },
                     {
