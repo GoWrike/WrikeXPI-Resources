@@ -149,8 +149,12 @@
                 // Now that dropdowns are loaded, apply any pending prefill data
                 if (pendingPrefillData) {
                     prefillForm();
-                    // Once all fields have been attempted, clear the pending data
+                    // Once all fields have been prefilled, clear the pending data
                     pendingPrefillData = null;
+
+                    // Automatically trigger the submission
+                    console.log('Prefill complete. Automatically submitting campaign...');
+                    dom.submitBtn.click();
                 }
                 
                 // Set default values from form if they exist in the loaded data
