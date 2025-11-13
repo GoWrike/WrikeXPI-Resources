@@ -18,10 +18,10 @@ const App = {};
     // --- Constants ---
     App.MODULE_CONFIG = [
         { code: 'MOD.C', name: 'Wrike Campaign Submission', hash: '#campaign-submission', type: 'User-defined', icon: 'campaign' },
-        { code: 'MAS.DemoCient', name: 'Demo Client', hash: '#demo-client', type: 'User-defined', icon: 'clients' },
+        { code: 'MAS.BB8Client', name: 'BB8 Clients', hash: '#demo-client', type: 'User-defined', icon: 'clients' },
+        { code: 'MOD.Campaign', name: 'BB8 Campaigns', hash: '#campaigns', type: 'User-defined', icon: 'megaphone' },
         { code: 'MAS.XPICFMapping', name: 'XPI Field Mapping', hash: '#xpi-cf-mapping', type: 'User-defined', icon: 'mapping' },
-        { code: 'MAS.Agencies', name: 'Agencies', hash: '#agencies', type: 'User-defined', icon: 'mapping' },
-        { code: 'MOD.Campaign', name: 'Campaigns', hash: '#campaigns', type: 'User-defined', icon: 'megaphone' },
+        { code: 'MAS.WrikeAgencies', name: 'Wrike Agencies', hash: '#wrike-agencies', type: 'User-defined', icon: 'mapping' },
         { code: 'MOD.V', name: 'Task Viewer', hash: '#task-viewer', type: 'User-defined', icon: 'viewer' },
         { code: 'MOD.A', name: 'Admin', hash: '#admin', type: 'Built-in', icon: 'admin' },
         { code: 'MOD.B', name: 'Login', hash: '#login', type: 'Built-in', icon: 'login' },
@@ -29,7 +29,7 @@ const App = {};
     
     App.MASTER_DATA_SCHEMAS = {
         'demoxpiclients': {
-            title: 'Demo Clients',
+            title: 'BB8 Clients',
             fields: [
                 { id: 'id', label: 'ID', readonly: true },
                 { id: 'value', label: 'Value', required: true },
@@ -49,7 +49,7 @@ const App = {};
             odataContext: 'https://api.wrikexpi.groupm.com/api/v1/v1.0/xpicfmapping' // Example, will use dynamic URL
         },
         'agencies': {
-            title: 'Agencies',
+            title: 'Wrike Agencies',
             fields: [
                 { id: 'value', label: 'Value', required: true }],
             type: "value"
@@ -452,9 +452,9 @@ const App = {};
                     document.getElementById('module-master-data').classList.remove('hidden');
                     initModule('xpi-cf-mapping', () => App.MasterData.init('xpicfmapping'), true);
                     break;
-                case '#agencies':
+                case '#wrike-agencies':
                     document.getElementById('module-master-data').classList.remove('hidden');
-                    initModule('agencies', () => App.MasterData.init('agencies'), true);
+                    initModule('wrike-agencies', () => App.MasterData.init('agencies'), true);
                     break;
                 case '#campaigns':
                     document.getElementById('module-campaign').classList.remove('hidden');
