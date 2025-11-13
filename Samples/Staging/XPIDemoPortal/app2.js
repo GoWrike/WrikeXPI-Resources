@@ -578,6 +578,7 @@
             modalTitle.textContent = campaign.id ? 'Edit Campaign' : 'Create New Campaign';
 
             const fields = [
+                // The user request specifies the endpoint is /sync-secrets relative to the base URL.
                 { id: 'campaignName', label: 'Campaign Name', required: true, value: campaign.campaignName },
                 { id: 'campaignObjective', label: 'Campaign Objective', value: campaign.campaignObjective },
                 { id: 'campaignStartDate', label: 'Campaign Start Date', type: 'date', value: campaign.campaignStartDate },
@@ -613,7 +614,12 @@
                 const channelsList = document.getElementById('channels-list');
                 const newChannel = { id: `new_${Date.now()}`, name: '', type: 'Biddable', budget: 0 };
                 channelsList.appendChild(createChannelInputRow(newChannel));
+                App.Styling.apply(); // Apply styles to the newly added row
             });
+
+            // Make modal wider for this specific form
+            const modalContent = modal.querySelector('.modal-content');
+            if (modalContent) modalContent.style.maxWidth = '70vw';
 
             App.Styling.apply();
             App.UI.showModal(modal);
@@ -706,14 +712,23 @@
             init();
             App.UI.hideModal(modal);
             App.UI.showToast(`Campaign ${currentEditCampaignId ? 'updated' : 'created'} successfully.`, 'success');
+
+            // Reset modal width
+            const modalContent = modal.querySelector('.modal-content');
+            if (modalContent) modalContent.style.maxWidth = '';
         }
 
         function setupModalEventListeners() {
             // These listeners are now scoped to the Campaigns module and won't conflict.
             // They are set up once on init.
             modalForm.addEventListener('submit', handleFormSubmit);
-            modalCancelBtn.addEventListener('click', () => App.UI.hideModal(modal));
-            deleteCancelBtn.addEventListener('click', () => App.UI.hideModal(deleteModal));
+            modalCancelBtn.addEventListener('click', () => {
+                App.UI.hideModal(modal);
+                // Reset modal width
+                const modalContent = modal.querySelector('.modal-content');
+                if (modalContent) modalContent.style.maxWidth = '';
+            });
+            deleteCancelBtn.addEventListener('click', () => { App.UI.hideModal(deleteModal); });
         }
 
         function showDeleteModal(onConfirm) {
