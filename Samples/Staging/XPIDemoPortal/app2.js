@@ -70,6 +70,7 @@
     App.SubmitWrikeCampaign = (function() {
         let dom = {};
         let tags = ['Twitter']; // Default tag
+        let pendingPrefillData = null;
 
         function init(prefilledData) {
             dom.form = document.getElementById('campaign-form');
@@ -88,27 +89,10 @@
             
             renderTags();
             loadDropdowns();
-            prefillForm(prefilledData);
-        }
 
-        function prefillForm(data) {
-            if (!data) return;
-
-            const fieldMap = {
-                'campaign-name': 'campaignname',
-                'client': 'client',
-                'debtor': 'debtor',
-                'brand': 'brand',
-                'campaign-objective': 'campaignobjective',
-                'campaign-start-date': 'campaignstartdate',
-                'campaign-end-date': 'campaignenddate',
-                'agency': 'agency'
-            };
-
-            for (const [jsonKey, formName] of Object.entries(fieldMap)) {
-                if (data[jsonKey] && dom.form.elements[formName]) {
-                    dom.form.elements[formName].value = data[jsonKey];
-                }
+            // Store prefill data to be applied after dropdowns are loaded
+            if (prefilledData) {
+                pendingPrefillData = prefilledData;
             }
         }
         
@@ -161,6 +145,13 @@
                 populateSelect(dom.clientSelect, clients.value);
                 populateSelect(dom.debtorSelect, debtors.value);
                 populateSelect(dom.agencySelect, agencies.value);
+
+                // Now that dropdowns are loaded, apply any pending prefill data
+                if (pendingPrefillData) {
+                    prefillForm();
+                    // Once all fields have been attempted, clear the pending data
+                    pendingPrefillData = null;
+                }
                 
                 // Set default values from form if they exist in the loaded data
                 // Example: dom.clientSelect.value = 'Adidas Group'; (if it exists)
@@ -170,6 +161,27 @@
                 App.UI.showToast('Failed to load form data. Please refresh.', 'error');
             } finally {
                 App.UI.hideSpinner();
+            }
+        }
+
+        function prefillForm() {
+            if (!pendingPrefillData) return; // Should not happen with new logic, but good practice
+
+            const fieldMap = {
+                'campaign-name': 'campaignname',
+                'client': 'client',
+                'debtor': 'debtor',
+                'brand': 'brand',
+                'campaign-objective': 'campaignobjective',
+                'campaign-start-date': 'campaignstartdate',
+                'campaign-end-date': 'campaignenddate',
+                'agency': 'agency'
+            };
+
+            for (const [jsonKey, formName] of Object.entries(fieldMap)) {
+                if (pendingPrefillData[jsonKey] && dom.form.elements[formName]) {
+                    dom.form.elements[formName].value = pendingPrefillData[jsonKey];
+                }
             }
         }
         
