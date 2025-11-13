@@ -695,9 +695,8 @@
 
             document.getElementById('add-attribute-btn').addEventListener('click', handleAddAttributeClick);
 
-            // Make modal wider for this specific form
-            const modalContent = modal.querySelector('.modal-content');
-            if (modalContent) modalContent.style.maxWidth = '70vw';
+            // Make modal wider for this specific campaign form
+            modal.style.maxWidth = '70vw';
 
             App.Styling.apply();
             App.UI.showModal(modal);
@@ -878,9 +877,8 @@
             App.UI.hideModal(modal);
             App.UI.showToast(`Campaign ${currentEditCampaignId ? 'updated' : 'created'} successfully.`, 'success');
 
-            // Reset modal width
-            const modalContent = modal.querySelector('.modal-content');
-            if (modalContent) modalContent.style.maxWidth = '';
+            // Reset modal width after closing
+            modal.style.maxWidth = '';
         }
 
         function setupModalEventListeners() {
@@ -889,9 +887,8 @@
             modalForm.addEventListener('submit', handleFormSubmit);
             modalCancelBtn.addEventListener('click', () => {
                 App.UI.hideModal(modal);
-                // Reset modal width
-                const modalContent = modal.querySelector('.modal-content');
-                if (modalContent) modalContent.style.maxWidth = '';
+                // Reset modal width after closing
+                modal.style.maxWidth = '';
             });
             deleteCancelBtn.addEventListener('click', () => { App.UI.hideModal(deleteModal); });
         }
