@@ -525,12 +525,12 @@
         // --- UI Rendering ---
         function renderCampaignListView() {
             const template = document.getElementById('master-data-template').content.cloneNode(true);
-            const instance = template;
+            const currentInstance = template;
 
-            instance.querySelector('[data-template-id="title"]').textContent = 'Campaigns';
-            instance.querySelector('p').textContent = 'Manage marketing campaigns and their channels.';
+            currentInstance.querySelector('[data-template-id="title"]').textContent = 'Campaigns';
+            currentInstance.querySelector('p').textContent = 'Manage marketing campaigns and their channels.';
 
-            const tableHead = instance.querySelector('[data-template-id="table-head"]');
+            const tableHead = currentInstance.querySelector('[data-template-id="table-head"]');
             const headers = ['Campaign Name', 'Client', 'Start Date', 'End Date', 'Budget', 'Actions'];
             tableHead.innerHTML = headers.map(h => `<th class="styled-table-th">${h}</th>`).join('');
             const tableBody = currentInstance.querySelector('[data-template-id="table-body"]');
@@ -560,12 +560,11 @@
                     tableBody.appendChild(row);
                 });
             } else {
-                instance.querySelector('[data-template-id="no-data"]').classList.remove('hidden');
+                currentInstance.querySelector('[data-template-id="no-data"]').classList.remove('hidden');
             }
 
             dom.moduleContainer.innerHTML = '';
-            dom.moduleContainer.appendChild(instance);
-
+            dom.moduleContainer.appendChild(currentInstance);
             // Add event listeners
             dom.moduleContainer.querySelector('[data-template-id="create-btn"]').addEventListener('click', handleCreateClick);
             dom.moduleContainer.querySelector('[data-template-id="load-btn"]').addEventListener('click', init);
