@@ -479,11 +479,6 @@
     })();
 })(App);
 
-// --- App Entry Point ---
-// This listener in app2.js ensures all core and module scripts are loaded
-// before starting the application.
-document.addEventListener('DOMContentLoaded', App.init);
-
 // === Module: Campaigns ===
 (function(App) {
     App.CampaignsModule = (function() {
@@ -777,3 +772,8 @@ document.addEventListener('DOMContentLoaded', App.init);
         return { init };
     })();
 })(App);
+
+// --- App Entry Point ---
+// This listener in app2.js ensures all core and module scripts are loaded
+// before starting the application.
+document.addEventListener('DOMContentLoaded', App.init);
