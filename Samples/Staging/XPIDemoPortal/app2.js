@@ -94,7 +94,22 @@
         function prefillForm(data) {
             if (!data) return;
 
-            if (data['campaign-name'] && dom.form.elements['cf-campaignname']) dom.form.elements['cf-campaignname'].value = data['campaign-name'];
+            const fieldMap = {
+                'campaign-name': 'campaignname',
+                'client': 'client',
+                'debtor': 'debtor',
+                'brand': 'brand',
+                'campaign-objective': 'campaignobjective',
+                'campaign-start-date': 'campaignstartdate',
+                'campaign-end-date': 'campaignenddate',
+                'agency': 'agency'
+            };
+
+            for (const [jsonKey, formName] of Object.entries(fieldMap)) {
+                if (data[jsonKey] && dom.form.elements[formName]) {
+                    dom.form.elements[formName].value = data[jsonKey];
+                }
+            }
         }
         
         function renderTags() {
