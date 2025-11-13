@@ -71,7 +71,7 @@
         let dom = {};
         let tags = ['Twitter']; // Default tag
 
-        function init() {
+        function init(prefilledData) {
             dom.form = document.getElementById('campaign-form');
             dom.submitBtn = document.getElementById('campaign-submit-btn');
             dom.resultPre = document.getElementById('campaign-result-pre');
@@ -88,6 +88,13 @@
             
             renderTags();
             loadDropdowns();
+            prefillForm(prefilledData);
+        }
+
+        function prefillForm(data) {
+            if (!data) return;
+
+            if (data['campaign-name'] && dom.form.elements['cf-campaignname']) dom.form.elements['cf-campaignname'].value = data['campaign-name'];
         }
         
         function renderTags() {

@@ -441,8 +441,17 @@ const App = {};
             App.Sidebar.updateActive(hash);
             switch (hash) {
                 case '#campaign-submission':
-                    document.getElementById('module-campaign-submission').classList.remove('hidden');
-                    initModule('campaign-submission', App.SubmitWrikeCampaign.init, false);
+                    {
+                        document.getElementById('module-campaign-submission').classList.remove('hidden');
+                        let prefilledData = null;
+                        if (params.has('prefilled')) {
+                            try {
+                                prefilledData = JSON.parse(params.get('prefilled'));
+                                window.history.replaceState({}, document.title, window.location.pathname + hash); // Clean URL
+                            } catch (e) { console.error("Failed to parse 'prefilled' JSON data:", e); }
+                        }
+                        initModule('campaign-submission', () => App.SubmitWrikeCampaign.init(prefilledData), false);
+                    }
                     break;
                 case '#demo-client':
                     document.getElementById('module-master-data').classList.remove('hidden');
