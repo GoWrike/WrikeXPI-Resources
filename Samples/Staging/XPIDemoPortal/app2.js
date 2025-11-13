@@ -612,6 +612,9 @@
                                 <button class="styled-btn-icon !text-red-400 hover:!text-red-300 delete-btn" data-id="${campaign.id}" title="Delete">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg>
                                 </button>
+                                <button class="styled-btn-icon !text-indigo-400 hover:!text-indigo-300 prefill-btn" data-id="${campaign.id}" title="Submit with Prefill">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/><path fill-rule="evenodd" d="M16 3.5a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0 0 1h5.793L8.146 8.146a.5.5 0 0 0 .708.708L15 2.707V8.5a.5.5 0 0 0 1 0v-5z"/></svg>
+                                </button>
                             </div>
                         </td>
                     `;
@@ -629,6 +632,7 @@
             seedBtn.addEventListener('click', handleReloadSeedData);
             dom.moduleContainer.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', handleEditClick));
             dom.moduleContainer.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', handleDeleteClick));
+            dom.moduleContainer.querySelectorAll('.prefill-btn').forEach(btn => btn.addEventListener('click', handlePrefillRedirectClick));
             App.Styling.apply();
         }
 
@@ -676,12 +680,53 @@
                 App.Styling.apply(); // Apply styles to the newly added row
             });
 
+            // --- Additional Prefill Attributes Section ---
+            const attributesContainer = document.createElement('div');
+            attributesContainer.className = 'md:col-span-2 border-t border-gray-700 mt-6 pt-6';
+            attributesContainer.innerHTML = `
+                <h4 class="text-lg font-semibold text-white mb-4">Additional Prefill Attributes</h4>
+                <p class="text-xs text-gray-400 mb-4">These name/value pairs will be added to the prefill data for automated submission.</p>
+                <div id="attributes-list" class="space-y-3 mb-4"></div>
+                <button type="button" id="add-attribute-btn" class="styled-btn-secondary">Add Attribute</button>
+            `;
+            modalFormFields.appendChild(attributesContainer);
+
+            renderAttributes(campaign.prefillAttributes || []);
+
+            document.getElementById('add-attribute-btn').addEventListener('click', handleAddAttributeClick);
+
             // Make modal wider for this specific form
             const modalContent = modal.querySelector('.modal-content');
             if (modalContent) modalContent.style.maxWidth = '70vw';
 
             App.Styling.apply();
             App.UI.showModal(modal);
+        }
+
+        function createAttributeInputRow(attribute) {
+            const div = document.createElement('div');
+            div.className = 'grid grid-cols-10 gap-2 items-center attribute-row';
+            div.innerHTML = `
+                <div class="col-span-4">
+                    <input type="text" placeholder="Attribute Name" class="styled-input attribute-name" value="${attribute.name || ''}">
+                </div>
+                <div class="col-span-5">
+                    <input type="text" placeholder="Attribute Value" class="styled-input attribute-value" value="${attribute.value || ''}">
+                </div>
+                <div class="col-span-1 text-right">
+                    <button type="button" class="styled-btn-icon !text-red-400 hover:!text-red-300 remove-attribute-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg>
+                    </button>
+                </div>
+            `;
+            div.querySelector('.remove-attribute-btn').addEventListener('click', () => div.remove());
+            return div;
+        }
+
+        function renderAttributes(attributes = []) {
+            const attributesList = document.getElementById('attributes-list');
+            attributesList.innerHTML = '';
+            attributes.forEach(attr => attributesList.appendChild(createAttributeInputRow(attr)));
         }
 
         function createChannelInputRow(channel) {
@@ -719,6 +764,12 @@
             });
         }
 
+        function handleAddAttributeClick() {
+            const attributesList = document.getElementById('attributes-list');
+            attributesList.appendChild(createAttributeInputRow({}));
+            App.Styling.apply();
+        }
+
         // --- Event Handlers ---
         function handleCreateClick() {
             renderCampaignForm();
@@ -752,6 +803,44 @@
             }
         }
 
+        function handlePrefillRedirectClick(e) {
+            const campaignId = e.currentTarget.dataset.id;
+            const campaign = campaigns.find(c => c.id === campaignId);
+            if (!campaign) {
+                App.UI.showToast('Could not find campaign data to prefill.', 'error');
+                return;
+            }
+
+            // Map campaign data to the format expected by the submission module
+            const prefillData = {
+                'campaign-name': campaign.campaignName,
+                'campaign-objective': campaign.campaignObjective,
+                'client': campaign.client,
+                'debtor': campaign.debtor,
+                'agency': campaign.agency,
+                'brand': campaign.brand,
+                'campaign-start-date': campaign.campaignStartDate,
+                'campaign-end-date': campaign.campaignEndDate,
+                'currency': campaign.campaignCurrency,
+                'overall-budget': campaign.budget,
+                'selected-channels': (campaign.channels || []).map(ch => ch.name),
+            };
+
+            // Add custom prefill attributes
+            if (campaign.prefillAttributes && Array.isArray(campaign.prefillAttributes)) {
+                campaign.prefillAttributes.forEach(attr => {
+                    if (attr.name) prefillData[attr.name] = attr.value;
+                });
+            };
+
+            // Create the URL
+            const jsonString = JSON.stringify(prefillData);
+            const encodedJson = encodeURIComponent(jsonString);
+            const url = `${window.location.pathname}?prefilled=${encodedJson}#campaign-submission`;
+
+            window.location.href = url;
+        }
+
         function handleFormSubmit(e) {
             e.preventDefault();
             const formData = new FormData(modalForm);
@@ -765,6 +854,14 @@
                 type: row.querySelector('.channel-type').value,
                 budget: parseFloat(row.querySelector('.channel-budget').value) || 0,
             }));
+
+            // Collect attribute data
+            const attributeRows = modalForm.querySelectorAll('.attribute-row');
+            campaignData.prefillAttributes = Array.from(attributeRows).map(row => ({
+                name: row.querySelector('.attribute-name').value,
+                value: row.querySelector('.attribute-value').value,
+            })).filter(attr => attr.name); // Only save attributes that have a name
+
 
             if (currentEditCampaignId) {
                 const index = campaigns.findIndex(c => c.id === currentEditCampaignId);
@@ -821,7 +918,14 @@
                             { id: crypto.randomUUID(), name: 'Twitter', type: 'Biddable', budget: 15000 },
                             { id: crypto.randomUUID(), name: 'Video (Youtube)', type: 'Biddable', budget: 25000 },
                             { id: crypto.randomUUID(), name: 'Programmatic (DV360, TTD)', type: 'Biddable', budget: 10000 }
-                        ]
+                        ],
+                        prefillAttributes: [
+                            { name: 'requested-start-date', value: '2026-12-12' },
+                            { name: 'requestor-market', value: 'Singapore' },
+                            { name: 'currency', value: 'SGD' },
+                            { name: 'opt-in', value: 'No' },
+                            { name: 'pod', value: 'Pod 1C' }
+                        ],
                     },
                     {
                         id: crypto.randomUUID(),
@@ -831,7 +935,14 @@
                         channels: [
                             { id: crypto.randomUUID(), name: 'YouTube Pre-roll', type: 'Biddable', budget: 60000 },
                             { id: crypto.randomUUID(), name: 'Influencer Outreach', type: 'Non-Biddable', budget: 40000 }
-                        ]
+                        ],
+                        prefillAttributes: [
+                            { name: 'requested-start-date', value: '2026-12-12' },
+                            { name: 'requestor-market', value: 'Singapore' },
+                            { name: 'currency', value: 'SGD' },
+                            { name: 'opt-in', value: 'No' },
+                            { name: 'pod', value: 'Pod 1C' }
+                        ],
                     }
                 ];
                 App.Storage.local.setObject(CAMPAIGN_STORAGE_KEY, sampleCampaigns);
