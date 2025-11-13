@@ -487,13 +487,13 @@
         let campaigns = [];
         let currentEditCampaignId = null;
         let dom = {};
-        let currentInstance = null;
 
         // --- Modal Elements (shared) ---
         let modal, modalTitle, modalForm, modalFormFields, modalCancelBtn;
         let deleteModal, deleteConfirmBtn, deleteCancelBtn;
 
         function cacheDOMElements() {
+            // Cache page-specific elements
             dom.moduleContainer = document.getElementById('module-campaign');
             modal = document.getElementById('modal-master-data');
             modalTitle = document.getElementById('master-data-modal-title');
@@ -507,12 +507,11 @@
 
         // --- Initialization ---
         function init() {
-            if (!dom.moduleContainer) {
-                cacheDOMElements();
-            }
+            cacheDOMElements();
             seedSampleData();
             loadCampaigns();
             renderCampaignListView();
+            setupModalEventListeners(); // Setup listeners once when the module is initialized
         }
 
         function loadCampaigns() {
@@ -526,15 +525,14 @@
         // --- UI Rendering ---
         function renderCampaignListView() {
             const template = document.getElementById('master-data-template').content.cloneNode(true);
-            currentInstance = template;
+            const instance = template;
 
-            currentInstance.querySelector('[data-template-id="title"]').textContent = 'Campaigns';
-            currentInstance.querySelector('p').textContent = 'Manage marketing campaigns and their channels.';
+            instance.querySelector('[data-template-id="title"]').textContent = 'Campaigns';
+            instance.querySelector('p').textContent = 'Manage marketing campaigns and their channels.';
 
-            const tableHead = currentInstance.querySelector('[data-template-id="table-head"]');
+            const tableHead = instance.querySelector('[data-template-id="table-head"]');
             const headers = ['Campaign Name', 'Client', 'Start Date', 'End Date', 'Budget', 'Actions'];
             tableHead.innerHTML = headers.map(h => `<th class="styled-table-th">${h}</th>`).join('');
-
             const tableBody = currentInstance.querySelector('[data-template-id="table-body"]');
             tableBody.innerHTML = '';
 
@@ -562,11 +560,11 @@
                     tableBody.appendChild(row);
                 });
             } else {
-                currentInstance.querySelector('[data-template-id="no-data"]').classList.remove('hidden');
+                instance.querySelector('[data-template-id="no-data"]').classList.remove('hidden');
             }
 
             dom.moduleContainer.innerHTML = '';
-            dom.moduleContainer.appendChild(currentInstance);
+            dom.moduleContainer.appendChild(instance);
 
             // Add event listeners
             dom.moduleContainer.querySelector('[data-template-id="create-btn"]').addEventListener('click', handleCreateClick);
@@ -711,33 +709,22 @@
             App.UI.showToast(`Campaign ${currentEditCampaignId ? 'updated' : 'created'} successfully.`, 'success');
         }
 
+        function setupModalEventListeners() {
+            // These listeners are now scoped to the Campaigns module and won't conflict.
+            // They are set up once on init.
+            modalForm.addEventListener('submit', handleFormSubmit);
+            modalCancelBtn.addEventListener('click', () => App.UI.hideModal(modal));
+            deleteCancelBtn.addEventListener('click', () => App.UI.hideModal(deleteModal));
+        }
+
         function showDeleteModal(onConfirm) {
             App.UI.showModal(deleteModal);
             // Clone and replace to remove old listeners
             const newConfirmBtn = deleteConfirmBtn.cloneNode(true);
             deleteConfirmBtn.parentNode.replaceChild(newConfirmBtn, deleteConfirmBtn);
+            deleteConfirmBtn = newConfirmBtn; // Update reference
             newConfirmBtn.addEventListener('click', onConfirm);
         }
-
-        // --- Global Event Listeners for this module ---
-        // We need to make sure these don't conflict with MasterData module
-        // The router will initialize the correct module, which will then set its own handlers.
-        // When switching modules, the new module's init should take precedence.
-        modalForm.addEventListener('submit', (e) => {
-            if (App.state.initializedModules.has('campaigns') && window.location.hash === '#campaigns') {
-                handleFormSubmit(e);
-            }
-        });
-        modalCancelBtn.addEventListener('click', () => {
-            if (App.state.initializedModules.has('campaigns') && window.location.hash === '#campaigns') {
-                App.UI.hideModal(modal);
-            }
-        });
-        deleteCancelBtn.addEventListener('click', () => {
-            if (App.state.initializedModules.has('campaigns') && window.location.hash === '#campaigns') {
-                App.UI.hideModal(deleteModal);
-            }
-        });
 
         // --- Sample Data Seeding ---
         function seedSampleData() {
