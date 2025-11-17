@@ -11,8 +11,8 @@ const App = {};
     App.state = {
         isLoggedIn: false,
         currentUser: null, // { firstName, lastName, avatarUrl }
-        xpiBaseUrl: 'https://xpi-api.gowrike.space/',
-        urlLandingPage: '',
+        xpiBaseUrl: 'https://api.wrikexpi.groupm.com/',
+        urlLandingPage: 'https://app-eu.wrike.com/open.htm?id=1802549085',
         initializedModules: new Set(),
     };
 
@@ -25,6 +25,7 @@ const App = {};
         { code: 'MAS.WrikeAgencies', name: 'Wrike Agencies', hash: '#wrike-agencies', type: 'User-defined', icon: 'mapping' },
         { code: 'MOD.V', name: 'Task Viewer', hash: '#task-viewer', type: 'User-defined', icon: 'viewer' },
         { code: 'MOD.A', name: 'Admin', hash: '#admin', type: 'Built-in', icon: 'admin' },
+        { code: 'MOD.L', name: 'Landing Page', hash: '#landing-page', type: 'Built-in', icon: 'home' },
         { code: 'MOD.B', name: 'Login', hash: '#login', type: 'Built-in', icon: 'login' },
     ];
     
@@ -366,7 +367,7 @@ const App = {};
             App.Sidebar.updateProfile(user);
             
             setTimeout(() => {
-                window.location.hash = '#campaign-submission';
+                window.location.hash = '#landing-page';
             }, 2000);
 
         } catch (error) {
@@ -480,6 +481,10 @@ const App = {};
                     document.getElementById('module-task-viewer').classList.remove('hidden');
                     initModule('task-viewer', App.TaskViewerModule.init, false);
                     break;
+                case '#landing-page':
+                    document.getElementById('module-landing-page').classList.remove('hidden');
+                    initModule('landing-page', App.LandingPageModule.init, true); // Force re-init
+                    break;
                 default:
                     window.location.hash = '#campaign-submission';
             }
@@ -517,6 +522,7 @@ const App = {};
         'clients': `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-people" viewBox="0 0 16 16"><path d="M15 14v1H1v-1l.5-1a.5.5 0 0 1 .5-1H6a.5.5 0 0 1 .5.5c0 .253.189.463.43.59a.5.5 0 0 0 .44 0c.24-.127.43-.337.43-.59a.5.5 0 0 1 .5-.5h3.5a.5.5 0 0 1 .5 1l.5 1ZM11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0ZM8 7a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z"/><path d="M4 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm-2 7a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v1H2v-1Z"/></svg>`,
         'mapping': `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-diagram-3" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M6 3.5A1.5 1.5 0 0 1 7.5 2h1A1.5 1.5 0 0 1 10 3.5v1A1.5 1.5 0 0 1 8.5 6v1H14a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0V8h-5v.5a.5.5 0 0 1-1 0v-1A.5.5 0 0 1 2 7h5.5V6A1.5 1.5 0 0 1 6 4.5v-1zM8.5 5a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1zM0 11.5A1.5 1.5 0 0 1 1.5 10h1A1.5 1.5 0 0 1 4 11.5v1A1.5 1.5 0 0 1 2.5 14h-1A1.5 1.5 0 0 1 0 12.5v-1zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1zm4.5.5A1.5 1.5 0 0 1 7.5 10h1a1.5 1.5 0 0 1 1.5 1.5v1A1.5 1.5 0 0 1 8.5 14h-1A1.5 1.5 0 0 1 6 12.5v-1zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1zm4.5.5a1.5 1.5 0 0 1 1.5-1.5h1a1.5 1.5 0 0 1 1.5 1.5v1a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5v-1zm1.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1z"/></svg>`,
         'viewer': `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-eye" viewBox="0 0 16 16"><path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/><path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/></svg>`,
+        'home': `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-house-door-fill" viewBox="0 0 16 16"><path d="M6.5 14.5v-3.505c0-.245.25-.495.5-.495h2c.25 0 .5.25.5.5v3.5a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5v-7a.5.5 0 0 0-.146-.354L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.354 1.146a.5.5 0 0 0-.708 0l-6 6A.5.5 0 0 0 1.5 7.5v7a.5.5 0 0 0 .5.5h4a.5.5 0 0 0 .5-.5z"/></svg>`,
         'default': `<svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/></svg>`
     };
 
@@ -873,6 +879,88 @@ const App = {};
     }
 
     App.TaskViewerModule = { init };
+})(App);
+
+// === Landing Page Module ===
+(function(App) {
+    let dom = {};
+
+    function init() {
+        dom.contentArea = document.getElementById('landing-page-content-area');
+        dom.wrikeLink = document.getElementById('landing-page-wrike-link');
+
+        const permalink = App.Config.get('urlLandingPage');
+
+        if (permalink) {
+            fetchContent(permalink);
+        } else {
+            displayError('Not Configured', 'The landing page URL has not been set in the Admin configuration.');
+        }
+    }
+
+    function showLoading() {
+        dom.contentArea.innerHTML = `
+            <div class="p-12 flex flex-col items-center justify-center text-gray-400">
+                <div class="animate-spin h-10 w-10 text-indigo-500" role="status">
+                     <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </div>
+                <span class="mt-4 text-lg font-medium">Loading Content...</span>
+            </div>`;
+    }
+
+    function displayError(title, message) {
+        dom.wrikeLink.classList.add('hidden');
+        dom.contentArea.innerHTML = `
+            <div class="p-8 bg-red-900/50 border border-red-700 rounded-lg">
+                <h3 class="text-xl font-semibold text-white">${title}</h3>
+                <p class="mt-2 text-red-200">${message}</p>
+            </div>`;
+    }
+
+    function displayContent(title, descriptionHtml, permalink) {
+        dom.wrikeLink.href = permalink;
+        dom.wrikeLink.classList.remove('hidden');
+
+        dom.contentArea.innerHTML = `
+            <h3 class="text-2xl font-bold text-white mb-4 pb-4 border-b border-gray-700">${title}</h3>
+            <div class="prose prose-lg prose-invert max-w-none">${descriptionHtml || '<p>No description provided.</p>'}</div>
+        `;
+        // Disable any checkboxes in the rendered HTML for a read-only view
+        dom.contentArea.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.disabled = true);
+    }
+
+    async function fetchContent(permalink) {
+        showLoading();
+        const token = App.Auth.getToken();
+        if (!token) {
+            displayError('Authentication Error', 'No authentication token found. Please log in.');
+            return;
+        }
+
+        const url = `${App.Config.get('xpiBaseUrl')}api/v1/wrikexpi/amoeba/wrikeapi/tasks?permalink=${encodeURIComponent(permalink)}&fields=[description]`;
+
+        try {
+            const response = await App.Api.fetchWithLogs(url, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+
+            if (response.success && response.data && response.data.length > 0) {
+                const task = response.data[0];
+                displayContent(task.title, task.description, permalink);
+            } else {
+                throw new Error(response.message || 'API response was successful, but no task data was found.');
+            }
+        } catch (error) {
+            console.error('Landing Page fetch error:', error);
+            const errorMessage = typeof error === 'object' ? (error.message || JSON.stringify(error)) : error.toString();
+            displayError('Failed to Load Content', `There was a problem retrieving the content. (Error: ${errorMessage})`);
+        }
+    }
+
+    App.LandingPageModule = { init };
 })(App);
 
 // === Main App Init ===
