@@ -19,11 +19,11 @@ const App = {};
     // --- Constants ---
     App.MODULE_CONFIG = [
         { code: 'MOD.L', name: 'Home', hash: '#landing-page', type: 'User-defined', icon: 'home' },
-        { code: 'MOD.C', name: 'Wrike Campaign Submission', hash: '#campaign-submission', type: 'User-defined', icon: 'campaign' },
         { code: 'MAS.BB8Client', name: 'BB8 Clients', hash: '#demo-client', type: 'User-defined', icon: 'clients' },
         { code: 'MOD.Campaign', name: 'BB8 Campaigns', hash: '#campaigns', type: 'User-defined', icon: 'megaphone' },
         //{ code: 'MAS.XPICFMapping', name: 'XPI Field Mapping', hash: '#xpi-cf-mapping', type: 'User-defined', icon: 'mapping' },
         { code: 'MAS.WrikeAgencies', name: 'Wrike Agencies', hash: '#wrike-agencies', type: 'User-defined', icon: 'mapping' },
+        { code: 'MOD.C', name: 'Wrike Campaign Submission', hash: '#campaign-submission', type: 'User-defined', icon: 'campaign' },
         { code: 'MOD.V', name: 'Task Viewer', hash: '#task-viewer', type: 'User-defined', icon: 'viewer' },
         { code: 'MOD.A', name: 'Admin', hash: '#admin', type: 'Built-in', icon: 'admin' },
         { code: 'MOD.B', name: 'Login', hash: '#login', type: 'Built-in', icon: 'login' },
