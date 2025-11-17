@@ -305,7 +305,7 @@ const App = {};
             
             const baseUrl = App.Config.get('xpiBaseUrl');
             const redirectUri = window.location.origin + window.location.pathname;
-            const authUrl = `${baseUrl}?accountId=3128883&redirectUri=${encodeURIComponent(redirectUri)}&client_id=${clientId}`;
+            const authUrl = `${baseUrl}?accountId=3128883&autoRedirect=1&redirectUri=${encodeURIComponent(redirectUri)}&client_id=${clientId}`;
             
             window.location.href = authUrl;
         } catch (error) {
