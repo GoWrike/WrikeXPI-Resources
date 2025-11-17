@@ -709,7 +709,16 @@ const App = {};
             url,
             method,
             status: 'Pending...',
-            request: options.body || null,
+            request: (() => {
+                if (!options.body) return null;
+                try {
+                    // Try to parse if it's a JSON string
+                    return JSON.parse(options.body);
+                } catch (e) {
+                    // Otherwise, return as is
+                    return options.body;
+                }
+            })(),
             response: null
         };
         saveLogs(logs);
