@@ -12,6 +12,7 @@ const App = {};
         isLoggedIn: false,
         currentUser: null, // { firstName, lastName, avatarUrl }
         xpiBaseUrl: 'https://xpi-api.gowrike.space/',
+        urlLandingPage: '',
         initializedModules: new Set(),
     };
 
@@ -156,18 +157,24 @@ const App = {};
 // === Config Module ===
 (function(App) {
     function init() {
-        const storedUrl = App.Storage.local.get('xpiBaseUrl');
-        if (storedUrl) {
-            App.state.xpiBaseUrl = storedUrl;
-        } else {
-            App.Storage.local.set('xpiBaseUrl', App.state.xpiBaseUrl);
-        }
+        // Initialize all configurable keys from localStorage
+        ['xpiBaseUrl', 'urlLandingPage'].forEach(key => {
+            const storedValue = App.Storage.local.get(key);
+            if (storedValue) {
+                App.state[key] = storedValue;
+            } else {
+                // If not in storage, set it from the initial state
+                App.Storage.local.set(key, App.state[key]);
+            }
+        });
     }
     function get(key) { return App.state[key]; }
     function set(key, value) { 
         App.state[key] = value; 
-        if (key === 'xpiBaseUrl') {
-            App.Storage.local.set('xpiBaseUrl', value);
+        // Persist configurable keys to localStorage
+        const persistKeys = ['xpiBaseUrl', 'urlLandingPage'];
+        if (persistKeys.includes(key)) {
+            App.Storage.local.set(key, value);
         }
     }
     App.Config = { init, get, set };
