@@ -581,7 +581,7 @@
             // Add "Reload Seed Data" button dynamically
             const buttonContainer = currentInstance.querySelector('[data-template-id="load-btn"]').parentNode;
             const seedBtn = document.createElement('button');
-            seedBtn.textContent = 'Reload Seed Data';
+            seedBtn.textContent = 'Reload Demo Data';
             seedBtn.className = 'styled-btn-secondary mr-2';
             buttonContainer.insertBefore(seedBtn, currentInstance.querySelector('[data-template-id="load-btn"]'));
 
@@ -794,11 +794,11 @@
         }
 
         function handleReloadSeedData() {
-            if (confirm('Are you sure you want to reload the seed data? This will overwrite all current campaign data.')) {
+            if (confirm('Are you sure you want to reload the demo data? This will overwrite all current campaign data.')) {
                 seedSampleData(true); // Force seeding
                 loadCampaigns();
                 renderCampaignListView();
-                App.UI.showToast('Seed data reloaded successfully.', 'success');
+                App.UI.showToast('Demo data reloaded successfully.', 'success');
             }
         }
 
