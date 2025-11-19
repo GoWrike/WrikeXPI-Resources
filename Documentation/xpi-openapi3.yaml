@@ -1,0 +1,1326 @@
+openapi: 3.0.0
+info:
+  title: WrikeXPI APIs (imported)
+  version: 1.0.0
+  description: ''
+servers:
+  - url: 'https://xpi-api.gowrike.space/api/v1'
+  - url: 'https://api.wrikexpi.groupm.com/api/v1'
+paths:
+  /wrikexpi/Campaigns:
+    get:
+      summary: Get Campaigns
+      tags:
+        - Koinos
+        - Campaign
+        - OData
+      responses:
+        '200':
+          description: Successfully returned campaign data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CampaignResponse'
+        '400':
+          description: Bad Request - Invalid parameters provided
+        '401':
+          description: Unauthorized - API Key or Token missing/invalid
+        '500':
+          description: Internal Server Error
+      security:
+        - BasicAuth: []
+  /wrikexpi/campaign/{campaign_id}:
+    get:
+      summary: Get Campaign
+      tags:
+        - Koinos
+        - Campaign
+      responses:
+        default:
+          description: Get Campaign
+      security:
+        - BearerAuth: []
+    parameters:
+      - name: campaign_id
+        in: path
+        required: true
+        schema:
+          type: string
+    delete:
+      summary: Delete Campaign
+      tags:
+        - Koinos
+        - Campaign
+      responses:
+        default:
+          description: Get Campaign
+    put:
+      summary: Update Campaign
+      tags:
+        - Koinos
+        - Campaign
+      responses:
+        '200':
+          description: Update Campaign
+          headers:
+            Cross-Origin-Opener-Policy:
+              schema:
+                type: string
+            Cross-Origin-Resource-Policy:
+              schema:
+                type: string
+            Origin-Agent-Cluster:
+              schema:
+                type: string
+            Referrer-Policy:
+              schema:
+                type: string
+            Strict-Transport-Security:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            X-DNS-Prefetch-Control:
+              schema:
+                type: string
+            X-Download-Options:
+              schema:
+                type: string
+            X-Frame-Options:
+              schema:
+                type: string
+            X-Permitted-Cross-Domain-Policies:
+              schema:
+                type: string
+            X-XSS-Protection:
+              schema:
+                type: integer
+            access-control-allow-origin:
+              schema:
+                type: string
+            x-ratelimit-limit:
+              schema:
+                type: integer
+            x-ratelimit-remaining:
+              schema:
+                type: integer
+            x-ratelimit-reset:
+              schema:
+                type: integer
+            content-length:
+              schema:
+                type: integer
+            Date:
+              schema:
+                type: string
+            Connection:
+              schema:
+                type: string
+            Keep-Alive:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      customfieldlist:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            value:
+                              type: string
+                      noofcrs:
+                        type: string
+                      agency:
+                        type: string
+                      mediabuyingtype:
+                        type: string
+                      brand:
+                        type: string
+                      briefeddate:
+                        type: string
+                      campaignbudget:
+                        type: string
+                      campaignenddate:
+                        type: string
+                        format: date
+                      campaignid:
+                        type: string
+                      campaignname:
+                        type: string
+                      campaignobjective:
+                        type: string
+                      campaignstartdate:
+                        type: string
+                        format: date
+                      campaignfeedbackstatus:
+                        type: string
+                      ccuid:
+                        type: string
+                      mediachannelpractice:
+                        type: string
+                      client:
+                        type: string
+                      comments:
+                        type: string
+                      cssid:
+                        type: string
+                      currency:
+                        type: string
+                      customerponumber:
+                        type: string
+                      debtor:
+                        type: string
+                      kpiobjective:
+                        type: string
+                      originalagency:
+                        type: string
+                      readyforarchive:
+                        type: string
+                      region:
+                        type: string
+                      requestedstartdate:
+                        type: string
+                      requestormarket:
+                        type: string
+                      spacename:
+                        type: string
+                      workitemlevel:
+                        type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                campaignname:
+                  type: string
+                title:
+                  type: string
+                testfield:
+                  type: string
+  /wrikexpi/campaign/upload:
+    post:
+      summary: File Upload
+      tags:
+        - Koinos
+        - Campaign
+      responses:
+        default:
+          description: File Upload
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      attachmentId:
+                        type: string
+  /wrikexpi/campaign:
+    get:
+      summary: Get Campaigns
+      tags:
+        - Koinos
+        - Campaign
+      parameters:
+        - name: filter
+          in: query
+          schema:
+            type: string
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+        - name: nextPageToken
+          in: query
+          schema:
+            type: string
+      responses:
+        default:
+          description: Get Campaigns
+    post:
+      summary: Create Campaign
+      tags:
+        - Koinos
+        - Campaign
+      responses:
+        '200':
+          description: Create Campaign
+          headers:
+            Cross-Origin-Opener-Policy:
+              schema:
+                type: string
+            Cross-Origin-Resource-Policy:
+              schema:
+                type: string
+            Origin-Agent-Cluster:
+              schema:
+                type: string
+            Referrer-Policy:
+              schema:
+                type: string
+            Strict-Transport-Security:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            X-DNS-Prefetch-Control:
+              schema:
+                type: string
+            X-Download-Options:
+              schema:
+                type: string
+            X-Frame-Options:
+              schema:
+                type: string
+            X-Permitted-Cross-Domain-Policies:
+              schema:
+                type: string
+            X-XSS-Protection:
+              schema:
+                type: integer
+            access-control-allow-origin:
+              schema:
+                type: string
+            x-ratelimit-limit:
+              schema:
+                type: integer
+            x-ratelimit-remaining:
+              schema:
+                type: integer
+            x-ratelimit-reset:
+              schema:
+                type: integer
+            content-length:
+              schema:
+                type: integer
+            Date:
+              schema:
+                type: string
+            Connection:
+              schema:
+                type: string
+            Keep-Alive:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      customfieldlist:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            value:
+                              type: string
+                      noofcrs:
+                        type: string
+                      agency:
+                        type: string
+                      mediabuyingtype:
+                        type: string
+                      brand:
+                        type: string
+                      briefeddate:
+                        type: string
+                      campaignbudget:
+                        type: string
+                      campaignenddate:
+                        type: string
+                        format: date
+                      campaignid:
+                        type: string
+                      campaignname:
+                        type: string
+                      campaignobjective:
+                        type: string
+                      campaignstartdate:
+                        type: string
+                        format: date
+                      campaignfeedbackstatus:
+                        type: string
+                      ccuid:
+                        type: string
+                      mediachannelpractice:
+                        type: string
+                      client:
+                        type: string
+                      comments:
+                        type: string
+                      cssid:
+                        type: string
+                      currency:
+                        type: string
+                      customerponumber:
+                        type: string
+                      debtor:
+                        type: string
+                      kpiobjective:
+                        type: string
+                      originalagency:
+                        type: string
+                      readyforarchive:
+                        type: string
+                      region:
+                        type: string
+                      requestedstartdate:
+                        type: string
+                      requestormarket:
+                        type: string
+                      spacename:
+                        type: string
+                      workitemlevel:
+                        type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                space:
+                  type: string
+                entity:
+                  type: string
+                variantId:
+                  type: integer
+                fields:
+                  type: object
+                  properties:
+                    requestedstartdate:
+                      type: string
+                      format: date
+                    agency:
+                      type: string
+                    brand:
+                      type: string
+                    client:
+                      type: string
+                    debtor:
+                      type: string
+                    currency:
+                      type: string
+                    pod:
+                      type: string
+                    campaignname:
+                      type: string
+                    campaignstartdate:
+                      type: string
+                      format: date
+                    campaignenddate:
+                      type: string
+                      format: date
+                    campaignobjective:
+                      type: string
+                    requestormarket:
+                      type: string
+                    optin:
+                      type: string
+                    porequired:
+                      type: string
+                    overallbudget:
+                      type: string
+                      format: color
+                    selectedchannels:
+                      type: array
+                      items:
+                        type: string
+  /wrikexpi/channel/{channel_id}:
+    get:
+      summary: Get Channel
+      tags:
+        - Koinos
+        - Channel
+      responses:
+        default:
+          description: Get Channel
+    parameters:
+      - name: channel_id
+        in: path
+        required: true
+        schema:
+          type: string
+    delete:
+      summary: Delete Channel
+      tags:
+        - Koinos
+        - Channel
+      responses:
+        default:
+          description: Delete Channel
+    put:
+      summary: Update Channel
+      tags:
+        - Koinos
+        - Channel
+      responses:
+        '200':
+          description: Update Channel
+          headers:
+            Cross-Origin-Opener-Policy:
+              schema:
+                type: string
+            Cross-Origin-Resource-Policy:
+              schema:
+                type: string
+            Origin-Agent-Cluster:
+              schema:
+                type: string
+            Referrer-Policy:
+              schema:
+                type: string
+            Strict-Transport-Security:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            X-DNS-Prefetch-Control:
+              schema:
+                type: string
+            X-Download-Options:
+              schema:
+                type: string
+            X-Frame-Options:
+              schema:
+                type: string
+            X-Permitted-Cross-Domain-Policies:
+              schema:
+                type: string
+            X-XSS-Protection:
+              schema:
+                type: integer
+            access-control-allow-origin:
+              schema:
+                type: string
+            x-ratelimit-limit:
+              schema:
+                type: integer
+            x-ratelimit-remaining:
+              schema:
+                type: integer
+            x-ratelimit-reset:
+              schema:
+                type: integer
+            content-length:
+              schema:
+                type: integer
+            Date:
+              schema:
+                type: string
+            Connection:
+              schema:
+                type: string
+            Keep-Alive:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      customfieldlist:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            value:
+                              type: string
+                      noofcrs:
+                        type: string
+                      agency:
+                        type: string
+                      mediabuyingtype:
+                        type: string
+                      brand:
+                        type: string
+                      briefeddate:
+                        type: string
+                      campaignbudget:
+                        type: string
+                      campaignenddate:
+                        type: string
+                        format: date
+                      campaignid:
+                        type: string
+                      campaignname:
+                        type: string
+                      campaignobjective:
+                        type: string
+                      campaignstartdate:
+                        type: string
+                        format: date
+                      campaignfeedbackstatus:
+                        type: string
+                      ccuid:
+                        type: string
+                      mediachannelpractice:
+                        type: string
+                      client:
+                        type: string
+                      comments:
+                        type: string
+                      cssid:
+                        type: string
+                      currency:
+                        type: string
+                      customerponumber:
+                        type: string
+                      debtor:
+                        type: string
+                      kpiobjective:
+                        type: string
+                      originalagency:
+                        type: string
+                      readyforarchive:
+                        type: string
+                      region:
+                        type: string
+                      requestedstartdate:
+                        type: string
+                      requestormarket:
+                        type: string
+                      spacename:
+                        type: string
+                      workitemlevel:
+                        type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                agency:
+                  type: string
+                title:
+                  type: string
+                testfield:
+                  type: string
+  /wrikexpi/campaign/{campaign_id}/channel:
+    get:
+      summary: Get Channels
+      tags:
+        - Koinos
+        - Channel
+      parameters:
+        - name: filter
+          in: query
+          schema:
+            type: string
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+        - name: nextPageToken
+          in: query
+          schema:
+            type: string
+      responses:
+        default:
+          description: Get Channels
+    parameters:
+      - name: campaign_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /wrikexpi/task/{task_id}:
+    get:
+      summary: Get Task
+      tags:
+        - Koinos
+        - Task
+      responses:
+        default:
+          description: Get Task
+    parameters:
+      - name: task_id
+        in: path
+        required: true
+        schema:
+          type: string
+    delete:
+      summary: Delete Task
+      tags:
+        - Koinos
+        - Task
+      responses:
+        default:
+          description: Delete Task
+    put:
+      summary: Update Task
+      tags:
+        - Koinos
+        - Task
+      responses:
+        '200':
+          description: Update Task
+          headers:
+            Cross-Origin-Opener-Policy:
+              schema:
+                type: string
+            Cross-Origin-Resource-Policy:
+              schema:
+                type: string
+            Origin-Agent-Cluster:
+              schema:
+                type: string
+            Referrer-Policy:
+              schema:
+                type: string
+            Strict-Transport-Security:
+              schema:
+                type: string
+            X-Content-Type-Options:
+              schema:
+                type: string
+            X-DNS-Prefetch-Control:
+              schema:
+                type: string
+            X-Download-Options:
+              schema:
+                type: string
+            X-Frame-Options:
+              schema:
+                type: string
+            X-Permitted-Cross-Domain-Policies:
+              schema:
+                type: string
+            X-XSS-Protection:
+              schema:
+                type: integer
+            access-control-allow-origin:
+              schema:
+                type: string
+            x-ratelimit-limit:
+              schema:
+                type: integer
+            x-ratelimit-remaining:
+              schema:
+                type: integer
+            x-ratelimit-reset:
+              schema:
+                type: integer
+            content-length:
+              schema:
+                type: integer
+            Date:
+              schema:
+                type: string
+            Connection:
+              schema:
+                type: string
+            Keep-Alive:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  data:
+                    type: object
+                    properties:
+                      type:
+                        type: string
+                      customfieldlist:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                            value:
+                              type: string
+                      noofcrs:
+                        type: string
+                      agency:
+                        type: string
+                      mediabuyingtype:
+                        type: string
+                      brand:
+                        type: string
+                      briefeddate:
+                        type: string
+                      campaignbudget:
+                        type: string
+                      campaignenddate:
+                        type: string
+                        format: date
+                      campaignid:
+                        type: string
+                      campaignname:
+                        type: string
+                      campaignobjective:
+                        type: string
+                      campaignstartdate:
+                        type: string
+                        format: date
+                      campaignfeedbackstatus:
+                        type: string
+                      ccuid:
+                        type: string
+                      mediachannelpractice:
+                        type: string
+                      client:
+                        type: string
+                      comments:
+                        type: string
+                      cssid:
+                        type: string
+                      currency:
+                        type: string
+                      customerponumber:
+                        type: string
+                      debtor:
+                        type: string
+                      kpiobjective:
+                        type: string
+                      originalagency:
+                        type: string
+                      readyforarchive:
+                        type: string
+                      region:
+                        type: string
+                      requestedstartdate:
+                        type: string
+                      requestormarket:
+                        type: string
+                      spacename:
+                        type: string
+                      workitemlevel:
+                        type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                agency:
+                  type: string
+                title:
+                  type: string
+                testfield:
+                  type: string
+  /wrikexpi/channel/{channel_id}/task:
+    get:
+      summary: Get Tasks
+      tags:
+        - Koinos
+        - Task
+      parameters:
+        - name: filter
+          in: query
+          schema:
+            type: string
+        - name: pageSize
+          in: query
+          schema:
+            type: integer
+        - name: nextPageToken
+          in: query
+          schema:
+            type: string
+      responses:
+        default:
+          description: Get Tasks
+    parameters:
+      - name: channel_id
+        in: path
+        required: true
+        schema:
+          type: string
+  /wrikexpi/v1.0/record/{master_slug}:
+    post:
+      summary: Create Datahub Record
+      tags:
+        - Dominus
+      responses:
+        '200':
+          description: Get Datahub Records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                    format: uri
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        value:
+                          type: string
+                        code:
+                          type: string
+                        fincode:
+                          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                fincode:
+                  type: string
+                value:
+                  type: string
+    parameters:
+      - name: master_slug
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get Datahub Records
+      tags:
+        - Dominus
+      parameters:
+        - name: nextPageToken
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Get Datahub Records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                    format: uri
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        value:
+                          type: string
+                        code:
+                          type: string
+                        fincode:
+                          type: string
+  /wrikexpi/v1.0/record/{master_slug}/{record_id}:
+    patch:
+      summary: Update Datahub Record
+      tags:
+        - Dominus
+      responses:
+        '200':
+          description: Get Datahub Records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                    format: uri
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        value:
+                          type: string
+                        code:
+                          type: string
+                        fincode:
+                          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                '@odata.type':
+                  type: string
+                  format: uri
+                code:
+                  type: string
+                fincode:
+                  type: string
+                value:
+                  type: string
+                remark:
+                  type: string
+    parameters:
+      - name: master_slug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: record_id
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      summary: Get Datahub Record By ID
+      tags:
+        - Dominus
+      responses:
+        '200':
+          description: Get Datahub Record By ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                    format: uri
+                  value:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                      value:
+                        type: string
+                      code:
+                        type: string
+                      fincode:
+                        type: string
+    delete:
+      summary: Delete Datahub Record
+      tags:
+        - Dominus
+      responses:
+        '200':
+          description: Get Datahub Records
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                    format: uri
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        value:
+                          type: string
+                        code:
+                          type: string
+                        fincode:
+                          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                code:
+                  type: string
+                fincode:
+                  type: string
+                value:
+                  type: string
+  /wrikexpi/v1.0/value/{master_slug}:
+    get:
+      summary: Get Datahub Values
+      tags:
+        - Dominus
+      parameters:
+        - name: nextPageToken
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Get Datahub Values
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                    format: uri
+                  nextPageToken:
+                    nullable: true
+                  value:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        value:
+                          type: string
+    parameters:
+      - name: master_slug
+        in: path
+        required: true
+        schema:
+          type: string
+  /wrikexpi/v1.0/value/{master_slug}/{id}:
+    get:
+      summary: Get Datahub Value By ID
+      tags:
+        - Dominus
+      responses:
+        '200':
+          description: Get Datahub Value by ID
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  '@odata.context':
+                    type: string
+                    format: uri
+                  value:
+                    type: string
+    parameters:
+      - name: master_slug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+  /wrikexpi/amoeba/{module_slug}/contacts:
+    get:
+      summary: Get by Module Slug
+      tags:
+        - Amoeba
+      parameters:
+        - name: me
+          in: query
+          schema:
+            type: string
+      responses:
+        default:
+          description: Get by Module Slug
+    parameters:
+      - name: module_slug
+        in: path
+        required: true
+        schema:
+          type: string
+  /wrikexpi/amoeba/{module_slug}/{service_slug}:
+    get:
+      summary: Get by Service Slug
+      tags:
+        - Amoeba
+      responses:
+        default:
+          description: Get by Service Slug
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  kind:
+                    type: string
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        title:
+                          type: string
+                        spaceId:
+                          nullable: true
+    parameters:
+      - name: module_slug
+        in: path
+        required: true
+        schema:
+          type: string
+      - name: service_slug
+        in: path
+        required: true
+        schema:
+          type: string
+components:
+  schemas:
+    # The Wrapper Object
+    CampaignResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/Campaign'
+
+    # The Data Object
+    Campaign:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "IEAC7PRTI5SVIV6V"
+        type:
+          type: string
+          example: "Campaign"
+        title:
+          type: string
+          example: "DEMO TEST"
+        agency:
+          type: string
+          example: "EssenceMediacom"
+        brand:
+          type: string
+          description: "Brand name associated with the campaign"
+        client:
+          type: string
+          description: "Client name"
+        # Note: Input shows budget as a string "10000", not a number
+        campaignbudget:
+          type: string 
+          pattern: '^\d+$' 
+          example: "10000"
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          example: "EUR"
+        campaignname:
+          type: string
+          example: "DEMO TEST"
+        # ISO 8601 Date Format (YYYY-MM-DD)
+        campaignstartdate:
+          type: string
+          format: date
+          example: "2025-08-01"
+        campaignenddate:
+          type: string
+          format: date
+          example: "2025-09-30"
+        createddate:
+          type: string
+          format: date-time
+          example: "2025-07-11T18:21:56Z"
+        updateddate:
+          type: string
+          format: date-time
+          example: "2025-07-11T18:31:22Z"
+        description:
+          type: string
+          description: "Contains HTML formatted text"
+          example: "<b>Required response date...</b>"
+        # Observation: This is a stringified JSON array, not a native array
+        role:
+          type: string
+          example: "[\"Planner\"]"
+        requestormarket:
+          type: string
+          example: "Italy"
+        spacename:
+          type: string
+          example: "WPP-DEMO-GMN"
+        workitemlevel:
+          type: string
+          example: "Campaign"
+        # Generic string fields based on empty input values
+        mediabuytype:
+          type: string
+        campaignid:
+          type: string
+        campaignobjective:
+          type: string
+        campaign_feedback_status:
+          type: string
+        ccuid:
+          type: string
+        comments:
+          type: string
+        copytochild:
+          type: string
+          example: "Completed"
+        cssid:
+          type: string
+        customerponumber:
+          type: string
+        debtor:
+          type: string
+          example: "DEMO-Bayer-Aspirina"
+        deliverydate:
+          type: string
+        gmnitemtype:
+          type: string
+          example: "Campaign Project"
+        kpiobjective:
+          type: string
+        readyforarchive:
+          type: string
+        reporthash:
+          type: string
+        taskcategory:
+          type: string
+        testfield:
+          type: string
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+    BasicAuth:
+      type: http
+      scheme: basic
+security:
+  - BearerAuth: []
