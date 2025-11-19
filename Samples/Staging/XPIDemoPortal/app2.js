@@ -577,13 +577,17 @@
         function renderCampaignListView() {
             const template = document.getElementById('master-data-template').content.cloneNode(true);
             const currentInstance = template;
-
+            
+            // Remove the redundant "Load Data" button for this module
+            const loadBtn = currentInstance.querySelector('[data-template-id="load-btn"]');
+            if (loadBtn) loadBtn.remove();
+            
             // Add "Reload Seed Data" button dynamically
-            const buttonContainer = currentInstance.querySelector('[data-template-id="load-btn"]').parentNode;
+            const buttonContainer = currentInstance.querySelector('[data-template-id="create-btn"]').parentNode;
             const seedBtn = document.createElement('button');
             seedBtn.textContent = 'Reload Demo Data';
             seedBtn.className = 'styled-btn-secondary mr-2';
-            buttonContainer.insertBefore(seedBtn, currentInstance.querySelector('[data-template-id="load-btn"]'));
+            buttonContainer.insertBefore(seedBtn, currentInstance.querySelector('[data-template-id="create-btn"]'));
 
             currentInstance.querySelector('[data-template-id="title"]').textContent = 'Campaigns';
             currentInstance.querySelector('p').textContent = 'Manage marketing campaigns and their channels.';
@@ -628,7 +632,6 @@
             dom.moduleContainer.appendChild(currentInstance);
             // Add event listeners
             dom.moduleContainer.querySelector('[data-template-id="create-btn"]').addEventListener('click', handleCreateClick);
-            dom.moduleContainer.querySelector('[data-template-id="load-btn"]').addEventListener('click', init);
             seedBtn.addEventListener('click', handleReloadSeedData);
             dom.moduleContainer.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', handleEditClick));
             dom.moduleContainer.querySelectorAll('.delete-btn').forEach(btn => btn.addEventListener('click', handleDeleteClick));
