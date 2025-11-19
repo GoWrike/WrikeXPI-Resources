@@ -19,8 +19,8 @@ const App = {};
     // --- Constants ---
     App.MODULE_CONFIG = [
         { code: 'MOD.L', name: 'Home', hash: '#landing-page', type: 'User-defined', icon: 'home' },
-        { code: 'MAS.Client', name: 'MIW Clients', hash: '#demo-client', type: 'User-defined', icon: 'person' },
-        { code: 'MOD.Campaign', name: 'MIW Campaigns', hash: '#campaigns', type: 'User-defined', icon: 'book' },
+        { code: 'MAS.Client', name: 'MiW Clients', hash: '#demo-client', type: 'User-defined', icon: 'person' },
+        { code: 'MOD.Campaign', name: 'MiW Campaigns', hash: '#campaigns', type: 'User-defined', icon: 'book' },
         //{ code: 'MAS.XPICFMapping', name: 'XPI Field Mapping', hash: '#xpi-cf-mapping', type: 'User-defined', icon: 'mapping' },
         { code: 'MAS.WrikeAgencies', name: 'Wrike Agencies', hash: '#wrike-agencies', type: 'User-defined', icon: 'mapping' },
         { code: 'MOD.C', name: 'Wrike Campaign Submission', hash: '#campaign-submission', type: 'User-defined', icon: 'campaign' },
@@ -31,7 +31,7 @@ const App = {};
     
     App.MASTER_DATA_SCHEMAS = {
         'demoxpiclients': {
-            title: 'MIW Clients',
+            title: 'MiW Clients',
             fields: [
                 { id: 'id', label: 'ID', readonly: true },
                 { id: 'value', label: 'Value', required: true },
