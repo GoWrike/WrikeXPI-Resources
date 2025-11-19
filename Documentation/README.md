@@ -8,5 +8,7 @@ Below is a list of available documentation:
 
 *   **OAuth Mechanism**: A comprehensive guide to understanding and implementing the OAuth 2.0 flow for the WrikeXPI API. This document outlines the step-by-step process for authenticating users and obtaining access tokens. [View OAuth Documentation](OAuth.md)
 
+*   **XPI API Spec and Playground**: The [XPI API spec](xpi-openapi3.yaml) in OpenAPI 3.0 format and a [web-based testing page](APIPlayground.html) for easy validation and evaluation of XPI. 
+
 Please refer to these documents to gain a deeper understanding of the WrikeXPI project's technical components and to assist with your development and integration efforts.
 
