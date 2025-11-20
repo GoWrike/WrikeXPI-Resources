@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MiW Media</title>
+    <!-- Load Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Load Inter Font from Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Load Custom Styles -->
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        // Apply Tailwind theme configuration
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                },
+            },
+        }
+    </script>
+</head>
+<body class="styled-body h-full overflow-hidden">
+
+    <!-- Global Loading Spinner -->
+    <div id="loading-spinner" class="fixed inset-0 bg-gray-900 bg-opacity-75 flex items-center justify-center z-[999] hidden">
+        <svg class="animate-spin h-10 w-10 text-indigo-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+    </div>
+    
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed top-5 right-5 z-[998] space-y-3"></div>
+
+    <!-- Main App Container -->
+    <div id="app-container" class="flex h-full">
+        <!-- Sidebar Navigation -->
+        <nav id="sidebar" class="styled-sidebar h-full">
+            <!-- Sidebar Header -->
+            <div class="flex items-center justify-center md:justify-between p-4 h-16 border-b border-gray-700">
+                <span id="sidebar-logo" class="text-2xl font-bold text-white transition-opacity duration-300">MiW Media</span>
+                <button id="sidebar-toggle-btn" class="styled-btn-icon">
+                    <!-- Bootstrap Icon: list -->
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-list" viewBox="0 0 16 16">
+                        <path fill-rule="evenodd" d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5m0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <ul id="sidebar-nav-links" class="flex-1 p-4 space-y-2 overflow-y-auto">
+                <!-- User-defined modules will be populated here by JS -->
+            </ul>
+
+            <!-- User Profile -->
+            <div id="user-profile" class="styled-user-profile transition-opacity duration-300 hidden">
+                <img id="user-avatar" src="https://placehold.co/40x40/667eea/ffffff?text=X" alt="User Avatar" class="w-10 h-10 rounded-full">
+                <div class="ml-3">
+                    <p id="user-name" class="text-sm font-semibold text-white">User Name</p>
+                    <a href="#" id="logout-link" class="text-xs text-indigo-400 hover:text-indigo-300">Logout</a>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main id="main-content" class="styled-main-content h-full overflow-y-auto p-6 sm:p-8">
+            <div class="max-w-7xl mx-auto">
+                
+                <!-- Module: Admin -->
+                <div id="module-admin" class="module-container hidden">
+                    <h2 class="styled-h2">Admin Configuration</h2>
+                    <div class="styled-form-card max-w-2xl">
+                        <form id="admin-form">
+                            <div class="mb-6">
+                                <label for="config-xpiBaseUrl" class="styled-label">XPI Base URL</label>
+                                <input type="text" id="config-xpiBaseUrl" name="xpiBaseUrl" class="styled-input" list="xpiBaseUrl-list">
+                                <datalist id="xpiBaseUrl-list">
+                                    <option value="https://api.wrikexpi.groupm.com"></option>
+                                    <option value="https://xpi-api.gowrike.space/"></option>
+                                </datalist>
+                                <p class="text-xs text-gray-400 mt-2">Set the base URL for all XPI API calls.</p>
+                            </div>
+                            <div class="mb-6">
+                                <label for="config-urlLandingPage" class="styled-label">Permalink of Landing Page</label>
+                                <input type="text" id="config-urlLandingPage" name="urlLandingPage" class="styled-input">
+                                <p class="text-xs text-gray-400 mt-2">Set the URL for the landing page after certain actions.</p>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <button type="submit" class="styled-btn-primary">Save Configuration</button>
+                            </div>
+                        </form>
+                        <div class="border-t border-gray-700 mt-6 pt-6">
+                            <label class="styled-label">Vault Synchronization</label>
+                            <p class="text-xs text-gray-400 mt-2 mb-4">If you are experiencing issues with secrets or credentials, you can trigger a manual resynchronization of the Vault keys with the XPI backend.</p>
+                            <button type="button" id="resync-vault-keys-btn" class="styled-btn-secondary">Resync Vault Keys</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Module: Login -->
+                <div id="module-login" class="module-container hidden">
+                    <!-- View 1: Authenticate Button -->
+                    <div id="login-authenticate-view" class="max-w-md mx-auto mt-20 text-center">
+                        <div class="styled-form-card">
+                            <h2 class="styled-h2">Welcome to MiW Media</h2>
+                            <p class="text-gray-300 mb-8">Please log in with your Wrike account to continue.</p>
+                            <button id="login-btn" class="styled-btn-primary w-full">Login & Authenticate</button>
+                        </div>
+                    </div>
+                    <!-- View 2: OAuth Callback -->
+                    <div id="login-callback-view" class="max-w-md mx-auto mt-20 text-center hidden">
+                        <div class="styled-form-card">
+                            <svg id="login-callback-spinner" class="animate-spin h-8 w-8 text-indigo-500 mx-auto mb-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            <p id="login-callback-message" class="text-lg text-white font-semibold mb-6">Processing login...</p>
+                            <pre id="login-callback-error" class="styled-pre-error mb-6 hidden"></pre>
+                            <button id="login-start-over-btn" class="styled-btn-secondary w-full hidden">Start Over</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Module: Campaign Submission -->
+                <div id="module-campaign-submission" class="module-container hidden">
+                    <h2 class="styled-h2">Wrike Campaign Submission</h2>
+                    <form id="campaign-form" class="styled-form-card max-w-4xl">
+                        <!-- Hidden fields -->
+                        <input type="hidden" name="type" value="Campaign Request">
+                        <input type="hidden" name="space" value="GRM-MYS-GMN">
+                        <input type="hidden" name="entity" value="Campaign">
+                        <input type="hidden" name="variantId" value="1">
+
+                        <!-- Form grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-6">
+                            <!-- Left Column -->
+                            <div>
+                                <label for="cf-campaignname" class="styled-label">Campaign Name</label>
+                                <input type="text" id="cf-campaignname" name="campaignname" class="styled-input" value="" required>
+                            </div>
+                            <div>
+                                <label for="cf-campaignobjective" class="styled-label">Campaign Objective</label>
+                                <input type="text" id="cf-campaignobjective" name="campaignobjective" class="styled-input" value="" required>
+                            </div>
+                            <div>
+                                <label for="cf-client" class="styled-label">Client</label>
+                                <select id="cf-client" name="client" class="styled-select" required>
+                                    <option value="">Loading...</option>
+                                    <!-- <option value="Adidas Group">Adidas Group</option> -->
+                                </select>
+                            </div>
+                            <div>
+                                <label for="cf-debtor" class="styled-label">Debtor</label>
+                                <select id="cf-debtor" name="debtor" class="styled-select" required>
+                                    <option value="">Loading...</option>
+                                    <!-- <option value="Adidas Malaysia Sdn Bhd">Adidas Malaysia Sdn Bhd</option> -->
+                                </select>
+                            </div>
+                             <div>
+                                <label for="cf-agency" class="styled-label">Agency</label>
+                                <select id="cf-agency" name="agency" class="styled-select" required>
+                                    <option value="">Loading...</option>
+                                    <!-- <option value="Eightbar">Eightbar</option> -->
+                                </select>
+                            </div>
+                            <div>
+                                <label for="cf-brand" class="styled-label">Brand</label>
+                                <input type="text" id="cf-brand" name="brand" class="styled-input" value="" required>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div>
+                                <label for="cf-campaignstartdate" class="styled-label">Campaign Start Date</label>
+                                <input type="date" id="cf-campaignstartdate" name="campaignstartdate" class="styled-input" value="" required>
+                            </div>
+                            <div>
+                                <label for="cf-campaignenddate" class="styled-label">Campaign End Date</label>
+                                <input type="date" id="cf-campaignenddate" name="campaignenddate" class="styled-input" value="" required>
+                            </div>
+                            <div>
+                                <label for="cf-requestedstartdate" class="styled-label">Requested Start Date</label>
+                                <input type="date" id="cf-requestedstartdate" name="requestedstartdate" class="styled-input" value="" required>
+                            </div>
+                            <div>
+                                <label for="cf-requestormarket" class="styled-label">Requestor Market</label>
+                                <input type="text" id="cf-requestormarket" name="requestormarket" class="styled-input" value="" required>
+                            </div>
+                            <div>
+                                <label for="cf-pod" class="styled-label">Pod</label>
+                                <input type="text" id="cf-pod" name="pod" class="styled-input" value="" required>
+                            </div>
+                            <div>
+                                <label for="cf-currency" class="styled-label">Currency</label>
+                                <input type="text" id="cf-currency" name="currency" class="styled-input" value="" required>
+                            </div>
+                            <div>
+                                <label for="cf-overallbudget" class="styled-label">Overall Budget</label>
+                                <input type="number" id="cf-overallbudget" name="overallbudget" class="styled-input" value="" required>
+                            </div>
+                            
+                            <!-- Spanning fields -->
+                            <div class="md:col-span-1">
+                                <label for="cf-optin" class="styled-label">Opt-in</label>
+                                <select id="cf-optin" name="optin" class="styled-select">
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
+                            <div class="md:col-span-1">
+                                <label for="cf-porequired" class="styled-label">PO Required</label>
+                                <select id="cf-porequired" name="porequired" class="styled-select">
+                                    <option value="No">No</option>
+                                    <option value="Yes">Yes</option>
+                                </select>
+                            </div>
+
+                            <!-- Tagging Interface -->
+                            <div class="md:col-span-2">
+                                <label for="cf-selectedchannels-input" class="styled-label">Selected Channels</label>
+                                <div id="cf-selectedchannels-tags" class="flex flex-wrap gap-2 mb-2">
+                                    <!-- Tags populated by JS -->
+                                </div>
+                                <input type="text" id="cf-selectedchannels-input" class="styled-input" placeholder="Type a channel and press Enter...">
+                                <p class="text-xs text-gray-400 mt-1">Press Enter or comma to add a channel.</p>
+                            </div>
+                        </div>
+
+                        <!-- Form Actions -->
+                        <div class="mt-8 pt-6 border-t border-gray-700">
+                            <button type="submit" id="campaign-submit-btn" class="styled-btn-primary">Submit Campaign</button>
+                        </div>
+                    </form>
+                    
+                    <!-- Result Display -->
+                    <pre id="campaign-result-pre" class="hidden mt-6"></pre>
+                </div>
+
+                <!-- Module: Landing Page -->
+                <div id="module-landing-page" class="module-container hidden">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="styled-h2 !mb-0">Home</h2>
+                        <a href="#" id="landing-page-wrike-link" target="_blank" rel="noopener noreferrer" class="styled-btn-secondary hidden">
+                            Link to Wrike
+                        </a>
+                    </div>
+                    <div class="styled-form-card max-w-4xl">
+                        <div id="landing-page-content-area" class="min-h-[200px]">
+                            <!-- Content will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Module: Task Viewer -->
+                <div id="module-task-viewer" class="module-container hidden">
+                    <h2 class="styled-h2">Task Viewer</h2>
+                    <div class="styled-form-card max-w-4xl">
+                        <form id="task-viewer-form" class="flex items-end gap-4 mb-8">
+                            <div class="flex-grow">
+                                <label for="task-viewer-permalink" class="styled-label">Task Permalink or ID</label>
+                                <input type="text" id="task-viewer-permalink" class="styled-input" placeholder="e.g., https://app-eu.wrike.com/open.htm?id=123456789 or 123456789">
+                            </div>
+                            <button type="submit" class="styled-btn-primary h-12">Load Task</button>
+                        </form>
+
+                        <div id="task-viewer-content-area" class="border-t border-gray-700 pt-6 min-h-[200px]">
+                            <div class="text-center text-gray-400 py-10">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-box-arrow-in-up-right mx-auto mb-4" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M6.364 13.5a.5.5 0 0 0 .5.5H13.5a1.5 1.5 0 0 0 1.5-1.5v-7a.5.5 0 0 0-1 0v7a.5.5 0 0 1-.5.5h-6.636a.5.5 0 0 0-.5.5"/><path fill-rule="evenodd" d="M11 5.5a.5.5 0 0 0 .5-.5V2.707l-4.146 4.147a.5.5 0 0 0 .708.708L12 3.707V5.5a.5.5 0 0 0 1 0V2.5a.5.5 0 0 0-.5-.5H9a.5.5 0 0 0 0 1h1.293L6.146 7.646a.5.5 0 0 0 .708.708z"/></svg>
+                                Please enter a task permalink or ID to view its details.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Module: Master Data -->
+                <div id="module-master-data" class="module-container hidden">
+                    <!-- This content will be replaced by the template -->
+                </div>
+
+                <!-- Module: Campaign -->
+                <div id="module-campaign" class="module-container hidden">
+                    <!-- This content will be populated by the Campaign module in app2.js -->
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Master Data Template -->
+    <template id="master-data-template">
+        <h2 class="styled-h2" data-template-id="title">Master Data</h2>
+        <div class="styled-form-card">
+            <div class="flex justify-between items-center mb-6">
+                <p class="text-gray-300">Manage master data records.</p>
+                <div>
+                    <button class="styled-btn-secondary mr-2" data-template-id="load-btn">Load Data</button>
+                    <button class="styled-btn-primary" data-template-id="create-btn">Create New</button>
+                </div>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="styled-table">
+                    <thead class="styled-table-header">
+                        <tr data-template-id="table-head">
+                            <!-- Headers populated by JS -->
+                        </tr>
+                    </thead>
+                    <tbody data-template-id="table-body">
+                        <!-- Rows populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+            <p data-template-id="no-data" class="text-center text-gray-400 py-8 hidden">No data found.</p>
+        </div>
+    </template>
+
+    <!-- Modal Backdrop -->
+    <div id="modal-backdrop" class="styled-modal-backdrop hidden"></div>
+
+    <!-- Modal: Master Data Create/Edit -->
+    <div id="modal-master-data" class="styled-modal-dialog max-w-lg hidden">
+        <h3 id="master-data-modal-title" class="text-xl font-semibold text-white mb-6">Manage Record</h3>
+        <form id="master-data-form">
+            <input type="hidden" id="master-data-id" name="id">
+            <div id="master-data-form-fields" class="space-y-4 max-h-[60vh] overflow-y-auto pr-2">
+                <!-- Form fields populated by JS -->
+            </div>
+            <div class="flex justify-end gap-3 mt-8 pt-6 border-t border-gray-700">
+                <button type="button" id="master-data-cancel-btn" class="styled-btn-secondary">Cancel</button>
+                <button type="submit" class="styled-btn-primary">Save Record</button>
+            </div>
+        </form>
+    </div>
+    
+    <!-- Modal: Delete Confirmation -->
+    <div id="modal-delete-confirm" class="styled-modal-dialog max-w-md hidden">
+        <h3 class="text-xl font-semibold text-white mb-4">Confirm Deletion</h3>
+        <p class="text-gray-300 mb-6">Are you sure you want to delete this record? This action cannot be undone.</p>
+        <div class="flex justify-end gap-3">
+            <button type="button" id="delete-cancel-btn" class="styled-btn-secondary">Cancel</button>
+            <button type="button" id="delete-confirm-btn" class="styled-btn-danger">Delete Record</button>
+        </div>
+    </div>
+    
+    <!-- Modal: Payload Viewer -->
+    <div id="modal-payload-viewer" class="styled-modal-dialog w-[70vw] h-[70vh] max-w-6xl hidden z-[995]">
+        <div class="flex justify-between items-center mb-4 flex-shrink-0">
+            <h3 class="text-xl font-semibold text-white">Payload Viewer</h3>
+            <button id="payload-viewer-close-btn" class="styled-btn-icon -mr-2">
+                <!-- Bootstrap Icon: x-lg -->
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                    <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="flex-grow overflow-auto bg-gray-900 rounded-lg">
+            <pre id="payload-viewer-content" class="p-4 text-sm"></pre>
+        </div>
+    </div>
+
+    <!-- Developer Tool Toggle -->
+    <button id="dev-tool-toggle" class="fixed bottom-5 right-5 styled-btn-icon !bg-indigo-600 !text-white z-50 shadow-lg">
+        <!-- Bootstrap Icon: mortarboard-fill -->
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-mortarboard-fill" viewBox="0 0 16 16">
+            <path d="M8.211 2.047a.5.5 0 0 0-.422 0l-7.5 3.5a.5.5 0 0 0 .025.917l7.5 3a.5.5 0 0 0 .372 0l7.5-3a.5.5 0 0 0 .025-.917l-7.5-3.5Z"/>
+            <path d="M4.176 9.032a.5.5 0 0 0-.656.327l-.5 1.7a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 10.466z"/>
+            <path d="M.207 7.488a.5.5 0 0 0 .294.605l4.5 1.8a.5.5 0 0 0 .372 0l4.5-1.8a.5.5 0 0 0 .294-.605l-.5-1.7a.5.5 0 0 0-.656-.327L8 7.588zM8 4.466 11.588 3 8 1.534 4.412 3z"/>
+        </svg>
+    </button>
+    
+    <!-- Developer Tool Dialog -->
+    <div id="dev-tool-dialog" class="fixed inset-0 bg-gray-900 bg-opacity-95 z-[990] hidden items-center justify-center">
+        <div class="styled-form-card w-full max-w-6xl h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-semibold text-white">Developer Tool: API Logs</h3>
+                <div>
+                    <button id="dev-tool-purge-btn" class="styled-btn-danger !px-3 !py-2 mr-2">
+                        <!-- Bootstrap Icon: trash-fill -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash-fill" viewBox="0 0 16 16">
+                            <path d="M2.5 1a1 1 0 0 0-1 1v1a1 1 0 0 0 1 1H3v9a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V4h.5a1 1 0 0 0 1-1V2a1 1 0 0 0-1-1H10a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1zm3 4a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5M8 5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 .5-.5m3 .5v7a.5.5 0 0 1-1 0v-7a.5.5 0 0 1 1 0"/>
+                        </svg>
+                    </button>
+                    <button id="dev-tool-close-btn" class="styled-btn-icon">
+                        <!-- Bootstrap Icon: x-lg -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+                            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            <div class="flex-1 overflow-auto">
+                <table class="styled-table">
+                    <thead class="styled-table-header sticky top-0">
+                        <tr>
+                            <th class="styled-table-th">Time</th>
+                            <th class="styled-table-th">Status</th>
+                            <th class="styled-table-th">Method</th>
+                            <th class="styled-table-th">URL</th>
+                            <th class="styled-table-th">Request</th>
+                            <th class="styled-table-th">Response</th>
+                        </tr>
+                    </thead>
+                    <tbody id="dev-tool-log-body">
+                        <!-- Logs populated by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- Load App Logic -->
+    <script src="app.js" defer></script>
+    <script src="app2.js" defer></script>
+
+</body>
+</html>

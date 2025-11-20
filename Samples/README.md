@@ -6,7 +6,7 @@ This repository presents a collection of demonstration applications designed to 
 
 These samples represent stable and fully functional implementations, suitable for showcasing core API integrations in a production-like environment.
 
-*   **XPI Portal**: A comprehensive portal demonstrating various WrikeXPI API functionalities. [View Portal](Production/XPI-Portal.html)
+*   **XPI Portal**: A comprehensive portal demonstrating various WrikeXPI API functionalities. [View Portal](Production/MiW-Media/index.html)
 *   **OAuth Test Page**: A utility page for testing OAuth authentication flows with the WrikeXPI API. (Production/OAuth-TestPage.html)
 
 ## Staging and Development Samples
