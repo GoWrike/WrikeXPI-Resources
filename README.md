@@ -2,7 +2,7 @@
 
 Please bookmark this page for easy access, as all the links and references in this site may be updated frequently.
 
-https://gowrike.github.io/WrikeXPI-Resources/
+[https://gowrike.github.io/WrikeXPI-Resources/](https://gowrike.github.io/WrikeXPI-Resources/)
 
 
 
