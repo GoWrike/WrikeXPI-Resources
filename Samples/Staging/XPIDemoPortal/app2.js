@@ -71,6 +71,7 @@
         let dom = {};
         let tags = ['Twitter']; // Default tag
         let pendingPrefillData = null;
+        let prefilledCampaignId = null; // To store the ID of the campaign being prefilled
 
         function init(prefilledData) {
             dom.form = document.getElementById('campaign-form');
@@ -93,6 +94,10 @@
             // Store prefill data to be applied after dropdowns are loaded
             if (prefilledData) {
                 pendingPrefillData = prefilledData;
+                if (prefilledData.internal_campaign_id) {
+                    prefilledCampaignId = prefilledData.internal_campaign_id;
+                    delete prefilledData.internal_campaign_id; // Clean it from the data to avoid filling a non-existent form field
+                }
             }
         }
         
@@ -261,6 +266,20 @@
                 dom.resultPre.classList.remove('hidden');
                 App.UI.showToast('Campaign submitted successfully!', 'success');
                 dom.form.reset(); // Clear form
+
+                // If this was a prefilled submission, update the original campaign with the new Wrike permalink
+                if (prefilledCampaignId && response.data && response.data.permalink) {
+                    const campaigns = App.Storage.local.getObject('xpi_campaigns') || [];
+                    const campaignIndex = campaigns.findIndex(c => c.id === prefilledCampaignId);
+                    if (campaignIndex !== -1) {
+                        campaigns[campaignIndex].WrikeCampaignLink = response.data.permalink;
+                        App.Storage.local.setObject('xpi_campaigns', campaigns);
+                        console.log(`Updated campaign ${prefilledCampaignId} with Wrike permalink ${response.data.permalink}`);
+                    }
+                }
+                // Reset the prefilled ID
+                prefilledCampaignId = null;
+
                 tags = [];
                 renderTags();
 
@@ -819,6 +838,7 @@
 
             // Map campaign data to the format expected by the submission module
             const prefillData = {
+                'internal_campaign_id': campaign.id,
                 'campaign-name': campaign.campaignName,
                 'campaign-objective': campaign.campaignObjective,
                 'client': campaign.client,
