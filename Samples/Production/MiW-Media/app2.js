@@ -14,6 +14,8 @@
             
             dom.urlInput.value = App.Config.get('xpiBaseUrl');
             
+            setupDatalist();
+
             dom.form.addEventListener('submit', (e) => {
                 e.preventDefault();
                 App.Config.set('xpiBaseUrl', dom.urlInput.value);
@@ -21,6 +23,23 @@
             });
 
             dom.resyncBtn.addEventListener('click', handleResync);
+        }
+
+        function setupDatalist() {
+            const datalistId = 'xpi-base-urls';
+            dom.urlInput.setAttribute('list', datalistId);
+
+            let datalist = document.getElementById(datalistId);
+            if (!datalist) {
+                datalist = document.createElement('datalist');
+                datalist.id = datalistId;
+                dom.urlInput.parentNode.appendChild(datalist);
+            }
+
+            datalist.innerHTML = `
+                <option value="https://api.wrikexpi.groupm.com"></option>
+                <option value="https://xpi-api.gowrike.space/"></option>
+            `;
         }
 
         async function handleResync() {
