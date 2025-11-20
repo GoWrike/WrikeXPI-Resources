@@ -21,7 +21,7 @@ This folder provides multiple OpenAPI (formerly Swagger) definition files. You o
 ### Which File Should I Use?
 
 *   For most standard use cases within the team, start with **`WrikeAPI-PAO-Connector.json`**.
-*   If you require an API endpoint that is not available in the custom-crafted version, use **`WrikeAPI-Native-PAO-Connector.yaml`**.
+*   If you require an API endpoint that is not available in the custom-crafted version, use **`WrikeAPI-Native-PAO-Connector.yaml`** or reach out to our team make it available into the curated connector.
 *   The YAML files are provided as alternatives if your tooling or preference is for YAML over JSON.
 
 ## How to Use
