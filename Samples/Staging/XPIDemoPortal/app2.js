@@ -593,13 +593,15 @@
             currentInstance.querySelector('p').textContent = 'Manage marketing campaigns and their channels.';
 
             const tableHead = currentInstance.querySelector('[data-template-id="table-head"]');
-            const headers = ['Campaign Name', 'Client', 'Start Date', 'End Date', 'Budget', 'Actions'];
+            const headers = ['Campaign Name', 'Client', 'Start Date', 'End Date', 'Budget', 'Wrike Campaign Link', 'Actions'];
             tableHead.innerHTML = headers.map(h => `<th class="styled-table-th">${h}</th>`).join('');
             const tableBody = currentInstance.querySelector('[data-template-id="table-body"]');
             tableBody.innerHTML = '';
 
             if (campaigns.length > 0) {
                 campaigns.forEach(campaign => {
+                    const wrikeLink = campaign.WrikeCampaignLink;
+                    const wrikeLinkHtml = wrikeLink ? `<a href="${wrikeLink}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">${wrikeLink.length > 30 ? wrikeLink.substring(0, 27) + '...' : wrikeLink}</a>` : '';
                     const row = document.createElement('tr');
                     row.className = 'styled-table-row';
                     row.innerHTML = `
@@ -608,6 +610,7 @@
                         <td class="styled-table-td">${campaign.campaignStartDate || ''}</td>
                         <td class="styled-table-td">${campaign.campaignEndDate || ''}</td>
                         <td class="styled-table-td">${campaign.campaignCurrency || ''} ${campaign.budget || ''}</td>
+                        <td class="styled-table-td" title="${wrikeLink || ''}">${wrikeLinkHtml}</td>
                         <td class="styled-table-td">
                             <div class="flex items-center gap-2">
                                 <button class="styled-btn-icon edit-btn" data-id="${campaign.id}" title="Edit">
@@ -655,6 +658,7 @@
                 { id: 'agency', label: 'Agency', value: campaign.agency },
                 { id: 'campaignCurrency', label: 'Campaign Currency', value: campaign.campaignCurrency || 'USD' },
                 { id: 'budget', label: 'Budget', type: 'number', value: campaign.budget },
+                { id: 'WrikeCampaignLink', label: 'Wrike Campaign Link', type: 'url', value: campaign.WrikeCampaignLink, placeholder: 'https://app-eu.wrike.com/open.htm?id=...' },
             ];
 
             modalFormFields.innerHTML = fields.map(f => `
@@ -847,6 +851,7 @@
             e.preventDefault();
             const formData = new FormData(modalForm);
             const campaignData = Object.fromEntries(formData.entries());
+
 
             // Collect channel data
             const channelRows = modalForm.querySelectorAll('.channel-row');
