@@ -10,15 +10,19 @@
         function init() {
             dom.form = document.getElementById('admin-form');
             dom.urlInput = document.getElementById('config-xpiBaseUrl');
+            dom.landingPageInput = document.getElementById('config-urlLandingPage');
             dom.resyncBtn = document.getElementById('resync-vault-keys-btn');
             
+            // Populate form with stored values
             dom.urlInput.value = App.Config.get('xpiBaseUrl');
+            dom.landingPageInput.value = App.Config.get('urlLandingPage');
             
             setupDatalist();
 
             dom.form.addEventListener('submit', (e) => {
                 e.preventDefault();
                 App.Config.set('xpiBaseUrl', dom.urlInput.value);
+                App.Config.set('urlLandingPage', dom.landingPageInput.value);
                 App.UI.showToast('Configuration saved successfully!', 'success');
             });
 
