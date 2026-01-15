@@ -6,6 +6,8 @@ Please bookmark this page for easy access, as all the links and references in th
 
 For any support request, please [submit a ticket](https://app-eu.wrike.com/workspace.htm?acc=3128883#/forms?formid=1002486) and we will get back to you.
 
+<br/>
+
 ## Overview
 
 Wrike supports integration via API (Wrike Native API), which allows 3rd party application to make API calls to access and modify content in Wrike.
@@ -17,18 +19,13 @@ On top of that, WrikeXPI had been developed by WPP ET Wrike Team with the goal t
 
 The following section will provide more context and guidance for the usage of Wrike Native API and WrikeXPI.
 
-> [Integration via API](#integration-via-api)
+[Integration via API](#integration-via-api)
 
-> [Integration via PowerAutomate](#integration-via-powerautomate)
+[Integration via PowerAutomate](#integration-via-powerautomate)
 
 The recommendation is to utilize WrikeXPI as much as possible if your use case fits within its supported usage, to make your integration more striaght forward and future proof from underlying Wrike product or business logic changes.
 
 <br/>
-<br/>
-<br/>
-<hr/>
-
-
 
 ## Requesting Access for API Integration
 
