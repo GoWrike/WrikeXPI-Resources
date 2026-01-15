@@ -32,7 +32,9 @@ After submitted the form, integration team will review and advice the next step 
 <br/>
 <br/>
 
-# Wrike Native API
+# Integration via API
+
+## Wrike Native API
 
 Wrike Native API is Wrike Product's Native API, fully own and supported by Wrike.
 
@@ -42,11 +44,7 @@ You may follow the guide to develop your solutions, and technical support are of
 
 Using the Native API would requires developer to fully understand how Wrike works, its structures, technical features and behaviours.
 
-## POA Connectors (PowerAutomate Online)
-
-*   **[Connector Documentation](PAO-Connectors/README.md)**: Instructions for setting up the Power Automate custom connector for Wrike API
-
-# WrikeXPI
+## WrikeXPI
 
 WrikeXPI is integration layer that built on top of Wrike Native API, to make your API development much more efficient.
 
@@ -59,3 +57,8 @@ WrikeXPI is integration layer that built on top of Wrike Native API, to make you
 Working examples of the WrikeXPI, showcasing the capabilities of the XPI.
 *  **[Showcase Portal](Samples/README.md)**: A mock system demonstrating the power of XPI. 
 
+# Integration via PowerAutomate
+
+## POA Connectors (PowerAutomate Online)
+
+*   **[Connector Documentation](PAO-Connectors/README.md)**: Instructions for setting up the Power Automate custom connector for Wrike API
