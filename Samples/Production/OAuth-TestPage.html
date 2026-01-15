@@ -1,314 +1,254 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>OAuth API Tester</title>
-    <!-- 1. Load Tailwind CSS -->
+    <!-- Load Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- 2. Configure Tailwind & Fonts -->
     <script>
         tailwind.config = {
+            darkMode: 'class', // Enable dark mode
             theme: {
                 extend: {
                     fontFamily: {
-                        inter: ['Inter', 'sans-serif'],
+                        sans: ['Inter', 'sans-serif'],
                     },
                 },
             },
-        };
+        }
     </script>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- 3. Custom Styles -->
+    <!-- Set base theme to dark -->
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* Simple spinner */
-        .spinner {
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
-        }
+        /* Simple spinner animation */
         @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+            to { transform: rotate(360deg); }
+        }
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.2);
+            border-left-color: #3b82f6; /* blue-500 */
+            border-radius: 50%;
+            width: 3rem; /* w-12 */
+            height: 3rem; /* h-12 */
+            animation: spin 1s linear infinite;
         }
     </style>
 </head>
 <body class="bg-gray-900 text-gray-100 flex items-center justify-center min-h-screen p-4">
 
-    <!-- Main Application Card -->
-    <div class="bg-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-lg">
-        <div class="text-center mb-6">
-            <h1 class="text-3xl font-bold text-white mb-2">OAuth API Tester</h1>
-            <p class="text-gray-400">Test your OAuth2 flow and token exchange.</p>
-        </div>
+    <div id="app-container" class="w-full max-w-2xl bg-gray-800 rounded-lg shadow-2xl p-8">
+        
+        <!-- App Title -->
+        <h1 class="text-3xl font-bold text-center text-blue-400 mb-6">OAuth 2.0 Test Tool</h1>
 
-        <!-- 
-          View 1: Authentication Mode (Default)
-          Shown when no 'code' is in the URL.
-        -->
-        <div id="auth-view">
-            <p class="text-center text-gray-300 mb-6">Click the button below to start the authentication process.</p>
-            <button id="login-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition-colors duration-300 flex items-center justify-center shadow-lg">
-                <!-- Spinner (hidden by default) -->
-                <svg id="login-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span id="login-button-text">Login & Authenticate</span>
+        <!-- Mode 1: Authentication -->
+        <div id="auth-mode" class="hidden">
+            <p class="text-gray-300 text-center mb-8">Click the button below to start the OAuth 2.0 authentication flow.</p>
+            <button id="login-button" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50">
+                Login & Authenticate
             </button>
         </div>
 
-        <!-- 
-          View 2: OAuth Callback Mode
-          Shown when 'code' is in the URL.
-        -->
-        <div id="callback-view" class="hidden">
-            <!-- Loading state while exchanging token -->
-            <div id="loading-view" class="flex flex-col items-center justify-center space-y-4">
-                <div class="spinner h-12 w-12 rounded-full border-4 border-blue-400"></div>
-                <p class="text-lg font-medium text-gray-300">Exchanging code for token, please wait...</p>
+        <!-- Mode 2: Callback / Loading -->
+        <div id="callback-mode" class="hidden">
+            
+            <!-- Loading Spinner -->
+            <div id="loading-spinner" class="flex flex-col items-center justify-center">
+                <div class="spinner"></div>
+                <p class="text-gray-400 mt-4 text-lg">Exchanging code for token...</p>
             </div>
 
-            <!-- Response state after token exchange -->
-            <div id="response-view" class="hidden">
-                <h2 class="text-2xl font-semibold text-white mb-4">API Response</h2>
-                <pre id="response-content" class="bg-gray-900 p-4 rounded-md overflow-x-auto text-sm text-green-300 border border-gray-700"></pre>
-                <button id="start-over-button" class="mt-6 w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-300">
+            <!-- Error Message -->
+            <div id="error-message" class="hidden p-4 bg-red-800 border border-red-600 text-red-100 rounded-lg">
+                <h3 class="font-bold text-lg mb-2">Error</h3>
+                <p id="error-text"></p>
+                <p id="redirect-timer" class="mt-4 text-sm text-red-200">Redirecting to start page in 10 seconds...</p>
+            </div>
+
+            <!-- API Response Display -->
+            <div id="response-display" class="hidden">
+                <h2 class="text-2xl font-semibold text-green-400 mb-4">Authentication Successful</h2>
+                <p class="text-gray-300 mb-4">Received the following response from the token exchange:</p>
+                <pre id="api-response" class="w-full bg-gray-900 text-gray-200 p-4 rounded-md overflow-x-auto text-sm"></pre>
+                <button id="start-over-button" class="mt-8 w-full bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg text-lg transition duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50">
                     Start Over
                 </button>
             </div>
-        </div>
 
-        <!-- 
-          View 3: Error Mode
-          Shown when something goes wrong.
-        -->
-        <div id="error-view" class="hidden bg-red-900 border border-red-700 text-red-100 px-4 py-3 rounded-lg" role="alert">
-            <div class="flex">
-                <div class="py-1">
-                    <!-- Heroicon: Exclamation Triangle -->
-                    <svg class="h-6 w-6 text-red-300 mr-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                    </svg>
-                </div>
-                <div>
-                    <p class="font-bold">Error</p>
-                    <p id="error-message" class="text-sm">Something went wrong.</p>
-                </div>
-            </div>
         </div>
-
     </div>
 
-    <!-- 
-      JavaScript Logic
-    -->
     <script>
-        // --- Helper Functions ---
-
-        /**
-         * Shows a specific view ("auth", "callback", "error") and hides others.
-         * @param {string} viewId - The ID of the view to show.
-         */
-        function showView(viewId) {
-            const views = ['auth-view', 'callback-view', 'error-view'];
-            views.forEach(id => {
-                const el = document.getElementById(id);
-                if (el) {
-                    if (id === viewId) {
-                        el.classList.remove('hidden');
-                    } else {
-                        el.classList.add('hidden');
-                    }
-                }
-            });
-        }
-
-        /**
-         * Displays an error message.
-         * @param {string} message - The error message to display.
-         */
-        function showError(message) {
-            console.error(message); // Log to console for debugging
-            document.getElementById('error-message').textContent = message;
-            showView('error-view');
-        }
-
-        /**
-         * Generates a SHA-256 hash of a string.
-         * @param {string} str - The string to hash.
-         * @returns {Promise<string>} The hex-encoded hash.
-         */
-        async function sha256(str) {
-            const textBuffer = new TextEncoder().encode(str);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', textBuffer);
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            return hexHash;
-        }
-
-        // --- Mode Handlers ---
-
-        /**
-         * Mode 1: Handle Authentication (No 'code' in URL)
-         * Generates a client ID, stores it, and sets up the login button.
-         */
-        async function handleAuthMode() {
-            showView('auth-view');
+        document.addEventListener('DOMContentLoaded', () => {
+            const authMode = document.getElementById('auth-mode');
+            const callbackMode = document.getElementById('callback-mode');
             const loginButton = document.getElementById('login-button');
-            const loginSpinner = document.getElementById('login-spinner');
-            const loginButtonText = document.getElementById('login-button-text');
+            const loadingSpinner = document.getElementById('loading-spinner');
+            const errorMessage = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            const responseDisplay = document.getElementById('response-display');
+            const apiResponse = document.getElementById('api-response');
+            const startOverButton = document.getElementById('start-over-button');
 
-            loginButton.addEventListener('click', async () => {
-                try {
-                    // Show spinner
-                    loginButton.disabled = true;
-                    loginSpinner.classList.remove('hidden');
-                    loginButtonText.textContent = 'Preparing...';
-
-                    // 1. Generate Client ID
-                    const hash = await sha256(new Date().toISOString() + Math.random());
-                    const clientId = hash.slice(-7);
-                    console.log('Generated Client ID:', clientId);
-
-                    // 2. Store Client ID in Local Storage
-                    localStorage.setItem('oauth_client_id', clientId);
-                    console.log('Client ID stored in Local Storage.');
-
-                    // 3. Construct Target URL
-                    const oauthHost = 'xpi-api.gowrike.space';
-                    const accountId = '3128883';
-                    // Get base URL (without any query strings)
-                    const redirectUri = window.location.href.split('?')[0];
-                    
-                    const oauthTargetUrl = `https://xpi-api.gowrike.space/?accountId=${accountId}&redirectUri=${encodeURIComponent(redirectUri)}&client_id=${clientId}`;
-
-                    // 4. Redirect
-                    console.log('Redirecting to:', oauthTargetUrl);
-                    window.location.href = oauthTargetUrl;
-
-                } catch (err) {
-                    showError(`Failed to start auth: ${err.message}`);
-                    loginButton.disabled = false;
-                    loginSpinner.classList.add('hidden');
-                    loginButtonText.textContent = 'Login & Authenticate';
-                }
-            });
-        }
-
-        /**
-         * Mode 2: Handle OAuth Callback (URL has 'code')
-         * Retrieves client ID, exchanges code for a token.
-         * @param {string} oauthCode - The 'code' from the URL query string.
-         */
-        async function handleCallbackMode(oauthCode) {
-            showView('callback-view');
-            document.getElementById('loading-view').classList.remove('hidden');
-            document.getElementById('response-view').classList.add('hidden');
-
-            try {
-                // 1. Retrieve Client ID from Local Storage
-                const clientId = localStorage.getItem('oauth_client_id');
-
-                console.log('Retrieved Client ID:', clientId);
-                console.log('Retrieved OAuth Code:', oauthCode);
-
-                // 2. Validate
-                if (!clientId || !oauthCode) {
-                    let missing = [];
-                    if (!clientId) missing.push("Client ID (from storage)");
-                    if (!oauthCode) missing.push("OAuth Code (from URL)");
-                    
-                    showError(`Missing required info: ${missing.join(', ')}. Redirecting in 10 seconds...`);
-
-                    setTimeout(() => {
-                        window.location.href = window.location.href.split('?')[0]; // Redirect to base URL
-                    }, 10000);
-                    return;
-                }
-
-                // 3. Exchange Code for Token
-                const tokenUrl = `https://xpi-api.gowrike.space/api/v1/wrikexpi/token/exchange?code=${oauthCode}&client_id=${clientId}&grant_type=authorization_code`;
-                console.log('Making GET request to:', tokenUrl);
-
-                const response = await fetch(tokenUrl, {
-                    method: 'GET'
-                });
-
-                let responseData;
-                const contentType = response.headers.get("content-type");
-                
-                if (contentType && contentType.indexOf("application/json") !== -1) {
-                    responseData = await response.json();
-                } else {
-                    responseData = await response.text();
-                }
-                
-                console.log('API Response:', responseData);
-
-                // 4. Display Response
-                const responseContentEl = document.getElementById('response-content');
-                
-                if (typeof responseData === 'object') {
-                    responseContentEl.textContent = JSON.stringify(responseData, null, 2);
-                    responseContentEl.classList.remove('text-red-300');
-                    responseContentEl.classList.add('text-green-300');
-                } else {
-                    responseContentEl.textContent = responseData;
-                    if (!response.ok) {
-                         responseContentEl.classList.add('text-red-300');
-                         responseContentEl.classList.remove('text-green-300');
-                    }
-                }
-
-                if (!response.ok) {
-                    console.warn(`API request failed with status: ${response.status}`);
-                }
-                
-
-                document.getElementById('loading-view').classList.add('hidden');
-                document.getElementById('response-view').classList.remove('hidden');
-
-            } catch (err) {
-                showError(`Failed during token exchange: ${err.message}`);
-            }
-        }
-
-        // --- Application Entry Point ---
-
-        /**
-         * Main function to route logic based on URL.
-         */
-        function main() {
-            console.log('App logic starting.');
-
-            // "Start Over" button
-            document.getElementById('start-over-button').addEventListener('click', () => {
-                window.location.href = window.location.href.split('?')[0];
-            });
+            const CLIENT_ID_KEY = 'oauth_tester_client_id';
+            const OAUTH_HOST = 'xpi-api.gowrike.space';
+            const ACCOUNT_ID = '3128883';
+            
+            // Get the base URL (e.g., "https://example.com/page.html")
+            const redirectUri = window.location.origin + window.location.pathname;
 
             const urlParams = new URLSearchParams(window.location.search);
             const oauthCode = urlParams.get('code');
 
-            if (oauthCode) {
-                // --- OAuth Callback Mode ---
-                handleCallbackMode(oauthCode);
-            } else {
-                // --- Authentication Mode ---
-                handleAuthMode();
+            /**
+             * Generates a SHA-256 hash and returns the last 7 chars.
+             */
+            async function generateClientId() {
+                try {
+                    const data = Date.now().toString() + Math.random().toString();
+                    const encoder = new TextEncoder();
+                    const buffer = encoder.encode(data);
+                    const hashBuffer = await crypto.subtle.digest('SHA-256', buffer);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    const hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                    return hexHash.slice(-7);
+                } catch (error) {
+                    console.error('Hash generation failed:', error);
+                    // Fallback to simpler random string if crypto fails
+                    return Math.random().toString(36).substring(2, 9);
+                }
             }
-        }
 
-        // Start the application on window load
-        window.onload = main;
+            /**
+             * Handles the login button click.
+             * Generates clientId, saves it, and redirects.
+             */
+            async function handleLogin() {
+                try {
+                    const clientId = await generateClientId();
+                    localStorage.setItem(CLIENT_ID_KEY, clientId);
+                    console.log('Generated clientId:', clientId);
 
+                    const authUrl = `https://${OAUTH_HOST}/?accountId=${ACCOUNT_ID}&redirectUri=${encodeURIComponent(redirectUri)}&client_id=${clientId}`;
+                    
+                    console.log('Redirecting to:', authUrl);
+                    window.location.href = authUrl;
+                } catch (err) {
+                    console.error('Login failed:', err);
+                    alert('Error preparing authentication. Check console.');
+                }
+            }
+
+            /**
+             * Handles the callback mode.
+             * Fetches token and displays response or error.
+             */
+            async function handleCallback() {
+                const clientId = localStorage.getItem(CLIENT_ID_KEY);
+                
+                // 1. Validation
+                let error = null;
+                if (!oauthCode) {
+                    error = 'No "code" parameter found in the URL.';
+                } else if (!clientId) {
+                    error = 'No "clientId" found in local storage. Please start the login flow again.';
+                }
+
+                if (error) {
+                    console.error(error);
+                    showError(error);
+                    return;
+                }
+
+                console.log('Callback mode: Success');
+                console.log('Code:', oauthCode);
+                console.log('Client ID:', clientId);
+
+                // 2. API Call
+                try {
+                    const tokenUrl = `https://${OAUTH_HOST}/api/v1/wrikexpi/token/exchange?code=${oauthCode}&client_id=${clientId}&grant_type=authorization_code`;
+                    console.log('Making GET request to:', tokenUrl);
+
+                    const response = await fetch(tokenUrl, {
+                        method: 'GET'
+                    });
+
+                    let responseData;
+                    const contentType = response.headers.get("content-type");
+                    if (contentType && contentType.includes("application/json")) {
+                        responseData = await response.json();
+                        apiResponse.textContent = JSON.stringify(responseData, null, 2);
+                    } else {
+                        responseData = await response.text();
+                        apiResponse.textContent = responseData;
+                    }
+                    
+                    console.log('API Response:', responseData);
+
+                    if (!response.ok) {
+                        throw new Error(`API Error (${response.status}): ${JSON.stringify(responseData)}`);
+                    }
+
+                    // 3. Display Response
+                    loadingSpinner.classList.add('hidden');
+                    responseDisplay.classList.remove('hidden');
+
+                } catch (err) {
+                    console.error('Token exchange failed:', err);
+                    showError(`Token exchange failed: ${err.message}`);
+                }
+            }
+
+            /**
+             * Displays an error message and starts the redirect timer.
+             */
+            function showError(message) {
+                loadingSpinner.classList.add('hidden');
+                errorText.textContent = message;
+                errorMessage.classList.remove('hidden');
+
+                let countdown = 10;
+                const timerElement = document.getElementById('redirect-timer');
+                
+                const interval = setInterval(() => {
+                    countdown--;
+                    timerElement.textContent = `Redirecting to start page in ${countdown} seconds...`;
+                    if (countdown <= 0) {
+                        clearInterval(interval);
+                        window.location.href = redirectUri;
+                    }
+                }, 1000);
+            }
+
+            /**
+             * Handles the "Start Over" button click.
+             */
+            function handleStartOver() {
+                // Clear the client ID for a fresh start? Optional, but safer.
+                // localStorage.removeItem(CLIENT_ID_KEY); 
+                window.location.href = redirectUri;
+            }
+
+            // --- App Initialization ---
+
+            loginButton.addEventListener('click', handleLogin);
+            startOverButton.addEventListener('click', handleStartOver);
+
+            if (oauthCode) {
+                // Mode 2: OAuth Callback
+                authMode.classList.add('hidden');
+                callbackMode.classList.remove('hidden');
+                handleCallback();
+            } else {
+                // Mode 1: Authentication
+                authMode.classList.remove('hidden');
+                callbackMode.classList.add('hidden');
+            }
+        });
     </script>
 </body>
 </html>
-
 

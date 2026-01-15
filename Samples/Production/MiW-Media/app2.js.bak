@@ -643,13 +643,7 @@
             if (campaigns.length > 0) {
                 campaigns.forEach(campaign => {
                     const wrikeLink = campaign.WrikeCampaignLink;
-                    let wrikeLinkHtml = '';
-                    const entityIdMatch = wrikeLink ? /id=([a-zA-Z0-9]+)/.exec(wrikeLink) : null;
-                    if (entityIdMatch && entityIdMatch[1]) {
-                        wrikeLinkHtml = `<button class="text-indigo-400 hover:underline wrike-link-btn" data-id="${entityIdMatch[1]}">${wrikeLink.length > 30 ? wrikeLink.substring(0, 27) + '...' : wrikeLink}</button>`;
-                    } else if (wrikeLink) {
-                        wrikeLinkHtml = `<a href="${wrikeLink}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">${wrikeLink.length > 30 ? wrikeLink.substring(0, 27) + '...' : wrikeLink}</a>`;
-                    }
+                    const wrikeLinkHtml = wrikeLink ? `<a href="${wrikeLink}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">${wrikeLink.length > 30 ? wrikeLink.substring(0, 27) + '...' : wrikeLink}</a>` : '';
                     const row = document.createElement('tr');
                     row.className = 'styled-table-row';
                     row.innerHTML = `
@@ -682,7 +676,6 @@
             dom.moduleContainer.innerHTML = '';
             dom.moduleContainer.appendChild(currentInstance);
             // Add event listeners
-            dom.moduleContainer.querySelectorAll('.wrike-link-btn').forEach(btn => btn.addEventListener('click', (e) => App.UI.showWrikeItem(e.target.dataset.id)));
             dom.moduleContainer.querySelector('[data-template-id="create-btn"]').addEventListener('click', handleCreateClick);
             seedBtn.addEventListener('click', handleReloadSeedData);
             dom.moduleContainer.querySelectorAll('.edit-btn').forEach(btn => btn.addEventListener('click', handleEditClick));
