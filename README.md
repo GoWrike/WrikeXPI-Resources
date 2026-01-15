@@ -4,6 +4,7 @@ Please bookmark this page for easy access, as all the links and references in th
 
 [https://gowrike.github.io/WrikeXPI-Resources/](https://gowrike.github.io/WrikeXPI-Resources/)
 
+For any support request, please [submit a ticket](https://app-eu.wrike.com/workspace.htm?acc=3128883#/forms?formid=1002486) and we will get back to you.
 
 ## Overview
 
@@ -17,9 +18,17 @@ On top of that, WrikeXPI had been developed by WPP ET Wrike Team with the goal t
 The following section will provide more context and guidance for the usage of Wrike Native API and WrikeXPI.
 
 > [Integration via API](#integration-via-api)
+
 > [Integration via PowerAutomate](#integration-via-powerautomate)
 
 The recommendation is to utilize WrikeXPI as much as possible if your use case fits within its supported usage, to make your integration more striaght forward and future proof from underlying Wrike product or business logic changes.
+
+<br/>
+<br/>
+<br/>
+<hr/>
+
+
 
 ## Requesting Access for API Integration
 
@@ -31,7 +40,7 @@ After submitted the form, integration team will review and advice the next step 
 <br/>
 <br/>
 <br/>
-<br/>
+<hr/>
 
 # Integration via API
 
@@ -61,7 +70,7 @@ Working examples of the WrikeXPI, showcasing the capabilities of the XPI.
 <br/>
 <br/>
 <br/>
-<br/>
+<hr/>
 
 
 # Integration via PowerAutomate
@@ -73,7 +82,7 @@ Working examples of the WrikeXPI, showcasing the capabilities of the XPI.
 We are still working to create the connector for WrikeXPI, do reach out if you need that.
 
 
+<br/>
+<br/>
+<br/>
 <hr/>
-
-
-
