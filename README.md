@@ -11,10 +11,13 @@ Wrike supports integration via API (Wrike Native API), which allows 3rd party ap
 
 On top of that, WrikeXPI had been developed by WPP ET Wrike Team with the goal to complement Wrike's existing offering, level it up and make more integration possible. Here are a few key features:
 
-1. Streamline API by translating IDs to readable attribute names. (e.g. Custom Field IDs)
-2. Abtraction of business logic by modeling entities (e.g. Campaigns, Channels, Tasks)
+> 1. Streamline API by translating IDs to readable attribute names. (e.g. Custom Field IDs)
+> 2. Abtraction of business logic by modeling entities (e.g. Campaigns, Channels, Tasks)
 
 The following section will provide more context and guidance for the usage of Wrike Native API and WrikeXPI.
+
+> [Integration via API](#integration-via-api)
+> [Integration via PowerAutomate](#integration-via-powerautomate)
 
 The recommendation is to utilize WrikeXPI as much as possible if your use case fits within its supported usage, to make your integration more striaght forward and future proof from underlying Wrike product or business logic changes.
 
@@ -55,8 +58,22 @@ WrikeXPI is integration layer that built on top of Wrike Native API, to make you
 Working examples of the WrikeXPI, showcasing the capabilities of the XPI.
 *  **[Showcase Portal](Samples/README.md)**: A mock system demonstrating the power of XPI. 
 
+<br/>
+<br/>
+<br/>
+<br/>
+
+
 # Integration via PowerAutomate
 
 ## POA Connectors (PowerAutomate Online)
 
 *   **[Connector Documentation](PAO-Connectors/README.md)**: Instructions for setting up the Power Automate custom connector for Wrike API
+
+We are still working to create the connector for WrikeXPI, do reach out if you need that.
+
+
+<hr/>
+
+
+
