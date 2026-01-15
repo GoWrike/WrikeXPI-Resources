@@ -279,7 +279,7 @@ const App = {};
 
     let wrikeModal, wrikeIframe, wrikeCloseBtn;
 
-    function showWrikeItem(entityId) {
+    async function showWrikeItem(entityId) {
         if (!wrikeModal) {
             wrikeModal = document.getElementById('modal-wrike-iframe');
             wrikeIframe = document.getElementById('wrike-iframe');
@@ -287,8 +287,31 @@ const App = {};
             if (wrikeCloseBtn) wrikeCloseBtn.addEventListener('click', () => hideModal(wrikeModal));
         }
         if (wrikeModal && wrikeIframe) {
-            wrikeIframe.src = `https://app-eu.wrike.com/frontend/ts_wrike_embeddable_work_item_app/index.html?entityId=${entityId}&entityType=ApiV4Folder`;
-            showModal(wrikeModal);
+            showSpinner();
+            try {
+                const baseUrl = App.Config.get('xpiBaseUrl');
+                const token = App.Auth.getToken();
+                // Call the IDs endpoint via the XPI proxy to convert v3 ID to v4 ID
+                const url = `${baseUrl}api/v1/wrikexpi/amoeba/wrikeapi/ids?type=ApiV2Folder&ids=[${entityId}]`;
+                
+                const response = await App.Api.fetchWithLogs(url, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (response.success && response.data && response.data.length > 0) {
+                    const v4Id = response.data[0].id;
+                    wrikeIframe.src = `https://app-eu.wrike.com/frontend/ts_wrike_embeddable_work_item_app/index.html?entityId=${v4Id}&entityType=ApiV4Folder`;
+                    showModal(wrikeModal);
+                } else {
+                    console.error('Failed to convert ID:', response);
+                    showToast('Failed to load Wrike item.', 'error');
+                }
+            } catch (error) {
+                console.error('Error loading Wrike item:', error);
+                showToast('Error loading Wrike item.', 'error');
+            } finally {
+                hideSpinner();
+            }
         }
     }
 
