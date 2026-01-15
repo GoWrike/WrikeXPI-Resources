@@ -277,7 +277,22 @@ const App = {};
         }
     }
 
-    App.UI = { showSpinner, hideSpinner, showToast, showModal, hideModal };
+    let wrikeModal, wrikeIframe, wrikeCloseBtn;
+
+    function showWrikeItem(entityId) {
+        if (!wrikeModal) {
+            wrikeModal = document.getElementById('modal-wrike-iframe');
+            wrikeIframe = document.getElementById('wrike-iframe');
+            wrikeCloseBtn = document.getElementById('wrike-iframe-close-btn');
+            if (wrikeCloseBtn) wrikeCloseBtn.addEventListener('click', () => hideModal(wrikeModal));
+        }
+        if (wrikeModal && wrikeIframe) {
+            wrikeIframe.src = `https://app-eu.wrike.com/frontend/ts_wrike_embeddable_work_item_app/index.html?entityId=${entityId}&entityType=ApiV4Folder`;
+            showModal(wrikeModal);
+        }
+    }
+
+    App.UI = { showSpinner, hideSpinner, showToast, showModal, hideModal, showWrikeItem };
 })(App);
 
 // === Authentication Module ===
@@ -932,7 +947,17 @@ const App = {};
     }
 
     function displayContent(title, descriptionHtml, permalink) {
-        dom.wrikeLink.href = permalink;
+        const entityIdMatch = /id=([a-zA-Z0-9]+)/.exec(permalink);
+        if (entityIdMatch && entityIdMatch[1]) {
+            dom.wrikeLink.href = '#';
+            dom.wrikeLink.onclick = (e) => {
+                e.preventDefault();
+                App.UI.showWrikeItem(entityIdMatch[1]);
+            };
+        } else {
+            dom.wrikeLink.href = permalink;
+            dom.wrikeLink.onclick = null;
+        }
         dom.wrikeLink.classList.remove('hidden');
 
         dom.contentArea.innerHTML = `
