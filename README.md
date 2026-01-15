@@ -20,6 +20,18 @@ The following section will provide more context and guidance for the usage of Wr
 
 The recommendation is to utilize WrikeXPI as much as possible if your use case fits within its supported usage, to make your integration more striaght forward and future proof from underlying Wrike product or business logic changes.
 
+## Requesting Access for API Integration
+
+For any integration, you need to register for an App Id, please submit your business use case via the following request form:
+https://app-eu.wrike.com/workspace.htm?acc=3128883#/forms?formid=964069
+
+After submitted the form, integration team will review and advice the next step to follow to get your App Id and secret.
+
+<br/>
+<br/>
+<br/>
+<br/>
+
 # Wrike Native API
 
 Wrike Native API is Wrike Product's Native API, fully own and supported by Wrike.
