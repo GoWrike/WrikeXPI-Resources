@@ -1,61 +1,56 @@
-# Changing Agency* from Dropdown list to Linked to Database field
+# Technical Advisory: Migration of "Agency*" Custom Field to Datahub
 
-## Overview
+**Target Audience:** Development teams integrating with Wrike API
+**Subject:** Change of "Agency*" Custom Field type from Dropdown to Linked to Database
 
-This document is targeted to development teams that built solutions that integrate with Wrike via Wrike API.
+## 1. Overview
 
-It involve the change of field type for the custom field Agency*, which will impact the way the field is to be read and update via Wrike API.
+This advisory outlines an upcoming technical change regarding the "Agency*" global custom field in Wrike. The field type will be migrated from a standard **Dropdown** list to a **Linked to Database** field powered by Wrike Datahub.
 
-If you do make use of the Agency* global custom field in your solution, you must make necessary action to mitigate this change.
+This change will impact how the "Agency*" field is read from and written to via the Wrike API. Integrations relying on this field must be updated to accommodate the new data structure and logic.
 
-The change will take place at a later agreed date, please refer to the WPP ET Wrike team for more information.
+**Note:** The specific date for this migration will be communicated separately. Please refer to the WPP ET Wrike team for the schedule.
 
+## 2. Background
 
-## Background
+Wrike has introduced **Datahub**, a feature allowing the creation of database tables with records natively within Wrike. This enables robust Master Data Management (MDM) directly in the platform, replacing the legacy method of maintaining master data solely as text options within Dropdown custom fields.
 
-Wrike introduced Datahub feature, which enables us to create database table with records.
+The "Agency*" custom field has been identified as a primary candidate for this enhancement.
 
-This feature essentially make it possible to maintain Master Data with in Wrike natively.
+### Comparison
 
-Prior to this, Master Data is only being maintained as names in Dropdown list of a custom field.
-
-### Agency* CF is one of such example.
-
+*   **Current State:** "Agency*" is a Dropdown Custom Field.
 ![Agency* Custom Field](AgencyCFDefinition.png)
 
-This is a perfect candidate to be enhanced to make use of Datahub.
-
-### Example of Agency with Linked to Database Custom Field.
-
+*   **Future State:** "Agency*" will become a Linked to Database Custom Field.
 ![Agency* LtDB Custom Field](AgencyLtDBCFDefinition.png)
 
-The Linked Database looks like this:
-
+The underlying data will reside in a Datahub Database:
 ![Datahub Database](DatahubDatabase.png)
 
-The User experience is the same (or very little difference) from end user point of view.
-
+The user experience remains largely consistent for end-users:
 ![Sample for LtDB CF Field](SampleLtDBCFField.png)
 
-## Impacted Changes
+## 3. User Experience Impact
 
-### User Experience
-
-#### Dropdown List
-
+*   **Dropdown List (Current):**
 ![UX for Dropdown List on CF](UXforDropdownlist.png)
 
-#### Linked to Database
-
+*   **Linked to Database (Future):**
 ![UX for Linked to Database](UXforLtDB.png)
 
-### API integration
+## 4. API Integration Impact
 
-#### Read Operation
+The most significant impact is on API operations. The data format for reading and writing to this field will change.
 
-https://app-eu.wrike.com/api/v4/tasks/MAAAAAEDmqEl
+### 4.1. Read Operations
 
-Response Snippet (CF)
+When fetching tasks, the `customFields` array will return different values for the "Agency*" field.
+
+#### Standard Response
+Instead of a plain text value (e.g., "EssenceMediacom"), the API will return a JSON array containing the **Record ID** from the Datahub database.
+
+**GET** `https://app-eu.wrike.com/api/v4/tasks/{taskId}`
 
 ``` json
 {
@@ -213,5 +208,3 @@ Response Snippet
 ```
 
 The Record Id for Eightbar is "RE281474983375798".
-
-
