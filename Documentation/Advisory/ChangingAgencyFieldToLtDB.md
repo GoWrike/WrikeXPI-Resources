@@ -120,11 +120,11 @@ Response Snippet (CF)
 
 #### Write/Update Operation, existing Dropdown List CF
 
-https://app-eu.wrike.com/api/v4/tasks/MAAAAAEDmqEl?customFields=[{"id":"IEAC7PRTJUAB43DB","value":"Eightbar"}]
+**POST** `https://app-eu.wrike.com/api/v4/tasks/MAAAAAEDmqEl?customFields=[{"id":"IEAC7PRTJUAB43DB","value":"Eightbar"}]`
 
 #### Write/Update Operation, future Linked to Database CF
 
-https://app-eu.wrike.com/api/v4/tasks/MAAAAAEDmqEl?customFields=[{"id":"IEAC7PRTJUAKMO4U","value":"[\"RE281474983375798\"]"}]
+**POST** `https://app-eu.wrike.com/api/v4/tasks/MAAAAAEDmqEl?customFields=[{"id":"IEAC7PRTJUAKMO4U","value":"[\"RE281474983375798\"]"}]`
 
 Note that the update to the CF requires the Record Id of the corresponding Database record.
 
@@ -137,7 +137,7 @@ To know find out the Record Id, there are a few steps to it:
 
 Using the Custom Field Id "IEAC7PRTJUAKMO4U", get the Database Id via:
 
-https://app-eu.wrike.com/api/v4/customfields/IEAC7PRTJUAKMO4U
+**GET** `https://app-eu.wrike.com/api/v4/customfields/IEAC7PRTJUAKMO4U`
 
 **Response Snippet**
 
@@ -181,7 +181,7 @@ The dataHubDatabaseId is the Id of the Database.
 
 ##### Retrieve the Record Id using Database Id via Datahub API
 
-https://app-eu.wrike.com/app/wrike_v2_web/public/api/v1/databases/DB281474977096236/records
+**GET** `https://app-eu.wrike.com/app/wrike_v2_web/public/api/v1/databases/DB281474977096236/records`
 
 **Response Snippet**
 
