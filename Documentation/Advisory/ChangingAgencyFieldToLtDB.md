@@ -84,7 +84,9 @@ Instead of a plain text value (e.g., "EssenceMediacom"), the API will return a J
 
 #### Read Operation (Transition option), lookupAsSelect option
 
-https://app-eu.wrike.com/api/v4/tasks/MAAAAAEDmqEl?lookupAsSelect
+Wrike product team had introduced a new parameter `lookupAsSelect` to make it possible to have original style with actual text value in the response.
+
+**GET** `https://app-eu.wrike.com/api/v4/tasks/MAAAAAEDmqEl?lookupAsSelect`
 
 Response Snippet (CF)
 
@@ -128,13 +130,16 @@ Note that the update to the CF requires the Record Id of the corresponding Datab
 
 To know find out the Record Id, there are a few steps to it:
 
-Get the Database Id from the Custom Field definition
+1. Retrieve the Database Id from Custom Field definition
+2. Retrieve the Record Id via Datahub API
+
+##### Retrieve the Database Id from the Custom Field definition
 
 Using the Custom Field Id "IEAC7PRTJUAKMO4U", get the Database Id via:
 
 https://app-eu.wrike.com/api/v4/customfields/IEAC7PRTJUAKMO4U
 
-Response Snippet
+**Response Snippet**
 
 ``` json
 {
@@ -174,11 +179,11 @@ Response Snippet
 
 The dataHubDatabaseId is the Id of the Database.
 
-Get the Record Id using Database Id via Datahub API
+##### Retrieve the Record Id using Database Id via Datahub API
 
 https://app-eu.wrike.com/app/wrike_v2_web/public/api/v1/databases/DB281474977096236/records
 
-Response Snippet
+**Response Snippet**
 
 ``` json
 {
