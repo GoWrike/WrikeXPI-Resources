@@ -1,6 +1,7 @@
 # Technical Advisory: Migration of "Agency*" Custom Field to Datahub
 
 **Target Audience:** Development teams integrating with Wrike API
+
 **Subject:** Change of "Agency*" Custom Field type from Dropdown to Linked to Database
 
 ## 1. Overview
@@ -20,23 +21,29 @@ The "Agency*" custom field has been identified as a primary candidate for this e
 ### Comparison
 
 *   **Current State:** "Agency*" is a Dropdown Custom Field.
+
 ![Agency* Custom Field](AgencyCFDefinition.png)
 
 *   **Future State:** "Agency*" will become a Linked to Database Custom Field.
+
 ![Agency* LtDB Custom Field](AgencyLtDBCFDefinition.png)
 
 The underlying data will reside in a Datahub Database:
+
 ![Datahub Database](DatahubDatabase.png)
 
 The user experience remains largely consistent for end-users:
+
 ![Sample for LtDB CF Field](SampleLtDBCFField.png)
 
 ## 3. User Experience Impact
 
 *   **Dropdown List (Current):**
+
 ![UX for Dropdown List on CF](UXforDropdownlist.png)
 
 *   **Linked to Database (Future):**
+
 ![UX for Linked to Database](UXforLtDB.png)
 
 ## 4. API Integration Impact
