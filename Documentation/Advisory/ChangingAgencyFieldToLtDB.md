@@ -1,5 +1,16 @@
 # Changing Agency* from Dropdown list to Linked to Database field
 
+## Overview
+
+This document is targeted to development teams that built solutions that integrate with Wrike via Wrike API.
+
+It involve the change of field type for the custom field Agency*, which will impact the way the field is to be read and update via Wrike API.
+
+If you do make use of the Agency* global custom field in your solution, you must make necessary action to mitigate this change.
+
+The change will take place at a later agreed date, please refer to the WPP ET Wrike team for more information.
+
+
 ## Background
 
 Wrike introduced Datahub feature, which enables us to create database table with records.
@@ -8,13 +19,13 @@ This feature essentially make it possible to maintain Master Data with in Wrike 
 
 Prior to this, Master Data is only being maintained as names in Dropdown list of a custom field.
 
-Agency* CF is one of such example.
+### Agency* CF is one of such example.
 
 ![Agency* Custom Field](AgencyCFDefinition.png)
 
 This is a perfect candidate to be enhanced to make use of Datahub.
 
-Example of Agency with Linked to Database Custom Field.
+### Example of Agency with Linked to Database Custom Field.
 
 ![Agency* LtDB Custom Field](AgencyLtDBCFDefinition.png)
 
