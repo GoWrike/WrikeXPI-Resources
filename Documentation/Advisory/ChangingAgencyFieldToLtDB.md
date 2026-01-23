@@ -16,7 +16,7 @@ This change will impact how the "Agency*" field is read from and written to via 
 
 Wrike has introduced **Datahub**, a feature allowing the creation of database tables with records natively within Wrike. This enables robust Master Data Management (MDM) directly in the platform, replacing the legacy method of maintaining master data solely as text options within Dropdown custom fields.
 
-The "Agency*" custom field has been identified as a primary candidate for this enhancement.
+The "Agency*" custom field has been identified as a upcoming candidate to make use of this new feature.
 
 ### Comparison
 
