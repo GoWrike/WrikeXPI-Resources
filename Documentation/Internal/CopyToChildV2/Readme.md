@@ -82,7 +82,4 @@ The set of rules in this will kicks in when Campaigns in the Test and Evalution 
 
 When you've made changes to the rules, please click the following button to force the service to retrieve the newly updated rules.
 
-<button>Refresh Rules</button>
-
-
-
+<button onclick="fetch('https://api.gowrike.space/api/v1/sync-c2c-rules/live', { method: 'PUT' }).then(res => alert(res.ok ? 'Rules refreshed successfully!' : 'Failed to refresh rules.')).catch(err => alert('Error: ' + err))">Refresh Rules</button>
