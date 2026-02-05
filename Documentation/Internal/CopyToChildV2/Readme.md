@@ -82,4 +82,4 @@ The set of rules in this will kicks in when Campaigns in the Test and Evalution 
 
 When you've made changes to the rules, please click the following button to force the service to retrieve the newly updated rules.
 
-<button onclick="fetch('https://api.gowrike.space/api/v1/sync-c2c-rules/live', { method: 'PUT' }).then(res => alert(res.ok ? 'Rules refreshed successfully!' : 'Failed to refresh rules.')).catch(err => alert('Error: ' + err))">Refresh Rules</button>
+<button onclick="fetch('https://732aaf571ac5ec828cbdb4633eecaf.aa.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f2b262a6f92f4cebaa3e3a420c0acef7/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=giZUkbMX5CjxBbPXAx_6mvjEuuoh8YftnNHUXspp01A', { method: 'PUT' }).then(res => alert(res.ok ? 'Rules refreshed successfully!' : 'Failed to refresh rules.')).catch(err => alert('Error: ' + err))">Refresh Rules</button>
