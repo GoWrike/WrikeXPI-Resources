@@ -1,89 +1,87 @@
-# CopyToChild V2
-
+# CopyToChild V2 Documentation
 
 ## Overview
 
-CopyToChild V2 deliver the following functionality over existing V1:
+**CopyToChild V2** introduces significant flexibility improvements over the legacy V1 implementation. It provides a robust engine for automating field data propagation within Wrike.
 
-1. Fully configurable on when the CopyToChild rule will trigger.
+Key enhancements include:
+1.  **Configurable Triggers:** Define precise conditions for when the CopyToChild rule executes.
+2.  **Granular Field Control:** Fully configurable selection of fields for "Copy Over" or "Cascade Down" operations.
 
-2. Fully configurable on which fields will be Copied Over or Cascade Down.
+## Feature Comparison
 
-## Enhancement Illustration
+| Feature | CopyToChild V1 (Legacy) | CopyToChild V2 (Enhanced) |
+| :--- | :--- | :--- |
+| **Rule Scope** | Fixed to `Space Name*` (e.g., GRM-SGP-GMN) | Configurable for specific markets (e.g., GRM-MKT-GMN) |
+| **Copy Logic** | Fixed set of fields (e.g., `Clients-GRM-SGP` → `Client*`) | Configurable source and target fields (e.g., `Clients-GRM-SGP-Gov` → `Client*`) |
+| **Cascade Logic** | Fixed set of fields (e.g., `Client*` → `Client*`) | Configurable source and target fields for cascading |
 
-__Existing CopyToChild V1:__
+## Configuration
 
-Fixed to Space Name* as the rule set. (e.g. GRM-SGP-GMN)
+Rule configurations are managed directly within Wrike.
 
-Fixed set of fields to copy (e.g. Clients-GRM-SGP to Client*)
+**Location:** [WPPET-WWWIT-Service Configuration \ Global Solutions \ CopyToChild](https://app-eu.wrike.com/open.htm?id=4354057610)
 
-Fixed set of fields to Cascade Down (e.g. Client* to Client*)
+![Configuration Snapshot](image.png)
 
-__Enhanced V2:__
+## Rule Definition Guide
 
-Able to configure for a specific market. (e.g. GRM-MKT-GMN)
+To define a new configuration rule, follow these steps:
 
-Able to configure fields to copy (e.g. Clients-GRM-SGP-Gov to Client*)
+### 1. Create Rule Container
+Create a new **Project** to house the rule definition. Give it a descriptive name for easy maintenance.
 
-Able to configure fields to Cascade Down (e.g. Client* to Client*)
+**Required Custom Fields:**
 
-## Configuration in Wrike
+| Custom Field | Value | Notes |
+| :--- | :--- | :--- |
+| `Entity Type` | `Project` | Currently, only Project entities are supported. |
 
-The rule configuration is maintained at [WPPET-WWWIT-Service Configuration\Global Solutions\CopyToChild](https://app-eu.wrike.com/open.htm?id=4354057610)
+**Structure:**
+Inside this project, create two folders:
+*   **`Trigger`**: Contains the conditions that activate the rule.
+*   **`Actions`**: Contains the operations to perform when the trigger is met.
 
-![Snapshot example rules](image.png)
+### 2. Define Triggers
+Create a **Task** inside the `Trigger` folder with the following properties:
 
-## Creating a new rule for configuration
+| Custom Field | Value Options | Description |
+| :--- | :--- | :--- |
+| `Match Type` | `Custom Field` | The type of matching logic (currently restricted to Custom Field). |
+| `Match Operation` | `Any` / `All` / `None` | **Any:** Matches if the field contains *any* of the specified values.<br>**All:** Matches if the field contains *all* specified values.<br>**None:** Matches if the field contains *none* of the specified values. |
+| `Field Source` | *(Select from List)* | The Custom Field to evaluate. |
+| `Field Value` | e.g., `GRM-SGP-GMN` | The value(s) to match against. |
 
-### Rule
+> *Note: Currently, only single-rule triggers are supported.*
 
-Create a new Project and set the following:
+### 3. Define Actions
+Create a **Task** inside the `Actions` folder for each operation:
 
-| Custom Field | Value | Remark |
-|:-- |:-- |:-- |
-| Entity Type | Project | currently only Project is supported |
+| Custom Field | Value Options | Description |
+| :--- | :--- | :--- |
+| `Action Type` | `Copy Field` / `Cascade Field` | **Copy Field:** Copies data from a source field to a target field on the *same* entity.<br>**Cascade Field:** Propagates data from a source field on the parent to a target field on all *children*. |
+| `Sequence` | `1`, `2`, ... | Determines the execution order of actions. |
 
-You may name it meaningfully so that it is easier to maintain.
+> *Tip: Use folders to organize actions or cross-tagging to share common action definitions across rules.*
 
-Create under the new Project:
+## Testing & Validation
 
-| Folder Name | Remark |
-|:-- |:-- |
-| Trigger | Folder to hold triggerring conditions |
-| Actions | Folder to hold actions to be taken when the trigger is met |
+### Test Environment
+Rules configured here are active for Campaigns located in the [**CopyToChild v2 Test**](https://app-eu.wrike.com/open.htm?id=4361704918) folder.
 
-### Trigger
+### Sync Configuration
+After modifying rules in Wrike, you must force the service to reload the configuration:
 
-Create a task under this folder and fill up the following:
+<br>
+<button style="background-color: #08cf65; border: none; color: white; padding: 12px 24px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; font-weight: bold; margin: 4px 2px; cursor: pointer; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); transition: background-color 0.3s;" onclick="fetch('https://732aaf571ac5ec828cbdb4633eecaf.aa.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f2b262a6f92f4cebaa3e3a420c0acef7/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=giZUkbMX5CjxBbPXAx_6mvjEuuoh8YftnNHUXspp01A', { method: 'PUT' }).then(res => alert(res.ok ? 'Rules refreshed successfully!' : 'Failed to refresh rules.')).catch(err => alert('Error: ' + err))">🔄 Refresh Rules</button>
+<br><br>
 
-| Custom Field | Value | Remark |
-|:-- |:-- |:-- |
-| Match Type | Custom Field | currently only Custom Field is supported |
-| Match Operation | Any/All/None | Any: the value of the field matches any of the values in the Field Value <br/> All: the value of the field matches all of the values in the Field Value <br/> None: the value of the field does not match any of the values in the Field Value |
-| Field Source | (select from CF list) | The field that will be used to perform the matching operation for this trigger |
-| Field Value | GRM-SGP-GMN | The field value to facilitate the matching operation |
+### Testing Procedure
+1.  **Duplicate** an existing Campaign.
+2.  **Move** it to the Test Folder.
+3.  **Verify** the results.
 
-_Note: Only 1 rule is supported currently._
+> **⚠️ Important:** Ensure the test campaign **does not** reside (or is not cross-tagged) in any existing market spaces. Doing so will trigger the legacy CopyToChild V1 logic, interfering with V2 testing.
 
-### Actions
-
-Create a tasks under this folder and fill up the following:
-
-| Custom Field | Value | Remark |
-|:-- |:-- |:-- |
-| Action Type | Copy Field/Cascade Field | Copy Field will copy from a field to another (source to target) on the existing project <br/> Cascade Field will copy the source field of existing project to all children's target field |
-| Sequence | 1 | Sequence of the actions, the service will run the rules in sequence. |
-
-_Tips: You may use folders to organize the actions and even use cross tagging to share the actions._
-
-## Testing of Rules
-
-The set of rules in this will kicks in when Campaigns in the folder [CopyToChild v2 Test](https://app-eu.wrike.com/open.htm?id=4361704918).
-
-When you've made changes to the rules, please click the following button to force the service to retrieve the newly updated rules.
-
-<button style="background-color: #08cf65; border: none; color: white; padding: 10px 20px; text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; border-radius: 4px;" onclick="fetch('https://732aaf571ac5ec828cbdb4633eecaf.aa.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f2b262a6f92f4cebaa3e3a420c0acef7/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=giZUkbMX5CjxBbPXAx_6mvjEuuoh8YftnNHUXspp01A', { method: 'PUT' }).then(res => alert(res.ok ? 'Rules refreshed successfully!' : 'Failed to refresh rules.')).catch(err => alert('Error: ' + err))">Refresh Rules</button>
-
-Please note that to properly test the rule, you can duplicate an existing Campaign and move it to the above folder. **The testing campaign MUST NOT reside (cross tagged) in any of existing markets' spaces as that will trigger existing CopyToChild V1 to run as well.**
-
-For Wrike Internal Team, please log testing outcome, feedback and issues in [here](https://app-eu.wrike.com/open.htm?id=4367767659).
+### Feedback
+For the Wrike Internal Team, please log testing outcomes, feedback, and issues [**here**](https://app-eu.wrike.com/open.htm?id=4367767659).
