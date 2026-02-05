@@ -78,8 +78,10 @@ _Tips: You may use folders to organize the actions and even use cross tagging to
 
 ## Testing of Rules
 
-The set of rules in this will kicks in when Campaigns in the Test and Evalution folder.
+The set of rules in this will kicks in when Campaigns in the folder [CopyToChild v2 Test](https://app-eu.wrike.com/open.htm?id=4361704918).
 
 When you've made changes to the rules, please click the following button to force the service to retrieve the newly updated rules.
 
 <button onclick="fetch('https://732aaf571ac5ec828cbdb4633eecaf.aa.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f2b262a6f92f4cebaa3e3a420c0acef7/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=giZUkbMX5CjxBbPXAx_6mvjEuuoh8YftnNHUXspp01A', { method: 'PUT' }).then(res => alert(res.ok ? 'Rules refreshed successfully!' : 'Failed to refresh rules.')).catch(err => alert('Error: ' + err))">Refresh Rules</button>
+
+Please note that to properly test the rule, you can duplicate an existing Campaign and move it to the above folder. **The testing campaign MUST NOT reside (cross tagged) in any of existing markets' spaces as that will trigger existing CopyToChild V1 to run as well.**
