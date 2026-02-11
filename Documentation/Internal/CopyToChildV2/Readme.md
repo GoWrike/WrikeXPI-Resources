@@ -67,7 +67,7 @@ Create a **Task** inside the `Actions` folder for each operation:
 
 | Custom Field | Value Options | Description |
 | :--- | :--- | :--- |
-| `Action Type` | `Copy Field` / `Cascade Field` / `Cascade Field (New Only)` | **Copy Field:** Copies data from a source field to a target field on the *same* entity.<br>**Cascade Field:** Propagates data from a source field on the parent to a target field on all *children*. <br>**Cascade Field (New Only):** Propagates data from a source field on the parent to a target field on all *children* only if it is first time propagation. |
+| `Action Type` | `Copy Field` / `Cascade Field` / `Cascade Field (New Only)` / `Set Field` | **Copy Field:** Copies data from a source field to a target field on the *same* entity.<br>**Cascade Field:** Propagates data from a source field on the parent to a target field on all *children*. <br>**Cascade Field (New Only):** Propagates data from a source field on the parent to a target field on all *children* only if it is first time propagation. <br>**Set Field:** Replace/set the value of the target field to the specified Field Value. |
 | `Sequence` | `1`, `2`, ... | Determines the execution order of actions. |
 
 > *Tip: Use folders to organize actions or cross-tagging to share common action definitions across rules.*
