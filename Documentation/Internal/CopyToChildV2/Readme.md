@@ -60,7 +60,7 @@ Create a **Task** inside the `Trigger` folder with the following properties:
 | `Field Source` | *(Select from List)* | The Custom Field to evaluate. |
 | `Field Value` | e.g., `GRM-SGP-GMN` | The value(s) to match against. |
 
-> *Note: Currently, only single-rule triggers are supported.*
+> *Note: You may add multiple trigger conditions, and the rule will only be executed when all the conditions are met.*
 
 ### 3. Define Actions
 Create a **Task** inside the `Actions` folder for each operation:
