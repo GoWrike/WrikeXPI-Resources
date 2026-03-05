@@ -32,6 +32,7 @@ The transparent proxy works the same way as Wrike API (https://developers.wrike.
 - [Dev Instance](https://xpi-api.gowrike.space/api/v1/wrikexpi/amoeba/wrikeapi)
 - [Prod Instance](https://api.wrikexpi.groupm.com/api/v1/wrikexpi/amoeba/wrikeapi)
 
+> [!TIP]
 > The transparent proxy needs XPI Token instead of Wrike API Token, please retrieve it at the XPI Token Service (refer to next section).
 
 ## Available Documents
@@ -50,6 +51,7 @@ Please use the following to get your XPI Token to be used in the API Playground:
 
 *  **[XPI Token Service (api.wrikexpi.groupm.com)](https://api.wrikexpi.groupm.com/?accountId=3128883)**
 
+> [!NOTE]
 > Due to the nature of Wrike's API session design, when a new token is generated, the old will be invalidated.
 > Hence, please keep your token if you need it for long term usage and do not regenerate new one unless you would like to terminate the previous generated token.
 
