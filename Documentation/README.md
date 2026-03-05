@@ -27,6 +27,14 @@ WrikeXPI had been developed with the goal to complement Wrike's existing offerin
 - Ability to add additional API endpoints
 - Ability to swap specific API endpoints
 
+The transparent proxy works the same way as Wrike API (https://developers.wrike.com/apiv4-schema-reference/), except that instead of using Wrike's URL (e.g. https://app-eu.wrike.com/api/v4), change the URL to:
+
+- https://xpi-api.gowrike.space/api/v1/wrikexpi/amoeba/wrikeapi (Dev Instance)
+- https://api.wrikexpi.groupm.com/api/v1/wrikexpi/amoeba/wrikeapi (Prod Instance)
+
+> [!NOTE]
+> Note: The transparent proxy needs XPI Token instead of Wrike API Token, please retrieve it at the XPI Token Service (refer to next section).
+
 ## Available Documents
 
 Below is a list of available documentation:
