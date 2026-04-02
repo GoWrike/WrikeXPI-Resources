@@ -6,6 +6,8 @@ Please bookmark this page for easy access, as all the links and references in th
 
 For any support request, please [submit a ticket](https://app-eu.wrike.com/workspace.htm?acc=3128883#/forms?formid=1002486) and we will get back to you.
 
+For recorded introduction to Wrike XPI, please [click here](https://insidemedia.sharepoint.com/:v:/r/sites/GRM-GLOBAL-WrikeWorkflow/Shared%20Documents/General/Public%20Access/Training%20%26%20Playbooks/Wrike%20XPI/Wrike%20XPI%20-%20Introduction%20(Session%202)-20251120_230312-Meeting%20Recording.mp4?csf=1&web=1&e=9IcQkv) to view.
+
 <br/>
 
 ## Overview
