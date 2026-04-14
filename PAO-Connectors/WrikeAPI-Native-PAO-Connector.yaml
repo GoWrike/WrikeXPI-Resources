@@ -3,8 +3,8 @@ info:
   version: 1.0.0
   title: Wrike Native API
   description: Wrike API based on Wrike API Spec
-host: app-eu.wrike.com
-basePath: /api/v4/
+host: api.wrikexpi.groupm.com
+basePath: /api/v1/wrikexpi/amoeba/wrikeapi/
 schemes:
   - https
 consumes: []
@@ -1360,6 +1360,320 @@ paths:
             - Completed
             - Deferred
             - Cancelled
+    put:
+      tags:
+        - Tasks
+      responses:
+        default:
+          description: default
+          schema:
+            type: object
+            properties:
+              kind:
+                type: string
+                description: kind
+              data:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: id
+                    accountId:
+                      type: string
+                      description: accountId
+                    title:
+                      type: string
+                      description: title
+                    description:
+                      type: string
+                      description: description
+                    briefDescription:
+                      type: string
+                      description: briefDescription
+                    parentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: parentIds
+                    superParentIds:
+                      type: array
+                      items:
+                        type: string
+                      description: superParentIds
+                    sharedIds:
+                      type: array
+                      items:
+                        type: string
+                      description: sharedIds
+                    responsibleIds:
+                      type: array
+                      items:
+                        type: string
+                      description: responsibleIds
+                    status:
+                      type: string
+                      description: status
+                    importance:
+                      type: string
+                      description: importance
+                    createdDate:
+                      type: string
+                      description: createdDate
+                    updatedDate:
+                      type: string
+                      description: updatedDate
+                    dates:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          description: type
+                        duration:
+                          type: integer
+                          format: int32
+                          description: duration
+                        start:
+                          type: string
+                          description: start
+                        due:
+                          type: string
+                          description: due
+                      description: dates
+                    scope:
+                      type: string
+                      description: scope
+                    authorIds:
+                      type: array
+                      items:
+                        type: string
+                      description: authorIds
+                    customStatusId:
+                      type: string
+                      description: customStatusId
+                    hasAttachments:
+                      type: boolean
+                      description: hasAttachments
+                    attachmentCount:
+                      type: integer
+                      format: int32
+                      description: attachmentCount
+                    permalink:
+                      type: string
+                      description: permalink
+                    priority:
+                      type: string
+                      description: priority
+                    followedByMe:
+                      type: boolean
+                      description: followedByMe
+                    followerIds:
+                      type: array
+                      items:
+                        type: string
+                      description: followerIds
+                    superTaskIds:
+                      type: array
+                      items:
+                        type: string
+                      description: superTaskIds
+                    subTaskIds:
+                      type: array
+                      items: {}
+                      description: subTaskIds
+                    dependencyIds:
+                      type: array
+                      items:
+                        type: string
+                      description: dependencyIds
+                    metadata:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          key:
+                            type: string
+                            description: key
+                          value:
+                            type: string
+                            description: value
+                      description: metadata
+                    customFields:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id:
+                            type: string
+                            description: id
+                          value:
+                            type: string
+                            description: value
+                      description: customFields
+                description: data
+      summary: Create Task
+      description: Create Task
+      operationId: Createtask
+      parameters:
+        - name: folderId
+          in: path
+          required: true
+          type: string
+        - name: title
+          in: query
+          description: Title of task
+          required: false
+          type: string
+        - name: description
+          in: query
+          description: Task Description
+          required: false
+          type: string
+        - name: status
+          in: query
+          required: false
+          enum:
+            - Active
+            - Deferred
+            - Completed
+            - Cancelled
+          type: string
+        - name: importance
+          in: query
+          required: false
+          enum:
+            - High
+            - Low
+            - Normal
+          type: string
+        - name: dates
+          in: query
+          description: Reschedule task and/or change task type
+          required: false
+          type: string
+        - name: addParents
+          in: query
+          required: false
+          type: string
+        - name: removeParents
+          in: query
+          description: >-
+            Remove task from specified folders. Can not contain RecycleBin
+            folder
+          required: false
+          type: string
+        - name: addShareds
+          in: query
+          description: Shared task with specified users or invitations
+          required: false
+          type: string
+        - name: removeShareds
+          in: query
+          description: Unshare task from specified users or invitations
+          required: false
+          type: string
+        - name: addResponsibles
+          in: query
+          description: Add specified users or invitations to assignee list
+          required: false
+          type: string
+        - name: removeResponsibles
+          in: query
+          description: Remove specified users or invitations from assignee list
+          required: false
+          type: string
+        - name: addResponsiblePlaceholders
+          in: query
+          description: Add specified placeholders to placeholder assignee list
+          required: false
+          type: string
+        - name: removeResponsiblePlaceholders
+          in: query
+          description: Remove specified placeholders from placeholder assignee list
+          required: false
+          type: string
+        - name: addFollowers
+          in: query
+          description: Add specified users to task followers
+          required: false
+          type: string
+        - name: follow
+          in: query
+          description: Follow task
+          required: false
+          type: boolean
+        - name: priorityBefore
+          in: query
+          description: Put task in task list before specified task
+          required: false
+          pattern: ^([A-Z0-9]){16}$
+          type: string
+        - name: priorityAfter
+          in: query
+          description: Put task in task list after specified task
+          required: false
+          pattern: ^([A-Z0-9]){16}$
+          type: string
+        - name: addSuperTasks
+          in: query
+          description: Add the task as subtask to specified tasks
+          required: false
+          type: string
+        - name: removeSuperTasks
+          in: query
+          description: Remove the task form specified tasks subtasks
+          required: false
+          type: string
+        - name: metadata
+          in: query
+          required: false
+          type: string
+        - name: customFields
+          in: query
+          required: false
+          type: string
+        - name: customStatus
+          in: query
+          description: Custom status ID
+          required: false
+          type: string
+        - name: restore
+          in: query
+          description: Restore task from Recycled Bin
+          required: false
+          type: boolean
+        - name: effortAllocation
+          in: query
+          description: 'Set Task Effort fields: mode, total Effort'
+          required: false
+          type: string
+        - name: billingType
+          in: query
+          required: false
+          enum:
+            - Billable
+            - NonBillable
+          type: string
+        - name: withInvitations
+          in: query
+          description: Include invitations in sharedIds & responsibleIds lists
+          required: false
+          type: boolean
+        - name: convertToCustomItemType
+          in: query
+          description: Custom Item Type id
+          required: false
+          type: string
+        - name: plainTextCustomFields
+          in: query
+          description: Strip HTML tags from custom fields
+          required: false
+          type: boolean
+        - name: fields
+          in: query
+          required: false
+          type: string
   /spaces/{spaceId}/tasks:
     get:
       tags:
