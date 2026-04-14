@@ -6,6 +6,12 @@ Please bookmark this page for easy access, as all the links and references in th
 
 For any support request, please [submit a ticket](https://app-eu.wrike.com/workspace.htm?acc=3128883#/forms?formid=1002486) and we will get back to you.
 
+For recorded introduction to Wrike XPI, please [click here](https://insidemedia.sharepoint.com/:v:/r/sites/GRM-GLOBAL-WrikeWorkflow/Shared%20Documents/General/Public%20Access/Training%20%26%20Playbooks/Wrike%20XPI/Wrike%20XPI%20-%20Introduction%20(Session%202)-20251120_230312-Meeting%20Recording.mp4?csf=1&web=1&e=9IcQkv) to view.
+
+> [!IMPORTANT]
+>
+> For your integration project, please [submit an App registration](https://app-eu.wrike.com/workspace.htm?acc=3128883#/forms?formid=964069), follow with the [technical](https://insidemedia.sharepoint.com/:b:/r/sites/GRM-GLOBAL-WrikeWorkflow/Shared%20Documents/General/Public%20Access/Data%20%26%20Integration/Technical%20Assessment%20and%20Questionnaire%20for%20Wrike%20Integration.pdf?csf=1&web=1&e=jfbs4k) and [business assessment](https://insidemedia.sharepoint.com/:b:/r/sites/GRM-GLOBAL-WrikeWorkflow/Shared%20Documents/General/Public%20Access/Data%20%26%20Integration/WPP-ET-Wrike%20Integration%20Business%20Assessment%20v1.0.pdf?csf=1&web=1&e=073zaw) while you start your exploration.
+
 <br/>
 
 ## Overview
