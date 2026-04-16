@@ -442,11 +442,9 @@ paths:
           in: query
           required: false
           type: integer
-          description: >-
-            The number of folders to return (max 1000 items per page). Only
+          description: The number of folders to return (max 1000 items per page). Only
             'folders' kind is supported
-          x-ms-summary: >-
-            The number of folders to return (max 1000 items per page). Only
+          x-ms-summary: The number of folders to return (max 1000 items per page). Only
             'folders' kind is supported
         - name: nextPageToken
           in: query
@@ -1360,7 +1358,7 @@ paths:
             - Completed
             - Deferred
             - Cancelled
-    put:
+    post:
       tags:
         - Tasks
       responses:
@@ -1558,8 +1556,7 @@ paths:
           type: string
         - name: removeParents
           in: query
-          description: >-
-            Remove task from specified folders. Can not contain RecycleBin
+          description: Remove task from specified folders. Can not contain RecycleBin
             folder
           required: false
           type: string
@@ -2326,8 +2323,7 @@ paths:
           type: string
         - name: removeParents
           in: query
-          description: >-
-            Remove task from specified folders. Can not contain RecycleBin
+          description: Remove task from specified folders. Can not contain RecycleBin
             folder
           required: false
           type: string
@@ -3186,8 +3182,7 @@ paths:
           in: query
           required: false
           type: boolean
-          description: >-
-            Get folders from Root (false), Recycle Bin (true). This parameter
+          description: Get folders from Root (false), Recycle Bin (true). This parameter
             does not affect method's mode. Get folders from Root (false),
             Recycle Bin (true). This parameter does not affect method's mode.
         - name: contractTypes
