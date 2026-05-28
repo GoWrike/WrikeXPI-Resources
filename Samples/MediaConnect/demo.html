@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wrike Media Connect Widget - Showcase</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
+    <style>
+        .error-message {
+            background-color: #fee2e2;
+            border: 1px solid #fecaca;
+            color: #991b1b;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 12px;
+            display: none;
+        }
+        .CodeMirror {
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            height: 400px !important;
+            font-size: 12px !important;
+            margin-bottom: 16px;
+        }
+        .CodeMirror-gutters {
+            background-color: #282a36;
+            border-right: 1px solid #44475a;
+        }
+        .button-row {
+            display: flex;
+            gap: 12px;
+        }
+        .template-select-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        .template-select-row label {
+            font-weight: 600;
+            color: #374151;
+            white-space: nowrap;
+            margin-bottom: 0;
+        }
+        .template-select-row select {
+            flex: 1;
+        }
+    </style>
+</head>
+<body>
+    <h1>Wrike Media Connect - Showcase</h1>
+
+    <div class="container">
+        <!-- Left Column: Code Editor -->
+        <div class="panel">
+            <h2>Code Editor</h2>
+            <div class="template-select-row">
+                <label for="template-select">Template:</label>
+                <select id="template-select">
+                    <option value="display">Display Campaign</option>
+                    <option value="update">Update Campaign</option>
+                    <option value="create">Create Campaign</option>
+                    <option value="custom" disabled>— Customized —</option>
+                </select>
+            </div>
+            <div class="error-message" id="error-message"></div>
+            <div id="code-editor"></div>
+            <div class="button-row">
+                <button class="save-btn test-btn" id="test-btn">Test Live</button>
+                <button class="clear-btn" id="clear-btn">Clear Result</button>
+            </div>
+        </div>
+
+        <!-- Center Column: Test Result -->
+        <div class="panel">
+            <h2>Test Result</h2>
+            <div class="widget-container" id="test-result-container">
+                <p style="text-align: center; color: #9ca3af;">Paste code and click "Test Live" to see the widget here</p>
+            </div>
+        </div>
+
+        <!-- Right Column: Host App Event Log -->
+        <div class="panel">
+            <h2>Host Application Event Log</h2>
+            <p style="font-size: 14px; color: #6b7280; margin-bottom: 16px;">
+                This panel listens to custom events emitted from the widgets.
+            </p>
+            <pre id="event-log">Waiting for widget events...</pre>
+        </div>
+    </div>
+
+    <!-- Script to simulate Host Application capturing Widget Events -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const TEMPLATES = {
+                display: `<div id="wrike-campaign-1"></div>\n<script\n    src="./wrike-media-connect.js"\n    data-target="wrike-campaign-1"\n    data-campaign-id="IEAC7PRTI5SVIV6V"\n    data-display-attr='["campaignname","campaignstartdate","campaignenddate","status","client","debtor"]'\n    data-callback-attr='["campaignname","client","debtor","campaignbudget"]'\n    data-color-primary="#1E40AF"\n    data-color-background="#FFFFFF"\n    data-color-text="#111827"\n    data-color-accent="#3B82F6"\n><\/script>`,
+                update: `<div id="wrike-campaign-update"></div>\n<script\n    src="./wrike-media-connect.js"\n    data-target="wrike-campaign-update"\n    data-mode="update"\n    data-campaign-id="MQAAAAEH0egx"\n    data-update-payload='{"campaignbudget":"11","campaignname":"World Pinball Day 23","client":"Adidas Group"}'\n    data-display-attr='["campaignname","campaignstartdate","campaignenddate","campaignbudget","client","debtor"]'\n    data-callback-attr='["campaignname","campaignbudget"]'\n><\/script>`,
+                create: `<div id="wrike-campaign-create"></div>\n<script\n    src="./wrike-media-connect.js"\n    data-target="wrike-campaign-create"\n    data-mode="create"\n    data-creation-payload='{"type":"Campaign Request","space":"WPPM-MKT1-STAGING (DEU)","entity":"Campaign","variantId":6,"fields":{"spacename":"WPP-DEMO-GMN","requestormarket":"Other","debtor":"DEMO-Bayer-Aspirina","customerponumber":"PO 331","currency":"EUR","cssid":"123134","client":"DEMO-Bayer","campaignstartdate":"2026-08-29","campaignobjective":"Upper Funnel / Awareness","campaignname":"World Peace Day 2026","campaignenddate":"2026-10-29","campaignbudget":"100","briefeddate":"2026-06-01","brand":"World Peace One","agency":"EssenceMediacom","selectedchannels":["Paid Search","Programmatic"],"porequired":"No","briefresponsedate":"2026-05-20"}}'\n><\/script>`
+            };
+
+            // Initialize CodeMirror
+            const codeEditor = CodeMirror(document.getElementById('code-editor'), {
+                mode: 'htmlmixed',
+                theme: 'dracula',
+                lineNumbers: true,
+                indentUnit: 4,
+                indentWithTabs: false,
+                lineWrapping: true,
+                value: TEMPLATES.display
+            });
+
+            const templateSelect = document.getElementById('template-select');
+            let isLoadingTemplate = false;
+
+            templateSelect.addEventListener('change', () => {
+                const selected = templateSelect.value;
+                if (TEMPLATES[selected]) {
+                    isLoadingTemplate = true;
+                    codeEditor.setValue(TEMPLATES[selected]);
+                    isLoadingTemplate = false;
+                }
+            });
+
+            codeEditor.on('change', () => {
+                if (isLoadingTemplate) return;
+                const current = codeEditor.getValue();
+                const matchedTemplate = Object.entries(TEMPLATES).find(([, tpl]) => tpl === current);
+                if (matchedTemplate) {
+                    templateSelect.value = matchedTemplate[0];
+                } else {
+                    templateSelect.querySelector('option[value="custom"]').disabled = false;
+                    templateSelect.value = 'custom';
+                }
+            });
+
+            const logEl = document.getElementById('event-log');
+            const testBtn = document.getElementById('test-btn');
+            const clearBtn = document.getElementById('clear-btn');
+            const testResultContainer = document.getElementById('test-result-container');
+            const errorMsg = document.getElementById('error-message');
+
+            let isFirstLog = true;
+            let currentWidgetId = null;
+
+            function logEvent(widgetId, eventName, detail) {
+                if (isFirstLog) {
+                    logEl.textContent = '';
+                    isFirstLog = false;
+                }
+                const time = new Date().toLocaleTimeString();
+                const payload = detail ? JSON.stringify(detail, null, 2) : '{}';
+                const logEntry = `[${time}] [${widgetId}] ${eventName}:\n${payload}\n\n`;
+                logEl.textContent = logEntry + logEl.textContent;
+            }
+
+            function extractWidgetInfo(code) {
+                // Extract data-target attribute value
+                const targetMatch = code.match(/data-target=['"]([^'"]+)['"]/);
+                const target = targetMatch ? targetMatch[1] : null;
+
+                if (!target) {
+                    throw new Error('No data-target attribute found in code');
+                }
+
+                return { target };
+            }
+
+            function testWidget() {
+                errorMsg.style.display = 'none';
+                errorMsg.textContent = '';
+
+                try {
+                    const code = codeEditor.getValue().trim();
+                    console.log('Code being tested:', code);
+                    if (!code) {
+                        errorMsg.textContent = 'Code editor is empty';
+                        errorMsg.style.display = 'block';
+                        return;
+                    }
+
+                    // Extract widget info to verify code is valid
+                    const { target } = extractWidgetInfo(code);
+
+                    // Clear previous widget
+                    testResultContainer.innerHTML = '';
+                    currentWidgetId = null;
+
+                    // Generate unique ID to avoid conflicts
+                    const uniqueId = `wrike-test-${Date.now()}`;
+
+                    // Parse the code to extract script attributes
+                    const scriptMatch = code.match(/<script\s+([^>]*?)>/);
+                    if (!scriptMatch) {
+                        throw new Error('No <script> tag found in code');
+                    }
+
+                    const scriptAttrs = scriptMatch[1];
+                    const attrMap = {};
+
+                    // Robust attribute parser that handles nested quotes
+                    let i = 0;
+                    while (i < scriptAttrs.length) {
+                        // Skip whitespace
+                        while (i < scriptAttrs.length && /\s/.test(scriptAttrs[i])) i++;
+                        if (i >= scriptAttrs.length) break;
+
+                        // Extract attribute name
+                        const nameStart = i;
+                        while (i < scriptAttrs.length && /[\w-]/.test(scriptAttrs[i])) i++;
+                        const attrName = scriptAttrs.substring(nameStart, i);
+
+                        // Skip '='
+                        while (i < scriptAttrs.length && /\s/.test(scriptAttrs[i])) i++;
+                        if (scriptAttrs[i] !== '=') break;
+                        i++;
+                        while (i < scriptAttrs.length && /\s/.test(scriptAttrs[i])) i++;
+
+                        // Extract attribute value (quoted)
+                        const quoteChar = scriptAttrs[i];
+                        if (quoteChar !== '"' && quoteChar !== "'") break;
+                        i++;
+                        const valueStart = i;
+                        while (i < scriptAttrs.length && scriptAttrs[i] !== quoteChar) i++;
+                        const attrValue = scriptAttrs.substring(valueStart, i);
+                        i++; // Skip closing quote
+
+                        if (attrName) {
+                            attrMap[attrName] = attrValue;
+                        }
+                    }
+
+                    // Create the target div first
+                    const targetDiv = document.createElement('div');
+                    targetDiv.id = uniqueId;
+                    testResultContainer.appendChild(targetDiv);
+
+                    // Now create and append the script tag
+                    const scriptTag = document.createElement('script');
+                    scriptTag.src = './wrike-media-connect.js';
+
+                    // Set all data-* attributes from the original code, replacing data-target
+                    Object.entries(attrMap).forEach(([key, value]) => {
+                        if (key === 'src') return; // Skip src, we already set it
+                        if (key === 'data-target') {
+                            scriptTag.setAttribute('data-target', uniqueId);
+                        } else {
+                            scriptTag.setAttribute(key, value);
+                        }
+                    });
+
+                    currentWidgetId = uniqueId;
+
+                    // Set up event listeners BEFORE appending script (so they're ready when widget initializes)
+                    const widgetEl = targetDiv;
+                    widgetEl.addEventListener('wrike-media-connect:ready', (e) => {
+                        logEvent(uniqueId, 'READY', e.detail);
+                    });
+
+                    widgetEl.addEventListener('wrike-media-connect:data', (e) => {
+                        logEvent(uniqueId, 'DATA', e.detail);
+                    });
+
+                    widgetEl.addEventListener('wrike-media-connect:created', (e) => {
+                        logEvent(uniqueId, 'CREATED', e.detail);
+                    });
+
+                    widgetEl.addEventListener('wrike-media-connect:updated', (e) => {
+                        logEvent(uniqueId, 'UPDATED', e.detail);
+                    });
+
+                    widgetEl.addEventListener('wrike-media-connect:error', (e) => {
+                        logEvent(uniqueId, 'ERROR', e.detail);
+                    });
+
+                    // Append script tag (triggers widget initialization)
+                    testResultContainer.appendChild(scriptTag);
+
+                } catch (error) {
+                    errorMsg.textContent = `Error: ${error.message}`;
+                    errorMsg.style.display = 'block';
+                }
+            }
+
+            function clearResult() {
+                testResultContainer.innerHTML = '<p style="text-align: center; color: #9ca3af;">Paste code and click "Test Live" to see the widget here</p>';
+                currentWidgetId = null;
+            }
+
+            testBtn.addEventListener('click', testWidget);
+            clearBtn.addEventListener('click', clearResult);
+        });
+    </script>
+</body>
+</html>

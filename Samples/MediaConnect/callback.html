@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wrike Authentication</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="centered-content">
+    <div class="panel message" id="status">Completing authentication...</div>
+    <script>
+        async function completeAuth() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const authCode = urlParams.get('code');
+            const stateParam = urlParams.get('state');
+            
+            if (!authCode) {
+                document.getElementById('status').textContent = 'Error: No authorization code found.';
+                if (window.opener) window.opener.postMessage({ type: 'wmc_auth_error' }, '*');
+                return;
+            }
+
+            let baseUrl = 'https://xpi-api.gowrike.space/';
+            let clientId = 'MediaConnectWidget';
+            
+            if (stateParam) {
+                try {
+                    const stateObj = JSON.parse(atob(stateParam));
+                    if (stateObj.baseUrl) baseUrl = stateObj.baseUrl;
+                    if (stateObj.clientId) clientId = stateObj.clientId;
+                } catch (e) { console.warn('Could not parse OAuth state parameter.'); }
+            }
+            
+            const tokenEndpoint = `${baseUrl}api/v1/wrikexpi/token/exchange?code=${authCode}&client_id=${clientId}&grant_type=authorization_code&environmentId=e9cc03d5-b645-4720-b6e4-d260ae0027bb`;
+            
+            try {
+                const response = await fetch(tokenEndpoint);
+                const result = await response.json();
+                
+                if (result.success && result.data && result.data.token) {
+                    // Always save token and notify the opener window
+                    try {
+                        localStorage.setItem('wmc_oauth_token', result.data.token);
+                    } catch (e) {
+                        console.warn('Could not save token to localStorage.', e);
+                    }
+                    if (window.opener) window.opener.postMessage({ type: 'wmc_auth_success', token: result.data.token }, '*');
+
+                    // If credentials are provided, display them for the user to save.
+                    if (result.data.credentials && result.data.credentials.username) {
+                        const creds = result.data.credentials;
+                        const statusEl = document.getElementById('status');
+                        statusEl.innerHTML = `
+                            <h3>Authentication Successful</h3>
+                            <p class="credentials-message">${creds.message || 'IMPORTANT: Save these credentials. They will only be shown once.'}</p>
+                            <div class="credential-field">
+                                <strong>Username:</strong>
+                                <code>${creds.username}</code>
+                            </div>
+                            <div class="credential-field">
+                                <strong>Password:</strong>
+                                <code>${creds.password}</code>
+                            </div>
+                            <button class="close-btn" onclick="window.close()">Close Window</button>
+                        `;
+                    } else {
+                        // Original behavior: show success message and auto-close
+                        document.getElementById('status').textContent = 'Authentication successful! You can close this window.';
+                        setTimeout(() => window.close(), 1500);
+                    }
+                } else {
+                    throw new Error(result.message || 'Token exchange failed.');
+                }
+            } catch (error) {
+                console.error(error);
+                document.getElementById('status').textContent = 'Authentication failed. Please try again.';
+                if (window.opener) window.opener.postMessage({ type: 'wmc_auth_error' }, '*');
+            }
+        }
+        
+        completeAuth();
+    </script>
+</body>
+</html>
