@@ -1299,10 +1299,13 @@
             each partner receives dedicated support.
         </p>
 
-        <form class="pilot-form" onsubmit="handlePilotSubmit(event)">
+        <p>
+            Registration will be open on 8 June.
+        </p>
+        <!-- <form class="pilot-form" onsubmit="handlePilotSubmit(event)">
             <input type="email" id="pilot-email" placeholder="your.email@wpp.com" required />
             <button type="submit">Register Interest</button>
-        </form>
+        </form> -->
         <p class="pilot-disclaimer">
             By registering you agree to provide integration feedback during the alpha period.
             Your data is handled in accordance with WPP's internal data policies.
@@ -1473,6 +1476,7 @@
         e.preventDefault();
         const email = document.getElementById('pilot-email').value;
         const btn = e.target.querySelector('button');
+        alert("Registration to be continued on Wrike Request Form when open");
         btn.textContent = '✓ Registered!';
         btn.style.background = '#d1fae5';
         btn.style.color = '#065f46';
