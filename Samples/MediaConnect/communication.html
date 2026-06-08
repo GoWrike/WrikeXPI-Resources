@@ -739,6 +739,31 @@
             box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
 
+        .pilot-cta {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #fff;
+            color: var(--blue-dark);
+            font-size: 15px;
+            font-weight: 600;
+            padding: 14px 32px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-bottom: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+            transition: background 0.15s, box-shadow 0.15s, transform 0.15s;
+        }
+
+        .pilot-cta:hover {
+            background: var(--bg-alt);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.22);
+            transform: translateY(-1px);
+        }
+
+        .pilot-cta .arrow { transition: transform 0.15s; }
+        .pilot-cta:hover .arrow { transform: translateX(3px); }
+
         .pilot-disclaimer {
             font-size: 12px;
             color: rgba(255,255,255,0.55);
@@ -1299,9 +1324,9 @@
             each partner receives dedicated support.
         </p>
 
-        <p>
-            Registration will be open on 8 June.
-        </p>
+        <a class="pilot-cta" target="_blank" rel="noopener" href="https://app-eu.wrike.com/forms/AAX34M3OXU2IBNDB/Media-Connect-Integration-Pilot-Interest-Form">
+            ✦ &nbsp;Open the Registration Form &nbsp;<span class="arrow">→</span>
+        </a>
         <!-- <form class="pilot-form" onsubmit="handlePilotSubmit(event)">
             <input type="email" id="pilot-email" placeholder="your.email@wpp.com" required />
             <button type="submit">Register Interest</button>
