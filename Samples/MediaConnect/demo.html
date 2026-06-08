@@ -3,95 +3,550 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wrike Media Connect Widget - Showcase</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Wrike Media Connect — Developer Sandbox</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/dracula.min.css">
     <style>
-        .error-message {
-            background-color: #fee2e2;
-            border: 1px solid #fecaca;
-            color: #991b1b;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            display: none;
+        /* ── Reset & Variables ── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        :root {
+            --blue:        #1a73e8;
+            --blue-dark:   #174ea6;
+            --blue-light:  #e8f0fe;
+            --green:       #34a853;
+            --red:         #ea4335;
+            --text:        #202124;
+            --text-mid:    #3c4043;
+            --text-muted:  #5f6368;
+            --border:      #dadce0;
+            --bg:          #ffffff;
+            --bg-alt:      #f8f9fa;
+            --bg-dark:     #1e1e2e;
+            --header-h:    64px;
+            --wpp-blue:    #005eb8;
         }
-        .CodeMirror {
-            border: 1px solid #d1d5db;
-            border-radius: 6px;
-            height: 400px !important;
-            font-size: 12px !important;
-            margin-bottom: 16px;
+
+        body {
+            font-family: Google Sans, Roboto, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+            font-size: 14px;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--bg-alt);
+            -webkit-font-smoothing: antialiased;
         }
-        .CodeMirror-gutters {
-            background-color: #282a36;
-            border-right: 1px solid #44475a;
-        }
-        .button-row {
-            display: flex;
-            gap: 12px;
-        }
-        .template-select-row {
+
+        /* ── Top Nav ── */
+        .topnav {
+            position: fixed;
+            top: 0; left: 0; right: 0;
+            height: var(--header-h);
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
+            padding: 0 32px;
+            gap: 8px;
+            z-index: 100;
         }
-        .template-select-row label {
+
+        .topnav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text);
+            flex-shrink: 0;
+        }
+
+        .brand-mark {
+            width: 32px; height: 32px;
+            background: var(--wpp-blue);
+            border-radius: 7px;
+            display: flex; align-items: center; justify-content: center;
+            color: #fff;
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .brand-name {
+            font-size: 17px;
+            font-weight: 500;
+            letter-spacing: -0.2px;
+            color: var(--text);
+        }
+
+        .nav-divider {
+            width: 1px; height: 22px;
+            background: var(--border);
+            margin: 0 12px;
+        }
+
+        .nav-badge {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 500;
+            background: var(--bg-alt);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 2px 10px;
+        }
+
+        .topnav-links {
+            display: flex;
+            gap: 2px;
+            margin-left: auto;
+        }
+
+        .topnav-links a {
+            padding: 7px 14px;
+            border-radius: 4px;
+            font-size: 13.5px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            transition: background 0.15s, color 0.15s;
+        }
+
+        .topnav-links a:hover { background: var(--bg-alt); color: var(--text); }
+
+        .topnav-links a.active {
+            color: var(--blue);
+            background: var(--blue-light);
+        }
+
+        .topnav-links a.nav-cta {
+            background: var(--blue);
+            color: #fff;
+            border-radius: 4px;
+        }
+
+        .topnav-links a.nav-cta:hover { background: var(--blue-dark); color: #fff; }
+
+        /* ── Page Header ── */
+        .page-header {
+            margin-top: var(--header-h);
+            background: var(--bg);
+            border-bottom: 1px solid var(--border);
+            padding: 32px 32px 28px;
+        }
+
+        .page-header-inner {
+            max-width: 1440px;
+            margin: 0 auto;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+
+        .page-header h1 {
+            font-size: 26px;
+            font-weight: 400;
+            letter-spacing: -0.5px;
+            color: var(--text);
+            margin-bottom: 6px;
+            line-height: 1.2;
+        }
+
+        .page-header p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin: 0;
+            line-height: 1.5;
+        }
+
+        .header-mode-tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .mode-tag {
+            display: inline-block;
+            font-size: 11px;
             font-weight: 600;
-            color: #374151;
-            white-space: nowrap;
-            margin-bottom: 0;
+            padding: 3px 10px;
+            border-radius: 12px;
+            border: 1px solid;
         }
-        .template-select-row select {
+
+        .mode-tag.display { color: #174ea6; background: #e8f0fe; border-color: #aecbfa; }
+        .mode-tag.update  { color: #137333; background: #e6f4ea; border-color: #a8d5b5; }
+        .mode-tag.create  { color: #b45309; background: #fef3e2; border-color: #fcd29b; }
+
+        /* ── Main Grid ── */
+        .main-grid {
+            max-width: 1440px;
+            margin: 0 auto;
+            padding: 28px 32px 48px;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            align-items: start;
+        }
+
+        /* ── Panel / Card ── */
+        .panel {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 16px 20px 14px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+        }
+
+        .panel-header h2 {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            letter-spacing: 0;
+        }
+
+        .panel-body {
+            padding: 20px;
+        }
+
+        /* ── Template select ── */
+        .template-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 14px;
+        }
+
+        .template-row label {
+            font-size: 12.5px;
+            font-weight: 600;
+            color: var(--text-muted);
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .template-row select {
             flex: 1;
+            padding: 7px 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: inherit;
+            color: var(--text);
+            background: var(--bg);
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+
+        .template-row select:focus {
+            border-color: var(--blue);
+            box-shadow: 0 0 0 2px rgba(26,115,232,0.2);
+        }
+
+        /* ── CodeMirror overrides ── */
+        .CodeMirror {
+            border: 1px solid var(--border) !important;
+            border-radius: 8px !important;
+            height: 388px !important;
+            font-size: 12px !important;
+            margin-bottom: 0 !important;
+        }
+
+        .CodeMirror-gutters {
+            background-color: #282a36 !important;
+            border-right: 1px solid #44475a !important;
+            border-radius: 8px 0 0 8px !important;
+        }
+
+        /* ── Error message ── */
+        .error-message {
+            display: none;
+            background: #fce8e6;
+            border: 1px solid #f5c6c2;
+            color: #c5221f;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            margin-top: 14px;
+        }
+
+        /* ── Button Row ── */
+        .button-row {
+            display: flex;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 18px;
+            border-radius: 6px;
+            font-size: 13.5px;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: background 0.15s, box-shadow 0.15s, border-color 0.15s;
+            white-space: nowrap;
+        }
+
+        .btn-primary {
+            background: var(--blue);
+            color: #fff;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+
+        .btn-primary:hover {
+            background: var(--blue-dark);
+            box-shadow: 0 2px 8px rgba(26,115,232,0.35);
+        }
+
+        .btn-outline {
+            background: var(--bg);
+            color: var(--text-mid);
+            border-color: var(--border);
+        }
+
+        .btn-outline:hover {
+            background: var(--bg-alt);
+            border-color: #bdc1c6;
+        }
+
+        /* ── Widget container (test result) ── */
+        .widget-area {
+            min-height: 320px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            padding: 8px;
+        }
+
+        .widget-area-empty {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 320px;
+            gap: 10px;
+            color: var(--text-muted);
+            text-align: center;
+            width: 100%;
+        }
+
+        .widget-area-empty .empty-icon {
+            font-size: 32px;
+            opacity: 0.4;
+        }
+
+        .widget-area-empty p {
+            font-size: 13px;
+            max-width: 200px;
+            line-height: 1.5;
+        }
+
+        /* ── Event Log ── */
+        .event-log-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .event-log-wrap {
+            margin-top: 14px;
+            background: var(--bg-dark);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .event-log-bar {
+            background: #2a2a3d;
+            padding: 8px 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .log-dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+        }
+
+        .log-dot:nth-child(1) { background: #ff5f57; }
+        .log-dot:nth-child(2) { background: #ffbd2e; }
+        .log-dot:nth-child(3) { background: #28ca41; }
+
+        .log-title {
+            margin-left: auto;
+            margin-right: auto;
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+            font-family: "Roboto Mono", monospace;
+        }
+
+        #event-log {
+            background: transparent;
+            color: #a6e3a1;
+            font-family: "Roboto Mono", "Courier New", monospace;
+            font-size: 11.5px;
+            line-height: 1.6;
+            padding: 16px;
+            min-height: 340px;
+            max-height: 430px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-break: break-all;
+            border: none;
+            border-radius: 0;
+            margin: 0;
+        }
+
+        #event-log::-webkit-scrollbar { width: 4px; }
+        #event-log::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+        /* ── Event type colours in log ── */
+        .log-waiting {
+            color: rgba(166,227,161,0.45);
+            font-style: italic;
+        }
+
+        /* ── Panel header status dot ── */
+        .live-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #28ca41;
+            box-shadow: 0 0 0 2px rgba(40,202,65,0.25);
+            animation: blink 2s infinite;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.4; }
+        }
+
+        /* ── Responsive ── */
+        @media (max-width: 1100px) {
+            .main-grid { grid-template-columns: 1fr 1fr; }
+            .main-grid .panel:last-child { grid-column: 1 / -1; }
+        }
+
+        @media (max-width: 720px) {
+            .main-grid { grid-template-columns: 1fr; padding: 20px 16px 40px; }
+            .topnav { padding: 0 16px; }
+            .topnav-links a:not(.nav-cta) { display: none; }
+            .page-header { padding: 24px 16px 20px; }
         }
     </style>
 </head>
 <body>
-    <h1>Wrike Media Connect - Showcase</h1>
 
-    <div class="container">
-        <!-- Left Column: Code Editor -->
-        <div class="panel">
-            <h2>Code Editor</h2>
-            <div class="template-select-row">
-                <label for="template-select">Template:</label>
-                <select id="template-select">
-                    <option value="display">Display Campaign</option>
-                    <option value="update">Update Campaign</option>
-                    <option value="create">Create Campaign</option>
-                    <option value="custom" disabled>— Customized —</option>
-                </select>
-            </div>
-            <div class="error-message" id="error-message"></div>
-            <div id="code-editor"></div>
-            <div class="button-row">
-                <button class="save-btn test-btn" id="test-btn">Test Live</button>
-                <button class="clear-btn" id="clear-btn">Clear Result</button>
-            </div>
+    <!-- ══════════════════════════════════════ Top Nav -->
+    <nav class="topnav">
+        <a class="topnav-brand" href="documentation.html">
+            <div class="brand-mark">W</div>
+            <span class="brand-name">Wrike Media Connect</span>
+        </a>
+        <div class="nav-divider"></div>
+        <span class="nav-badge">Developer Sandbox</span>
+        <div class="topnav-links">
+            <a href="documentation.html">Docs</a>
+            <a href="demo.html" class="active">Demo</a>
+            <a href="communication.html">About</a>
+            <a href="communication.html#pilot-program" class="nav-cta">Join Pilot →</a>
         </div>
+    </nav>
 
-        <!-- Center Column: Test Result -->
-        <div class="panel">
-            <h2>Test Result</h2>
-            <div class="widget-container" id="test-result-container">
-                <p style="text-align: center; color: #9ca3af;">Paste code and click "Test Live" to see the widget here</p>
+    <!-- ══════════════════════════════════════ Page Header -->
+    <div class="page-header">
+        <div class="page-header-inner">
+            <div>
+                <h1>Developer Sandbox</h1>
+                <p>Edit widget embed code, run it live, and inspect the Custom Events it emits — all in one place.</p>
             </div>
-        </div>
-
-        <!-- Right Column: Host App Event Log -->
-        <div class="panel">
-            <h2>Host Application Event Log</h2>
-            <p style="font-size: 14px; color: #6b7280; margin-bottom: 16px;">
-                This panel listens to custom events emitted from the widgets.
-            </p>
-            <pre id="event-log">Waiting for widget events...</pre>
+            <div class="header-mode-tags">
+                <span class="mode-tag display">display</span>
+                <span class="mode-tag update">update</span>
+                <span class="mode-tag create">create</span>
+            </div>
         </div>
     </div>
 
-    <!-- Script to simulate Host Application capturing Widget Events -->
+    <!-- ══════════════════════════════════════ Main Grid -->
+    <div class="main-grid">
+
+        <!-- ── Left: Code Editor ── -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Code Editor</h2>
+            </div>
+            <div class="panel-body">
+                <div class="template-row">
+                    <label for="template-select">Template</label>
+                    <select id="template-select">
+                        <option value="display">Display Campaign</option>
+                        <option value="update">Update Campaign</option>
+                        <option value="create">Create Campaign</option>
+                        <option value="custom" disabled>— Customized —</option>
+                    </select>
+                </div>
+                <div id="code-editor"></div>
+                <div class="error-message" id="error-message"></div>
+                <div class="button-row">
+                    <button class="btn btn-primary" id="test-btn">▶ &nbsp;Test Live</button>
+                    <button class="btn btn-outline" id="clear-btn">Clear Result</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Center: Test Result ── -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Test Result</h2>
+            </div>
+            <div class="panel-body">
+                <div class="widget-area" id="test-result-container">
+                    <div class="widget-area-empty">
+                        <span class="empty-icon">◻</span>
+                        <p>Select a template and click <strong>Test Live</strong> to render the widget here.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Right: Event Log ── -->
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Event Log</h2>
+                <span class="live-dot" title="Listening for widget events"></span>
+            </div>
+            <div class="panel-body">
+                <p class="event-log-desc">
+                    Custom Events emitted by the widget appear here in real time. Events fire on the target element and can be captured anywhere in the host application.
+                </p>
+                <div class="event-log-wrap">
+                    <div class="event-log-bar">
+                        <div class="log-dot"></div>
+                        <div class="log-dot"></div>
+                        <div class="log-dot"></div>
+                        <span class="log-title">wrike-media-connect events</span>
+                    </div>
+                    <pre id="event-log"><span class="log-waiting">Waiting for widget events…</span></pre>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ══════════════════════════════════════ Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/xml/xml.min.js"></script>
@@ -150,24 +605,19 @@
 
             function logEvent(widgetId, eventName, detail) {
                 if (isFirstLog) {
-                    logEl.textContent = '';
+                    logEl.innerHTML = '';
                     isFirstLog = false;
                 }
                 const time = new Date().toLocaleTimeString();
                 const payload = detail ? JSON.stringify(detail, null, 2) : '{}';
-                const logEntry = `[${time}] [${widgetId}] ${eventName}:\n${payload}\n\n`;
+                const logEntry = `[${time}] [${widgetId}]\n  ▸ ${eventName}\n${payload}\n\n`;
                 logEl.textContent = logEntry + logEl.textContent;
             }
 
             function extractWidgetInfo(code) {
-                // Extract data-target attribute value
                 const targetMatch = code.match(/data-target=['"]([^'"]+)['"]/);
                 const target = targetMatch ? targetMatch[1] : null;
-
-                if (!target) {
-                    throw new Error('No data-target attribute found in code');
-                }
-
+                if (!target) throw new Error('No data-target attribute found in code');
                 return { target };
             }
 
@@ -177,28 +627,21 @@
 
                 try {
                     const code = codeEditor.getValue().trim();
-                    console.log('Code being tested:', code);
                     if (!code) {
-                        errorMsg.textContent = 'Code editor is empty';
+                        errorMsg.textContent = 'Code editor is empty.';
                         errorMsg.style.display = 'block';
                         return;
                     }
 
-                    // Extract widget info to verify code is valid
                     const { target } = extractWidgetInfo(code);
 
-                    // Clear previous widget
                     testResultContainer.innerHTML = '';
                     currentWidgetId = null;
 
-                    // Generate unique ID to avoid conflicts
                     const uniqueId = `wrike-test-${Date.now()}`;
 
-                    // Parse the code to extract script attributes
                     const scriptMatch = code.match(/<script\s+([^>]*?)>/);
-                    if (!scriptMatch) {
-                        throw new Error('No <script> tag found in code');
-                    }
+                    if (!scriptMatch) throw new Error('No <script> tag found in code');
 
                     const scriptAttrs = scriptMatch[1];
                     const attrMap = {};
@@ -206,47 +649,38 @@
                     // Robust attribute parser that handles nested quotes
                     let i = 0;
                     while (i < scriptAttrs.length) {
-                        // Skip whitespace
                         while (i < scriptAttrs.length && /\s/.test(scriptAttrs[i])) i++;
                         if (i >= scriptAttrs.length) break;
 
-                        // Extract attribute name
                         const nameStart = i;
                         while (i < scriptAttrs.length && /[\w-]/.test(scriptAttrs[i])) i++;
                         const attrName = scriptAttrs.substring(nameStart, i);
 
-                        // Skip '='
                         while (i < scriptAttrs.length && /\s/.test(scriptAttrs[i])) i++;
                         if (scriptAttrs[i] !== '=') break;
                         i++;
                         while (i < scriptAttrs.length && /\s/.test(scriptAttrs[i])) i++;
 
-                        // Extract attribute value (quoted)
                         const quoteChar = scriptAttrs[i];
                         if (quoteChar !== '"' && quoteChar !== "'") break;
                         i++;
                         const valueStart = i;
                         while (i < scriptAttrs.length && scriptAttrs[i] !== quoteChar) i++;
                         const attrValue = scriptAttrs.substring(valueStart, i);
-                        i++; // Skip closing quote
+                        i++;
 
-                        if (attrName) {
-                            attrMap[attrName] = attrValue;
-                        }
+                        if (attrName) attrMap[attrName] = attrValue;
                     }
 
-                    // Create the target div first
                     const targetDiv = document.createElement('div');
                     targetDiv.id = uniqueId;
                     testResultContainer.appendChild(targetDiv);
 
-                    // Now create and append the script tag
                     const scriptTag = document.createElement('script');
                     scriptTag.src = './wrike-media-connect.js';
 
-                    // Set all data-* attributes from the original code, replacing data-target
                     Object.entries(attrMap).forEach(([key, value]) => {
-                        if (key === 'src') return; // Skip src, we already set it
+                        if (key === 'src') return;
                         if (key === 'data-target') {
                             scriptTag.setAttribute('data-target', uniqueId);
                         } else {
@@ -256,29 +690,12 @@
 
                     currentWidgetId = uniqueId;
 
-                    // Set up event listeners BEFORE appending script (so they're ready when widget initializes)
-                    const widgetEl = targetDiv;
-                    widgetEl.addEventListener('wrike-media-connect:ready', (e) => {
-                        logEvent(uniqueId, 'READY', e.detail);
-                    });
+                    targetDiv.addEventListener('wrike-media-connect:ready',   (e) => logEvent(uniqueId, 'READY', e.detail));
+                    targetDiv.addEventListener('wrike-media-connect:data',    (e) => logEvent(uniqueId, 'DATA', e.detail));
+                    targetDiv.addEventListener('wrike-media-connect:created', (e) => logEvent(uniqueId, 'CREATED', e.detail));
+                    targetDiv.addEventListener('wrike-media-connect:updated', (e) => logEvent(uniqueId, 'UPDATED', e.detail));
+                    targetDiv.addEventListener('wrike-media-connect:error',   (e) => logEvent(uniqueId, 'ERROR', e.detail));
 
-                    widgetEl.addEventListener('wrike-media-connect:data', (e) => {
-                        logEvent(uniqueId, 'DATA', e.detail);
-                    });
-
-                    widgetEl.addEventListener('wrike-media-connect:created', (e) => {
-                        logEvent(uniqueId, 'CREATED', e.detail);
-                    });
-
-                    widgetEl.addEventListener('wrike-media-connect:updated', (e) => {
-                        logEvent(uniqueId, 'UPDATED', e.detail);
-                    });
-
-                    widgetEl.addEventListener('wrike-media-connect:error', (e) => {
-                        logEvent(uniqueId, 'ERROR', e.detail);
-                    });
-
-                    // Append script tag (triggers widget initialization)
                     testResultContainer.appendChild(scriptTag);
 
                 } catch (error) {
@@ -288,7 +705,11 @@
             }
 
             function clearResult() {
-                testResultContainer.innerHTML = '<p style="text-align: center; color: #9ca3af;">Paste code and click "Test Live" to see the widget here</p>';
+                testResultContainer.innerHTML = `
+                    <div class="widget-area-empty">
+                        <span class="empty-icon">◻</span>
+                        <p>Select a template and click <strong>Test Live</strong> to render the widget here.</p>
+                    </div>`;
                 currentWidgetId = null;
             }
 
