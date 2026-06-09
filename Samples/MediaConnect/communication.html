@@ -576,6 +576,117 @@
             line-height: 1.5;
         }
 
+        /* ── Engagement Phases ── */
+        .phase-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-top: 40px;
+        }
+
+        .phase-card {
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px 22px;
+            background: var(--bg);
+            position: relative;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+
+        .phase-card:hover {
+            box-shadow: 0 8px 28px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+        }
+
+        .phase-num {
+            width: 36px; height: 36px;
+            border-radius: 50%;
+            background: var(--blue-light);
+            color: var(--blue-dark);
+            font-size: 15px;
+            font-weight: 700;
+            display: flex; align-items: center; justify-content: center;
+            margin-bottom: 16px;
+            flex-shrink: 0;
+        }
+
+        .phase-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            margin-bottom: 6px;
+        }
+
+        .phase-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 10px;
+            line-height: 1.3;
+        }
+
+        .phase-desc {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.65;
+            margin-bottom: 16px;
+        }
+
+        .phase-gate {
+            font-size: 12px;
+            color: var(--blue-dark);
+            background: var(--blue-light);
+            border-radius: 4px;
+            padding: 6px 10px;
+            line-height: 1.4;
+        }
+
+        .phase-gate strong {
+            display: block;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.6px;
+            margin-bottom: 2px;
+            opacity: 0.7;
+        }
+
+        .phase-connector {
+            display: none;
+        }
+
+        .participant-callout {
+            margin-top: 32px;
+            padding: 20px 24px;
+            background: #fef7e0;
+            border: 1px solid #fcd29b;
+            border-radius: 10px;
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .participant-callout .callout-icon {
+            font-size: 22px;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .participant-callout h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #92400e;
+            margin-bottom: 6px;
+        }
+
+        .participant-callout p {
+            font-size: 13.5px;
+            color: #78350f;
+            line-height: 1.65;
+            margin: 0;
+        }
+
         /* ── Audience Cards ── */
         .audience-grid {
             display: grid;
@@ -941,6 +1052,7 @@
             .feature-grid         { grid-template-columns: 1fr; }
             .code-preview-section { grid-template-columns: 1fr; }
             .audience-grid        { grid-template-columns: 1fr; }
+            .phase-grid           { grid-template-columns: repeat(2, 1fr); }
             .contacts-grid        { grid-template-columns: 1fr; }
             .stats-inner          { grid-template-columns: repeat(2, 1fr); }
             .pilot-form           { flex-direction: column; }
@@ -1231,8 +1343,100 @@
     </div>
 </section>
 
-<!-- ══════════════════════════════════════ Roadmap -->
+<!-- ══════════════════════════════════════ Engagement Process -->
 <section id="how-it-works">
+    <div class="section-inner">
+        <span class="section-label">Engagement Process</span>
+        <h2 class="section-title">How the pilot works</h2>
+        <p class="section-sub">
+            A typical pilot engagement runs <strong>2 to 4 weeks</strong> across four structured phases.
+            We begin with discovery to confirm fit and scope before any integration work is undertaken —
+            ensuring both sides commit only when there is a clear and viable case to proceed.
+        </p>
+
+        <div class="phase-grid">
+            <div class="phase-card">
+                <div class="phase-num">1</div>
+                <div class="phase-label">Phase 1 · 3–5 business days</div>
+                <div class="phase-title">Discovery &amp; Scoping</div>
+                <div class="phase-desc">
+                    Stakeholder alignment and use case confirmation. Technical feasibility and
+                    compatibility assessment. Definition of measurable success criteria. Access
+                    provisioning and environment setup.
+                </div>
+                <div class="phase-gate">
+                    <strong>Gate</strong>
+                    Agreed integration brief with defined success criteria
+                </div>
+            </div>
+
+            <div class="phase-card">
+                <div class="phase-num">2</div>
+                <div class="phase-label">Phase 2 · 1–2 weeks</div>
+                <div class="phase-title">Proof of Concept (PoC)</div>
+                <div class="phase-desc">
+                    Initial integration build against the Wrike staging environment. Validates the
+                    technical approach and data flow. Surfaces integration challenges early, before
+                    full testing commitment. Engineering team provides direct support throughout.
+                </div>
+                <div class="phase-gate">
+                    <strong>Gate</strong>
+                    Working PoC demonstrating the agreed integration capability
+                </div>
+            </div>
+
+            <div class="phase-card">
+                <div class="phase-num">3</div>
+                <div class="phase-label">Phase 3 · 3–5 business days</div>
+                <div class="phase-title">User Acceptance Testing (UAT)</div>
+                <div class="phase-desc">
+                    Structured test execution against the acceptance criteria defined in Phase 1.
+                    Business user involvement is strongly recommended to validate real-world
+                    usability alongside technical correctness. Issues are logged, triaged, and
+                    resolved collaboratively.
+                </div>
+                <div class="phase-gate">
+                    <strong>Gate</strong>
+                    UAT completion with signed-off test outcomes
+                </div>
+            </div>
+
+            <div class="phase-card">
+                <div class="phase-num">4</div>
+                <div class="phase-label">Phase 4 · 2–3 business days</div>
+                <div class="phase-title">Pilot Review &amp; GA Commitment</div>
+                <div class="phase-desc">
+                    Formal review of pilot findings and UAT outcomes. Structured feedback submitted
+                    to the MediaConnect programme team. As the widget is in alpha, production
+                    go-live is not available at this stage — the phase concludes with a confirmed
+                    intent to adopt upon General Availability (August 2026), with agreed scope and
+                    integration requirements documented for a smooth GA transition.
+                </div>
+                <div class="phase-gate">
+                    <strong>Outcome</strong>
+                    Pilot conclusion report and confirmed GA adoption intent
+                </div>
+            </div>
+        </div>
+
+        <div class="participant-callout">
+            <span class="callout-icon">⚠️</span>
+            <div>
+                <h4>What we ask of participating teams</h4>
+                <p>
+                    To ensure the engagement is productive for both sides, pilot partners are expected to
+                    come prepared with <strong>dedicated technical resource</strong>, a clear understanding
+                    of their own product and data requirements, and a confirmed use case before the
+                    Discovery phase begins. The more domain knowledge and context your team brings to each
+                    phase, the faster and more effective the engagement will be.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════ Roadmap -->
+<section id="roadmap">
     <div class="section-inner">
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start;">
             <div>
@@ -1275,7 +1479,9 @@
                 <span class="section-label">What Pilot Partners Get</span>
                 <h2 class="section-title">Your pilot experience</h2>
                 <p style="font-size: 15px; color: var(--text-muted); line-height: 1.7; margin-bottom: 40px;">
-                    Alpha is not a passive access program. Pilot partners are active collaborators.
+                    The pilot is a structured, four-phase engagement — not open-ended access. Each partner
+                    works through a defined process with clear gates and outcomes, supported by the
+                    MediaConnect team at every step.
                 </p>
 
                 <div style="display: flex; flex-direction: column; gap: 20px;">
@@ -1416,10 +1622,20 @@
             <div class="faq-item">
                 <div class="faq-q">What does the alpha program commit us to?</div>
                 <div class="faq-a">
-                    Pilot partners are asked to attempt at least one integration against the Wrike staging
-                    environment, participate in two feedback calls (roughly 30 minutes each), and submit a
-                    brief written summary of their integration experience at the end of the alpha period.
-                    There is no cost and no obligation to adopt the widget after the pilot.
+                    The pilot follows a structured four-phase process — Discovery &amp; Scoping, Proof of
+                    Concept, User Acceptance Testing, and Pilot Review &amp; GA Commitment — typically
+                    completing within 2 to 4 weeks depending on scope and team availability.
+                    <br><br>
+                    Participating teams are expected to bring dedicated technical resource, a clear and
+                    confirmed use case, and sufficient product knowledge to inform scoping and testing
+                    decisions. The engagement only proceeds to the PoC phase once scope and viability are
+                    mutually agreed at the conclusion of Discovery.
+                    <br><br>
+                    At the end of the pilot, partners submit structured feedback to the MediaConnect
+                    programme team and participate in a formal Pilot Review. As the widget is in alpha,
+                    production go-live is not available during this phase — the pilot concludes with a
+                    confirmed intent to adopt upon General Availability (August 2026). There is no cost
+                    and no obligation to commit.
                 </div>
             </div>
             <div class="faq-item">
