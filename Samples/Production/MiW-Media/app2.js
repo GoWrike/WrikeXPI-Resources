@@ -11,18 +11,24 @@
             dom.form = document.getElementById('admin-form');
             dom.urlInput = document.getElementById('config-xpiBaseUrl');
             dom.landingPageInput = document.getElementById('config-urlLandingPage');
+            dom.environmentIdInput = document.getElementById('config-environmentId');
+            dom.clientIdInput = document.getElementById('config-clientId');
             dom.resyncBtn = document.getElementById('resync-vault-keys-btn');
-            
+
             // Populate form with stored values
             dom.urlInput.value = App.Config.get('xpiBaseUrl');
             dom.landingPageInput.value = App.Config.get('urlLandingPage');
-            
+            dom.environmentIdInput.value = App.Config.get('environmentId');
+            dom.clientIdInput.value = App.Config.get('clientId');
+
             setupDatalist();
 
             dom.form.addEventListener('submit', (e) => {
                 e.preventDefault();
                 App.Config.set('xpiBaseUrl', dom.urlInput.value);
                 App.Config.set('urlLandingPage', dom.landingPageInput.value);
+                App.Config.set('environmentId', dom.environmentIdInput.value);
+                App.Config.set('clientId', dom.clientIdInput.value);
                 App.UI.showToast('Configuration saved successfully!', 'success');
             });
 
@@ -52,7 +58,7 @@
             try {
                 const baseUrl = App.Config.get('xpiBaseUrl');
                 // The user request specifies the endpoint is /sync-secrets relative to the base URL.
-                const url = new URL('sync-secrets', baseUrl).href;
+                const url = new URL('/api/v1/sync-secrets', baseUrl).href;
                 const token = App.Auth.getToken();
 
                 const response = await App.Api.fetchWithLogs(url, {
@@ -433,7 +439,7 @@
             
             currentData.forEach(item => {
                 const tr = document.createElement('tr');
-                tr.className = 'border-b border-gray-700 hover:bg-gray-700';
+                tr.className = 'border-b border-[#dadce0] hover:bg-[#f8f9fa]';
                 
                 let rowHtml = '';
                 currentSchema.fields.forEach(field => {
@@ -472,7 +478,7 @@
                     modalFormFields.innerHTML += `
                         <div class="mb-4">
                             <label class="styled-label">${field.label}</label>
-                            <input type="text" class="styled-input bg-gray-600" value="${item[field.id] || ''}" readonly>
+                            <input type="text" class="styled-input bg-[#f1f3f4]" value="${item[field.id] || ''}" readonly>
                         </div>
                     `;
                 } else if (!field.readonly) {
@@ -646,9 +652,9 @@
                     let wrikeLinkHtml = '';
                     const entityIdMatch = wrikeLink ? /id=([a-zA-Z0-9]+)/.exec(wrikeLink) : null;
                     if (entityIdMatch && entityIdMatch[1]) {
-                        wrikeLinkHtml = `<button class="text-indigo-400 hover:underline wrike-link-btn" data-id="${entityIdMatch[1]}">${wrikeLink.length > 30 ? wrikeLink.substring(0, 27) + '...' : wrikeLink}</button>`;
+                        wrikeLinkHtml = `<button class="text-[#1a73e8] hover:underline wrike-link-btn" data-id="${entityIdMatch[1]}">${wrikeLink.length > 30 ? wrikeLink.substring(0, 27) + '...' : wrikeLink}</button>`;
                     } else if (wrikeLink) {
-                        wrikeLinkHtml = `<a href="${wrikeLink}" target="_blank" rel="noopener noreferrer" class="text-indigo-400 hover:underline">${wrikeLink.length > 30 ? wrikeLink.substring(0, 27) + '...' : wrikeLink}</a>`;
+                        wrikeLinkHtml = `<a href="${wrikeLink}" target="_blank" rel="noopener noreferrer" class="text-[#1a73e8] hover:underline">${wrikeLink.length > 30 ? wrikeLink.substring(0, 27) + '...' : wrikeLink}</a>`;
                     }
                     const row = document.createElement('tr');
                     row.className = 'styled-table-row';
@@ -664,10 +670,10 @@
                                 <button class="styled-btn-icon edit-btn" data-id="${campaign.id}" title="Edit">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pencil-square" viewBox="0 0 16 16"><path d="M15.502 1.94a.5.5 0 0 1 0 .706L14.459 3.69l-2-2L13.502.646a.5.5 0 0 1 .707 0l1.293 1.293zm-1.75 2.456-2-2L4.939 9.21a.5.5 0 0 0-.121.196l-.805 2.414a.25.25 0 0 0 .316.316l2.414-.805a.5.5 0 0 0 .196-.12l6.813-6.814z"/><path fill-rule="evenodd" d="M1 13.5A1.5 1.5 0 0 0 2.5 15h11a1.5 1.5 0 0 0 1.5-1.5v-6a.5.5 0 0 0-1 0v6a.5.5 0 0 1-.5.5h-11a.5.5 0 0 1-.5-.5v-11a.5.5 0 0 1 .5-.5H9a.5.5 0 0 0 0-1H2.5A1.5 1.5 0 0 0 1 2.5z"/></svg>
                                 </button>
-                                <button class="styled-btn-icon !text-red-400 hover:!text-red-300 delete-btn" data-id="${campaign.id}" title="Delete">
+                                <button class="styled-btn-icon !text-[#d93025] hover:!text-[#c5221f] delete-btn" data-id="${campaign.id}" title="Delete">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg>
                                 </button>
-                                <button class="styled-btn-icon !text-indigo-400 hover:!text-indigo-300 prefill-btn" data-id="${campaign.id}" title="Submit with Prefill">
+                                <button class="styled-btn-icon !text-[#1a73e8] hover:!text-[#1765cc] prefill-btn" data-id="${campaign.id}" title="Submit with Prefill">
                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-box-arrow-up-right" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V7.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5z"/><path fill-rule="evenodd" d="M16 3.5a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0 0 1h5.793L8.146 8.146a.5.5 0 0 0 .708.708L15 2.707V8.5a.5.5 0 0 0 1 0v-5z"/></svg>
                                 </button>
                             </div>
@@ -719,9 +725,9 @@
 
             // --- Channels Section ---
             const channelsContainer = document.createElement('div');
-            channelsContainer.className = 'md:col-span-2 border-t border-gray-700 mt-6 pt-6';
+            channelsContainer.className = 'md:col-span-2 border-t border-[#dadce0] mt-6 pt-6';
             channelsContainer.innerHTML = `
-                <h4 class="text-lg font-semibold text-white mb-4">Channels</h4>
+                <h4 class="text-lg font-medium text-[#202124] mb-4">Channels</h4>
                 <div id="channels-list" class="space-y-3 mb-4"></div>
                 <button type="button" id="add-channel-btn" class="styled-btn-secondary">Add Channel</button>
             `;
@@ -738,10 +744,10 @@
 
             // --- Additional Prefill Attributes Section ---
             const attributesContainer = document.createElement('div');
-            attributesContainer.className = 'md:col-span-2 border-t border-gray-700 mt-6 pt-6';
+            attributesContainer.className = 'md:col-span-2 border-t border-[#dadce0] mt-6 pt-6';
             attributesContainer.innerHTML = `
-                <h4 class="text-lg font-semibold text-white mb-4">Additional Prefill Attributes</h4>
-                <p class="text-xs text-gray-400 mb-4">These name/value pairs will be added to the prefill data for automated submission.</p>
+                <h4 class="text-lg font-medium text-[#202124] mb-4">Additional Prefill Attributes</h4>
+                <p class="text-xs text-[#5f6368] mb-4">These name/value pairs will be added to the prefill data for automated submission.</p>
                 <div id="attributes-list" class="space-y-3 mb-4"></div>
                 <button type="button" id="add-attribute-btn" class="styled-btn-secondary">Add Attribute</button>
             `;
@@ -769,7 +775,7 @@
                     <input type="text" placeholder="Attribute Value" class="styled-input attribute-value" value="${attribute.value || ''}">
                 </div>
                 <div class="col-span-1 text-right">
-                    <button type="button" class="styled-btn-icon !text-red-400 hover:!text-red-300 remove-attribute-btn">
+                    <button type="button" class="styled-btn-icon !text-[#d93025] hover:!text-[#c5221f] remove-attribute-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg>
                     </button>
                 </div>
@@ -802,7 +808,7 @@
                     <input type="number" placeholder="Budget" class="styled-input channel-budget" value="${channel.budget || ''}">
                 </div>
                 <div class="col-span-1 text-right">
-                    <button type="button" class="styled-btn-icon !text-red-400 hover:!text-red-300 remove-channel-btn">
+                    <button type="button" class="styled-btn-icon !text-[#d93025] hover:!text-[#c5221f] remove-channel-btn">
                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-x-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708"/></svg>
                     </button>
                 </div>

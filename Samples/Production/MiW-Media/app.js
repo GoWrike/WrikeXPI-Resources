@@ -13,14 +13,16 @@ const App = {};
         currentUser: null, // { firstName, lastName, avatarUrl }
         xpiBaseUrl: 'https://api.wrikexpi.groupm.com/',
         urlLandingPage: 'https://app-eu.wrike.com/open.htm?id=1802549085',
+        environmentId: 'e9cc03d5-b645-4720-b6e4-d260ae0027bb',
+        clientId: null, // Generated and persisted by Config.init() on first run
         initializedModules: new Set(),
     };
 
     // --- Constants ---
     App.MODULE_CONFIG = [
         { code: 'MOD.L', name: 'Home', hash: '#landing-page', type: 'User-defined', icon: 'home' },
-        { code: 'MAS.Client', name: 'MiW Clients', hash: '#demo-client', type: 'User-defined', icon: 'person' },
-        { code: 'MOD.Campaign', name: 'MiW Campaigns', hash: '#campaigns', type: 'User-defined', icon: 'book' },
+        { code: 'MAS.Client', name: 'Clients', hash: '#demo-client', type: 'User-defined', icon: 'person' },
+        { code: 'MOD.Campaign', name: 'Campaigns', hash: '#campaigns', type: 'User-defined', icon: 'book' },
         //{ code: 'MAS.XPICFMapping', name: 'XPI Field Mapping', hash: '#xpi-cf-mapping', type: 'User-defined', icon: 'mapping' },
         { code: 'MAS.WrikeAgencies', name: 'Wrike Agencies', hash: '#wrike-agencies', type: 'User-defined', icon: 'mapping' },
         { code: 'MOD.C', name: 'Wrike Campaign Submission', hash: '#campaign-submission', type: 'User-defined', icon: 'campaign' },
@@ -31,7 +33,7 @@ const App = {};
     
     App.MASTER_DATA_SCHEMAS = {
         'demoxpiclients': {
-            title: 'MiW Clients',
+            title: 'Clients',
             fields: [
                 { id: 'id', label: 'ID', readonly: true },
                 { id: 'value', label: 'Value', required: true },
@@ -65,33 +67,33 @@ const App = {};
 // === Styling Module ===
 (function(App) {
     const STYLE_MAP = {
-        'styled-body': 'bg-gray-900 text-gray-100',
-        'styled-sidebar': 'w-64 bg-gray-800 flex flex-col h-full transition-all duration-300 z-30',
-        'styled-sidebar-hidden': 'w-20 bg-gray-800 flex flex-col h-full transition-all duration-300 z-30',
-        'styled-main-content': 'flex-1 h-full bg-gray-900 transition-all duration-300',
-        'styled-btn-icon': 'p-2 rounded-lg text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-indigo-500',
-        'styled-user-profile': 'p-4 border-t border-gray-700 flex items-center',
-        'styled-nav-link': 'flex items-center p-3 rounded-lg text-gray-300 hover:bg-gray-700 hover:text-white',
-        'styled-nav-link-active': 'flex items-center p-3 rounded-lg bg-indigo-600 text-white font-semibold shadow-lg',
+        'styled-body': 'bg-white text-[#202124]',
+        'styled-sidebar': 'w-64 bg-white border-r border-[#dadce0] flex flex-col h-full transition-all duration-300 z-30',
+        'styled-sidebar-hidden': 'w-20 bg-white border-r border-[#dadce0] flex flex-col h-full transition-all duration-300 z-30',
+        'styled-main-content': 'flex-1 h-full bg-[#f8f9fa] transition-all duration-300',
+        'styled-btn-icon': 'p-2 rounded-full text-[#5f6368] hover:bg-[#f1f3f4] hover:text-[#202124] focus:outline-none focus:ring-2 focus:ring-[#1a73e8]',
+        'styled-user-profile': 'p-4 border-t border-[#dadce0] flex items-center',
+        'styled-nav-link': 'flex items-center p-3 rounded-full text-[#3c4043] font-medium hover:bg-[#f1f3f4]',
+        'styled-nav-link-active': 'flex items-center p-3 rounded-full bg-[#e8f0fe] text-[#1a73e8] font-medium',
         'styled-nav-icon': 'w-6 h-6 flex-shrink-0',
-        'styled-h2': 'text-3xl font-bold text-white mb-6',
-        'styled-form-card': 'bg-gray-800 p-6 sm:p-8 rounded-xl shadow-2xl',
-        'styled-label': 'block text-sm font-medium text-gray-300 mb-2',
-        'styled-input': 'block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
-        'styled-select': 'block w-full px-4 py-3 bg-gray-700 border border-gray-600 rounded-lg text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500',
-        'styled-btn-primary': 'px-5 py-3 rounded-lg bg-indigo-600 text-white font-semibold hover:bg-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition duration-150 disabled:opacity-50',
-        'styled-btn-secondary': 'px-5 py-3 rounded-lg bg-gray-600 text-white font-semibold hover:bg-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition duration-150 disabled:opacity-50',
-        'styled-btn-danger': 'px-5 py-3 rounded-lg bg-red-600 text-white font-semibold hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-800 transition duration-150 disabled:opacity-50',
-        'styled-pre-error': 'p-4 bg-red-900 bg-opacity-50 border border-red-700 text-red-200 rounded-lg text-left text-sm overflow-x-auto',
-        'styled-pre-success': 'p-4 bg-gray-700 border border-gray-600 text-gray-100 rounded-lg text-left text-sm overflow-x-auto',
-        'styled-modal-backdrop': 'fixed inset-0 bg-black bg-opacity-75 z-40',
-        'styled-modal-dialog': 'bg-gray-800 rounded-xl shadow-2xl p-6 z-50 w-full flex flex-col fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
-        'styled-table': 'min-w-full divide-y divide-gray-700',
-        'styled-table-header': 'bg-gray-700',
-        'styled-table-th': 'px-4 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider',
-        'styled-table-td': 'px-4 py-3 whitespace-nowrap text-sm text-gray-100',
-        'styled-tag': 'flex items-center bg-indigo-600 text-white text-sm font-medium px-2.5 py-1 rounded-full',
-        'styled-tag-remove': 'ml-2 -mr-1 text-indigo-100 hover:text-white cursor-pointer',
+        'styled-h2': 'text-3xl font-normal text-[#202124] mb-6',
+        'styled-form-card': 'bg-white border border-[#dadce0] p-6 sm:p-8 rounded-lg shadow-sm',
+        'styled-label': 'block text-sm font-medium text-[#3c4043] mb-2',
+        'styled-input': 'block w-full px-4 py-3 bg-white border border-[#dadce0] rounded-lg text-[#202124] focus:outline-none focus:ring-2 focus:ring-[#1a73e8] focus:border-[#1a73e8]',
+        'styled-select': 'block w-full px-4 py-3 bg-white border border-[#dadce0] rounded-lg text-[#202124] focus:outline-none focus:ring-2 focus:ring-[#1a73e8] focus:border-[#1a73e8]',
+        'styled-btn-primary': 'px-5 py-2.5 rounded-lg bg-[#1a73e8] text-white font-medium shadow-sm hover:bg-[#1765cc] focus:outline-none focus:ring-2 focus:ring-[#1a73e8] focus:ring-offset-2 focus:ring-offset-white transition duration-150 disabled:opacity-50',
+        'styled-btn-secondary': 'px-5 py-2.5 rounded-lg bg-white text-[#1a73e8] font-medium border border-[#dadce0] hover:bg-[#f8faff] focus:outline-none focus:ring-2 focus:ring-[#1a73e8] focus:ring-offset-2 focus:ring-offset-white transition duration-150 disabled:opacity-50',
+        'styled-btn-danger': 'px-5 py-2.5 rounded-lg bg-[#d93025] text-white font-medium shadow-sm hover:bg-[#c5221f] focus:outline-none focus:ring-2 focus:ring-[#d93025] focus:ring-offset-2 focus:ring-offset-white transition duration-150 disabled:opacity-50',
+        'styled-pre-error': 'p-4 bg-[#fce8e6] border border-[#fad2cf] text-[#c5221f] rounded-lg text-left text-sm overflow-x-auto',
+        'styled-pre-success': 'p-4 bg-[#f8f9fa] border border-[#dadce0] text-[#202124] rounded-lg text-left text-sm overflow-x-auto',
+        'styled-modal-backdrop': 'fixed inset-0 bg-black bg-opacity-40 z-40',
+        'styled-modal-dialog': 'bg-white rounded-lg shadow-2xl p-6 z-50 w-full flex flex-col fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2',
+        'styled-table': 'min-w-full divide-y divide-[#dadce0]',
+        'styled-table-header': 'bg-[#f8f9fa]',
+        'styled-table-th': 'px-4 py-3 text-left text-xs font-medium text-[#5f6368] uppercase tracking-wider',
+        'styled-table-td': 'px-4 py-3 whitespace-nowrap text-sm text-[#3c4043]',
+        'styled-tag': 'flex items-center bg-[#e8f0fe] text-[#1a73e8] text-sm font-medium px-2.5 py-1 rounded-full',
+        'styled-tag-remove': 'ml-2 -mr-1 text-[#1a73e8] hover:text-[#1765cc] cursor-pointer',
     };
 
     function apply() {
@@ -157,9 +159,16 @@ const App = {};
 
 // === Config Module ===
 (function(App) {
+    function generateClientId() {
+        // A short hex id used only for local reference (not a security credential).
+        const bytes = new Uint8Array(4);
+        crypto.getRandomValues(bytes);
+        return Array.from(bytes).map(b => b.toString(16).padStart(2, '0')).join('').slice(-7);
+    }
+
     function init() {
         // Initialize all configurable keys from localStorage
-        ['xpiBaseUrl', 'urlLandingPage'].forEach(key => {
+        ['xpiBaseUrl', 'urlLandingPage', 'environmentId'].forEach(key => {
             const storedValue = App.Storage.local.get(key);
             if (storedValue) {
                 App.state[key] = storedValue;
@@ -168,12 +177,20 @@ const App = {};
                 App.Storage.local.set(key, App.state[key]);
             }
         });
+
+        // Client ID has no static default: generate it once on first run, then persist it.
+        let clientId = App.Storage.local.get('clientId');
+        if (!clientId) {
+            clientId = generateClientId();
+            App.Storage.local.set('clientId', clientId);
+        }
+        App.state.clientId = clientId;
     }
     function get(key) { return App.state[key]; }
-    function set(key, value) { 
-        App.state[key] = value; 
+    function set(key, value) {
+        App.state[key] = value;
         // Persist configurable keys to localStorage
-        const persistKeys = ['xpiBaseUrl', 'urlLandingPage'];
+        const persistKeys = ['xpiBaseUrl', 'urlLandingPage', 'environmentId', 'clientId'];
         if (persistKeys.includes(key)) {
             App.Storage.local.set(key, value);
         }
@@ -243,10 +260,10 @@ const App = {};
         if (!toastContainer) return;
         
         const toast = document.createElement('div');
-        const baseClasses = 'px-4 py-3 rounded-lg shadow-lg text-white font-semibold text-sm';
-        const typeClasses = type === 'success' 
-            ? 'bg-green-600' 
-            : (type === 'error' ? 'bg-red-600' : 'bg-blue-600');
+        const baseClasses = 'px-4 py-3 rounded-lg shadow-lg text-white font-medium text-sm';
+        const typeClasses = type === 'success'
+            ? 'bg-[#188038]'
+            : (type === 'error' ? 'bg-[#d93025]' : 'bg-[#1a73e8]');
         
         toast.className = `${baseClasses} ${typeClasses}`;
         toast.textContent = message;
@@ -292,7 +309,7 @@ const App = {};
                 const baseUrl = App.Config.get('xpiBaseUrl');
                 const token = App.Auth.getToken();
                 // Call the IDs endpoint via the XPI proxy to convert v3 ID to v4 ID
-                const url = `${baseUrl}api/v1/wrikexpi/amoeba/wrikeapi/ids?type=ApiV2Folder&ids=[${entityId}]`;
+                const url = `${baseUrl}api/v1/wrikexpi/amoeba/wrikeapi/ids?type=ApiV2Task&ids=[${entityId}]`;
                 
                 const response = await App.Api.fetchWithLogs(url, {
                     headers: { 'Authorization': `Bearer ${token}` }
@@ -300,7 +317,7 @@ const App = {};
 
                 if (response.success && response.data && response.data.length > 0) {
                     const v4Id = response.data[0].id;
-                    wrikeIframe.src = `https://app-eu.wrike.com/frontend/ts_wrike_embeddable_work_item_app/index.html?entityId=${v4Id}&entityType=ApiV4Folder`;
+                    wrikeIframe.src = `https://app-eu.wrike.com/frontend/ts_wrike_embeddable_work_item_app/index.html?entityId=${v4Id}&entityType=ApiV4Task`;
                     showModal(wrikeModal);
                 } else {
                     console.error('Failed to convert ID:', response);
@@ -329,27 +346,21 @@ const App = {};
         }
     }
 
-    async function login() {
+    function login() {
         App.UI.showSpinner();
         try {
-            const timestamp = Date.now().toString();
-            const random = Math.random().toString();
-            const hashBuffer = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(timestamp + random));
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const hexHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-            const clientId = hexHash.slice(-7);
-            
-            App.Storage.session.set('clientId', clientId);
-            
             const baseUrl = App.Config.get('xpiBaseUrl');
-            const redirectUri = window.location.origin + window.location.pathname;
-            const authUrl = `${baseUrl}?accountId=3128883&autoRedirect=1&redirectUri=${encodeURIComponent(redirectUri)}&client_id=${clientId}`;
-            
+            const environmentId = App.Config.get('environmentId');
+            const clientId = App.Config.get('clientId');
+            // redirectUrl is the full URL of the app's landing page; URL-encode it for the query string.
+            const redirectUrl = window.location.origin + window.location.pathname;
+            const authUrl = `${baseUrl}?environmentId=${encodeURIComponent(environmentId)}&autoRedirect=1&redirectUri=${encodeURIComponent(redirectUrl)}&client_id=${encodeURIComponent(clientId)}`;
+
             window.location.href = authUrl;
         } catch (error) {
             console.error('Login failed:', error);
             App.UI.hideSpinner();
-            App.UI.showToast('Login failed. Could not generate client ID.', 'error');
+            App.UI.showToast('Login failed.', 'error');
         }
     }
 
@@ -364,7 +375,8 @@ const App = {};
 
         try {
             const baseUrl = App.Config.get('xpiBaseUrl');
-            const tokenUrl = `${baseUrl}api/v1/wrikexpi/token/exchange?code=${code}&client_id=${clientId}&grant_type=authorization_code`;
+            const environmentId = App.Config.get('environmentId');
+            const tokenUrl = `${baseUrl}api/v1/wrikexpi/token/exchange?code=${code}&client_id=${clientId}&environmentId=${encodeURIComponent(environmentId)}&grant_type=authorization_code`;
             const tokenResponse = await App.Api.fetchWithLogs(tokenUrl);
             
             if (!tokenResponse.success || !tokenResponse.data) {
@@ -411,7 +423,7 @@ const App = {};
         } catch (error) {
             console.error('Callback handling failed:', error);
             msgEl.textContent = 'Login failed. We were unable to verify your account.';
-            msgEl.classList.add('text-red-400');
+            msgEl.classList.add('text-[#d93025]');
             errEl.textContent = typeof error === 'object' ? JSON.stringify(error, null, 2) : error.toString();
             errEl.classList.remove('hidden');
             startOverBtn.classList.remove('hidden');
@@ -423,7 +435,7 @@ const App = {};
     function logout() {
         App.Storage.session.remove('token');
         App.Storage.session.remove('user');
-        App.Storage.session.remove('clientId');
+        // clientId is a persistent local-reference id in localStorage; keep it across logouts.
         App.state.isLoggedIn = false;
         App.state.currentUser = null;
         window.location.href = window.location.pathname;
@@ -456,7 +468,7 @@ const App = {};
 
         if (params.has('code')) {
             const code = params.get('code');
-            const clientId = App.Storage.session.get('clientId');
+            const clientId = App.Config.get('clientId');
             
             document.getElementById('module-login').classList.remove('hidden');
             document.getElementById('login-authenticate-view').classList.add('hidden');
@@ -622,7 +634,7 @@ const App = {};
             if (userName) userName.textContent = `${user.firstName} ${user.lastName}`;
             if (userAvatar) {
                 userAvatar.src = user.avatarUrl;
-                userAvatar.onerror = () => { userAvatar.src = `https://placehold.co/40x40/667eea/ffffff?text=${user.firstName.charAt(0)}`; };
+                userAvatar.onerror = () => { userAvatar.src = `https://placehold.co/40x40/1a73e8/ffffff?text=${user.firstName.charAt(0)}`; };
             }
             if (userProfile) userProfile.classList.remove('hidden');
         }
@@ -650,7 +662,7 @@ const App = {};
             sidebar.classList.remove(...hiddenClasses.split(' '));
             sidebar.classList.add(...expandedClasses.split(' '));
 
-            logo.textContent = 'XPI';
+            logo.textContent = 'RainDrop';
             logo.classList.remove('opacity-0');
             userProfile.classList.remove('opacity-0');
             navLinks.querySelectorAll('.nav-link-text').forEach(el => el.classList.remove('hidden'));
@@ -659,7 +671,7 @@ const App = {};
             sidebar.classList.remove(...expandedClasses.split(' '));
             sidebar.classList.add(...hiddenClasses.split(' '));
 
-            logo.textContent = 'X';
+            logo.textContent = 'R';
             logo.classList.add('opacity-0');
             userProfile.classList.add('opacity-0');
             navLinks.querySelectorAll('.nav-link-text').forEach(el => el.classList.add('hidden'));
@@ -784,19 +796,19 @@ const App = {};
         dom.logBody.innerHTML = '';
         
         if (sortedLogs.length === 0) {
-            dom.logBody.innerHTML = '<tr><td colspan="6" class="styled-table-td text-center text-gray-400">No logs yet.</td></tr>';
+            dom.logBody.innerHTML = '<tr><td colspan="6" class="styled-table-td text-center text-[#5f6368]">No logs yet.</td></tr>';
             App.Styling.apply();
             return;
         }
         
         sortedLogs.forEach(log => {
             const tr = document.createElement('tr');
-            tr.className = 'border-b border-gray-700 hover:bg-gray-700';
-            
-            const statusColor = log.status >= 400 ? 'text-red-400' : (log.status >= 200 ? 'text-green-400' : 'text-yellow-400');
+            tr.className = 'border-b border-[#dadce0] hover:bg-[#f8f9fa]';
+
+            const statusColor = log.status >= 400 ? 'text-[#d93025]' : (log.status >= 200 ? 'text-[#188038]' : 'text-[#f9ab00]');
             
             tr.innerHTML = `
-                <td class="styled-table-td text-xs text-gray-400">${new Date(log.timestamp).toLocaleTimeString()}</td>
+                <td class="styled-table-td text-xs text-[#5f6368]">${new Date(log.timestamp).toLocaleTimeString()}</td>
                 <td class="styled-table-td font-semibold ${statusColor}">${log.status}</td>
                 <td class="styled-table-td text-xs">${log.method}</td>
                 <td class="styled-table-td text-xs truncate max-w-xs" title="${log.url}">${log.url}</td>
@@ -865,8 +877,8 @@ const App = {};
 
     function showLoading() {
         dom.contentArea.innerHTML = `
-            <div class="p-12 flex flex-col items-center justify-center text-gray-400">
-                <div class="animate-spin h-10 w-10 text-indigo-500" role="status">
+            <div class="p-12 flex flex-col items-center justify-center text-[#5f6368]">
+                <div class="animate-spin h-10 w-10 text-[#1a73e8]" role="status">
                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -878,16 +890,16 @@ const App = {};
 
     function displayError(title, message) {
         dom.contentArea.innerHTML = `
-            <div class="p-8 bg-red-900/50 border border-red-700 rounded-lg">
-                <h3 class="text-xl font-semibold text-white">${title}</h3>
-                <p class="mt-2 text-red-200">${message}</p>
+            <div class="p-8 bg-[#fce8e6] border border-[#fad2cf] rounded-lg">
+                <h3 class="text-xl font-medium text-[#c5221f]">${title}</h3>
+                <p class="mt-2 text-[#c5221f]">${message}</p>
             </div>`;
     }
 
     function displayContent(title, descriptionHtml) {
         dom.contentArea.innerHTML = `
-            <h3 class="text-2xl font-bold text-white mb-4 pb-4 border-b border-gray-700">${title}</h3>
-            <div class="prose prose-lg prose-invert max-w-none">${descriptionHtml || '<p>No description provided.</p>'}</div>
+            <h3 class="text-2xl font-normal text-[#202124] mb-4 pb-4 border-b border-[#dadce0]">${title}</h3>
+            <div class="prose prose-lg max-w-none">${descriptionHtml || '<p>No description provided.</p>'}</div>
         `;
         // Disable any checkboxes in the rendered HTML for a read-only view
         dom.contentArea.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.disabled = true);
@@ -949,8 +961,8 @@ const App = {};
 
     function showLoading() {
         dom.contentArea.innerHTML = `
-            <div class="p-12 flex flex-col items-center justify-center text-gray-400">
-                <div class="animate-spin h-10 w-10 text-indigo-500" role="status">
+            <div class="p-12 flex flex-col items-center justify-center text-[#5f6368]">
+                <div class="animate-spin h-10 w-10 text-[#1a73e8]" role="status">
                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -963,9 +975,9 @@ const App = {};
     function displayError(title, message) {
         dom.wrikeLink.classList.add('hidden');
         dom.contentArea.innerHTML = `
-            <div class="p-8 bg-red-900/50 border border-red-700 rounded-lg">
-                <h3 class="text-xl font-semibold text-white">${title}</h3>
-                <p class="mt-2 text-red-200">${message}</p>
+            <div class="p-8 bg-[#fce8e6] border border-[#fad2cf] rounded-lg">
+                <h3 class="text-xl font-medium text-[#c5221f]">${title}</h3>
+                <p class="mt-2 text-[#c5221f]">${message}</p>
             </div>`;
     }
 
@@ -984,8 +996,8 @@ const App = {};
         dom.wrikeLink.classList.remove('hidden');
 
         dom.contentArea.innerHTML = `
-            <h3 class="text-2xl font-bold text-white mb-4 pb-4 border-b border-gray-700">${title}</h3>
-            <div class="prose prose-lg prose-invert max-w-none">${descriptionHtml || '<p>No description provided.</p>'}</div>
+            <h3 class="text-2xl font-normal text-[#202124] mb-4 pb-4 border-b border-[#dadce0]">${title}</h3>
+            <div class="prose prose-lg max-w-none">${descriptionHtml || '<p>No description provided.</p>'}</div>
         `;
         // Disable any checkboxes in the rendered HTML for a read-only view
         dom.contentArea.querySelectorAll('input[type="checkbox"]').forEach(cb => cb.disabled = true);

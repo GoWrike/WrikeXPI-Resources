@@ -1,25 +1,26 @@
 /*
- * XPI Portal Custom Styles
+ * RainDrop Custom Styles
  * styles.css
  */
 body {
-    font-family: 'Inter', sans-serif;
+    font-family: 'Google Sans Text', 'Roboto', Arial, sans-serif;
 }
 
-/* Custom scrollbar for dark mode */
+/* Custom scrollbar (Google-docs light theme) */
 /* For Webkit browsers (Chrome, Safari) */
 ::-webkit-scrollbar {
-    width: 10px;
-    height: 10px;
+    width: 12px;
+    height: 12px;
 }
 ::-webkit-scrollbar-track {
-    background: #1f2937; /* gray-800 */
+    background: #ffffff;
 }
 ::-webkit-scrollbar-thumb {
-    background: #4b5563; /* gray-600 */
-    border-radius: 5px;
+    background: #dadce0; /* Google border gray */
+    border: 3px solid #ffffff;
+    border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
-    background: #6b7280; /* gray-500 */
+    background: #bdc1c6;
 }
 
