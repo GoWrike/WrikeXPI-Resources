@@ -1,7 +1,7 @@
 # CopyToChild V2 Documentation
 
 #### Quick Links
-- [CopyToChild Configuration](https://app-eu.wrike.com/open.htm?id=4371879499)
+- [CopyToChild Configuration](https://app-eu.wrike.com/open.htm?id=4354057610)
 - [CopyToChild v2 Test Folder](https://app-eu.wrike.com/workspace.htm?acc=3128883#/folder/4361704918/tableV2?spaceId=4371879306&viewId=440053154)
 - [CopyToChild v2 Feedback Form](https://app-eu.wrike.com/workspace.htm#/forms?formid=1534723)
 
