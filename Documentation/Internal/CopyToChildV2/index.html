@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CopyToChild V2  |  Wrike Internal Documentation</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Google+Sans:wght@400;500;700&family=Roboto:wght@400;500;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --gc-blue: #1a73e8;
+      --gc-blue-dark: #174ea6;
+      --gc-text: #202124;
+      --gc-text-secondary: #5f6368;
+      --gc-border: #dadce0;
+      --gc-bg: #ffffff;
+      --gc-bg-subtle: #f1f3f4;
+      --gc-code-bg: #f1f3f4;
+      --gc-note-bg: #e8f0fe;
+      --gc-note-border: #1a73e8;
+      --gc-warn-bg: #fef7e0;
+      --gc-warn-border: #f9ab00;
+      --gc-tip-bg: #e6f4ea;
+      --gc-tip-border: #1e8e3e;
+      --gc-green: #1e8e3e;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: 'Roboto', Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      color: var(--gc-text);
+      background: var(--gc-bg);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ---------- Layout ---------- */
+    .layout {
+      display: grid;
+      grid-template-columns: 260px minmax(0, 1fr);
+      max-width: 1280px;
+      margin: 0 auto;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      height: 64px;
+      padding: 0 24px;
+      background: var(--gc-bg);
+      border-bottom: 1px solid var(--gc-border);
+    }
+
+    .topbar .product {
+      font-family: 'Google Sans', 'Roboto', sans-serif;
+      font-size: 20px;
+      color: var(--gc-text);
+      font-weight: 500;
+    }
+
+    .topbar .product .muted {
+      color: var(--gc-text-secondary);
+      font-weight: 400;
+    }
+
+    .topbar .badge {
+      margin-left: auto;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: .3px;
+      color: var(--gc-blue);
+      background: var(--gc-note-bg);
+      padding: 4px 10px;
+      border-radius: 12px;
+    }
+
+    /* ---------- Sidebar ---------- */
+    aside.nav {
+      border-right: 1px solid var(--gc-border);
+      padding: 28px 16px;
+      position: sticky;
+      top: 64px;
+      align-self: start;
+      height: calc(100vh - 64px);
+      overflow-y: auto;
+    }
+
+    aside.nav .nav-title {
+      font-family: 'Google Sans', sans-serif;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: .8px;
+      color: var(--gc-text-secondary);
+      margin: 0 12px 12px;
+    }
+
+    aside.nav a {
+      display: block;
+      padding: 8px 12px;
+      border-radius: 0 16px 16px 0;
+      color: var(--gc-text-secondary);
+      text-decoration: none;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+
+    aside.nav a:hover {
+      background: var(--gc-bg-subtle);
+      color: var(--gc-text);
+    }
+
+    aside.nav a.sub {
+      padding-left: 28px;
+      font-size: 13px;
+    }
+
+    /* ---------- Main ---------- */
+    main {
+      padding: 40px 56px 96px;
+      min-width: 0;
+    }
+
+    .content { max-width: 760px; }
+
+    h1 {
+      font-family: 'Google Sans', 'Roboto', sans-serif;
+      font-weight: 400;
+      font-size: 34px;
+      line-height: 1.25;
+      margin: 0 0 8px;
+      letter-spacing: -.2px;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: var(--gc-text-secondary);
+      margin: 0 0 28px;
+    }
+
+    h2 {
+      font-family: 'Google Sans', 'Roboto', sans-serif;
+      font-weight: 400;
+      font-size: 26px;
+      line-height: 1.3;
+      margin: 48px 0 8px;
+      padding-top: 12px;
+    }
+
+    h3 {
+      font-family: 'Google Sans', 'Roboto', sans-serif;
+      font-weight: 500;
+      font-size: 19px;
+      margin: 32px 0 8px;
+    }
+
+    h2 + p, h3 + p { margin-top: 8px; }
+
+    p { margin: 14px 0; }
+
+    a { color: var(--gc-blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    hr {
+      border: none;
+      border-top: 1px solid var(--gc-border);
+      margin: 40px 0;
+    }
+
+    /* ---------- Code ---------- */
+    code {
+      font-family: 'Roboto Mono', monospace;
+      font-size: 85%;
+      background: var(--gc-code-bg);
+      color: #b80672;
+      padding: 2px 6px;
+      border-radius: 4px;
+    }
+
+    /* ---------- Lists ---------- */
+    ul, ol { padding-left: 26px; margin: 14px 0; }
+    li { margin: 6px 0; }
+    li::marker { color: var(--gc-text-secondary); }
+
+    /* ---------- Tables ---------- */
+    .table-wrap { overflow-x: auto; margin: 20px 0; }
+
+    table {
+      border-collapse: collapse;
+      width: 100%;
+      font-size: 14px;
+      border: 1px solid var(--gc-border);
+      border-radius: 8px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--gc-border);
+      vertical-align: top;
+    }
+
+    th {
+      font-family: 'Google Sans', sans-serif;
+      font-weight: 500;
+      background: var(--gc-bg-subtle);
+      color: var(--gc-text);
+    }
+
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: #fafafb; }
+
+    td code, th code { background: #e8eaed; }
+
+    /* ---------- Callouts (aside) ---------- */
+    .callout {
+      border-radius: 8px;
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 15px;
+      border-left: 4px solid;
+    }
+
+    .callout .label {
+      font-family: 'Google Sans', sans-serif;
+      font-weight: 700;
+      font-size: 12px;
+      letter-spacing: .8px;
+      text-transform: uppercase;
+      display: block;
+      margin-bottom: 4px;
+    }
+
+    .callout p:first-of-type { margin-top: 0; }
+    .callout p:last-child { margin-bottom: 0; }
+
+    .callout.note { background: var(--gc-note-bg); border-color: var(--gc-note-border); }
+    .callout.note .label { color: var(--gc-blue-dark); }
+
+    .callout.warning { background: var(--gc-warn-bg); border-color: var(--gc-warn-border); }
+    .callout.warning .label { color: #b06000; }
+
+    .callout.tip { background: var(--gc-tip-bg); border-color: var(--gc-tip-border); }
+    .callout.tip .label { color: var(--gc-green); }
+
+    /* ---------- Quick links ---------- */
+    .quick-links {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin: 24px 0 8px;
+    }
+
+    .quick-links a {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 14px 16px;
+      border: 1px solid var(--gc-border);
+      border-radius: 8px;
+      color: var(--gc-text);
+      font-weight: 500;
+      font-size: 14px;
+      transition: box-shadow .2s, border-color .2s;
+    }
+
+    .quick-links a:hover {
+      text-decoration: none;
+      border-color: var(--gc-blue);
+      box-shadow: 0 1px 3px rgba(60,64,67,.3);
+    }
+
+    .quick-links a::before {
+      content: "→";
+      color: var(--gc-blue);
+      font-weight: 700;
+    }
+
+    /* ---------- Figure ---------- */
+    figure {
+      margin: 24px 0;
+    }
+
+    figure img {
+      max-width: 100%;
+      height: auto;
+      border: 1px solid var(--gc-border);
+      border-radius: 8px;
+      display: block;
+    }
+
+    figcaption {
+      font-size: 13px;
+      color: var(--gc-text-secondary);
+      margin-top: 8px;
+    }
+
+    /* ---------- Steps ---------- */
+    .step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--gc-blue);
+      color: #fff;
+      font-family: 'Google Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      margin-right: 10px;
+      flex: 0 0 28px;
+    }
+
+    h3.step {
+      display: flex;
+      align-items: center;
+    }
+
+    /* ---------- Refresh button ---------- */
+    .action-row { margin: 20px 0; }
+
+    .btn-refresh {
+      background-color: #1e8e3e;
+      border: none;
+      color: white;
+      padding: 12px 24px;
+      font-family: 'Google Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 6px;
+      box-shadow: 0 1px 2px rgba(60,64,67,.3);
+      transition: background-color .2s, box-shadow .2s;
+    }
+
+    .btn-refresh:hover {
+      background-color: #188038;
+      box-shadow: 0 1px 3px rgba(60,64,67,.4);
+    }
+
+    /* ---------- Footer ---------- */
+    footer {
+      margin-top: 64px;
+      padding-top: 24px;
+      border-top: 1px solid var(--gc-border);
+      font-size: 13px;
+      color: var(--gc-text-secondary);
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+      aside.nav { display: none; }
+      main { padding: 32px 24px 64px; }
+      h1 { font-size: 28px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="topbar">
+    <span class="product">Wrike XPI <span class="muted">/ Internal Docs</span></span>
+    <span class="badge">CopyToChild V2</span>
+  </div>
+
+  <div class="layout">
+    <aside class="nav">
+      <p class="nav-title">On this page</p>
+      <a href="#overview">Overview</a>
+      <a href="#comparison">Feature comparison</a>
+      <a href="#configuration">Configuration</a>
+      <a href="#rule-definition">Rule definition guide</a>
+      <a class="sub" href="#step-container">Create rule container</a>
+      <a class="sub" href="#step-triggers">Define triggers</a>
+      <a class="sub" href="#step-actions">Define actions</a>
+      <a class="sub" href="#step-other">Pre/Post-Actions &amp; Exception</a>
+      <a href="#testing">Testing &amp; validation</a>
+      <a class="sub" href="#sync">Sync configuration</a>
+      <a class="sub" href="#testing-steps">Testing steps</a>
+      <a class="sub" href="#feedback">Feedback</a>
+    </aside>
+
+    <main>
+      <div class="content">
+        <h1>CopyToChild V2</h1>
+        <p class="subtitle">A configurable engine for automating field-data propagation within Wrike.</p>
+
+        <div class="quick-links">
+          <a href="https://app-eu.wrike.com/open.htm?id=4354057610">CopyToChild configuration</a>
+          <a href="https://app-eu.wrike.com/workspace.htm?acc=3128883#/folder/4361704918/tableV2?spaceId=4371879306&viewId=440053154">V2 test folder</a>
+          <a href="https://app-eu.wrike.com/workspace.htm#/forms?formid=1534723">V2 feedback form</a>
+        </div>
+
+        <h2 id="overview">Overview</h2>
+        <p>
+          <strong>CopyToChild V2</strong> introduces significant flexibility improvements over the
+          legacy V1 implementation. It provides a robust engine for automating field-data
+          propagation within Wrike.
+        </p>
+        <p>Key enhancements include:</p>
+        <ul>
+          <li><strong>Configurable triggers.</strong> Define precise conditions for when the CopyToChild rule executes.</li>
+          <li><strong>Granular field control.</strong> Fully configurable selection of fields for <em>copy over</em> or <em>cascade down</em> operations.</li>
+        </ul>
+
+        <h2 id="comparison">Feature comparison</h2>
+        <p>The following table compares the legacy and enhanced implementations.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Feature</th>
+                <th>CopyToChild V1 (legacy)</th>
+                <th>CopyToChild V2 (enhanced)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><strong>Rule scope</strong></td>
+                <td>Fixed to <code>Space Name*</code> (for example, GRM-SGP-GMN)</td>
+                <td>Configurable for specific markets (for example, GRM-MKT-GMN)</td>
+              </tr>
+              <tr>
+                <td><strong>Copy logic</strong></td>
+                <td>Fixed set of fields (for example, <code>Clients-GRM-SGP</code> → <code>Client*</code>)</td>
+                <td>Configurable source and target fields (for example, <code>Clients-GRM-SGP-Gov</code> → <code>Client*</code>)</td>
+              </tr>
+              <tr>
+                <td><strong>Cascade logic</strong></td>
+                <td>Fixed set of fields (for example, <code>Client*</code> → <code>Client*</code>)</td>
+                <td>Configurable source and target fields for cascading</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="configuration">Configuration</h2>
+        <p>Rule configurations are managed directly within Wrike.</p>
+        <p><strong>Location:</strong> <a href="https://app-eu.wrike.com/open.htm?id=4354057610">CopyToChild configuration</a></p>
+        <figure>
+          <img src="RuleConfigurationSnapshot.png" alt="Snapshot of the CopyToChild rule configuration in Wrike">
+          <figcaption>The rule configuration view in Wrike.</figcaption>
+        </figure>
+
+        <h2 id="rule-definition">Rule definition guide</h2>
+        <p>To define a new configuration rule, follow these steps.</p>
+
+        <h3 id="step-container" class="step"><span class="step-num">1</span>Create the rule container</h3>
+        <p>
+          Create a new <strong>Project</strong> to house the rule definition. Give it a descriptive
+          name for easy maintenance.
+        </p>
+        <p><strong>Required custom fields</strong></p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Custom field</th>
+                <th>Value</th>
+                <th>Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Entity Type</code></td>
+                <td><code>Project</code></td>
+                <td>Currently, only Project entities are supported.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>Structure.</strong> Inside this project, create five folders:</p>
+        <ul>
+          <li><code>Trigger</code> — Contains the conditions that activate the rule.</li>
+          <li><code>Pre-Actions</code> — Contains the operations to perform after the trigger is met but before any main operations.</li>
+          <li><code>Actions</code> — Contains the main operations to perform when the trigger is met.</li>
+          <li><code>Post-Actions</code> — Contains the operations to perform after the Actions section completes.</li>
+          <li><code>Exception</code> — Contains the operations to perform if an unexpected error occurs during rule execution.</li>
+        </ul>
+
+        <h3 id="step-triggers" class="step"><span class="step-num">2</span>Define triggers</h3>
+        <p>Create a <strong>Task</strong> inside the <code>Trigger</code> folder with the following properties.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Custom field</th>
+                <th>Value options</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Match Type</code></td>
+                <td><code>Custom Field</code></td>
+                <td>The type of matching logic (currently restricted to Custom Field).</td>
+              </tr>
+              <tr>
+                <td><code>Match Operation</code></td>
+                <td><code>Any</code> / <code>All</code> / <code>None</code></td>
+                <td>
+                  <strong>Any:</strong> Matches if the field contains <em>any</em> of the specified values.<br>
+                  <strong>All:</strong> Matches if the field contains <em>all</em> specified values.<br>
+                  <strong>None:</strong> Matches if the field contains <em>none</em> of the specified values.
+                </td>
+              </tr>
+              <tr>
+                <td><code>Field Source</code></td>
+                <td><em>(Select from list)</em></td>
+                <td>The custom field to evaluate.</td>
+              </tr>
+              <tr>
+                <td><code>Field Value</code></td>
+                <td>For example, <code>GRM-SGP-GMN</code></td>
+                <td>The value or values to match against.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout note">
+          <span class="label">Note</span>
+          <p>You can add multiple trigger conditions. The rule executes only when all conditions are met.</p>
+        </div>
+
+        <h3 id="step-actions" class="step"><span class="step-num">3</span>Define actions</h3>
+        <p>Create a <strong>Task</strong> inside the <code>Actions</code> folder for each operation.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Custom field</th>
+                <th>Value options</th>
+                <th>Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><code>Action Type</code></td>
+                <td><code>Copy Field</code> / <code>Cascade Field</code> / <code>Cascade Field (New Only)</code> / <code>Set Field</code></td>
+                <td>
+                  <strong>Copy Field:</strong> Copies data from a source field to a target field on the <em>same</em> entity.<br>
+                  <strong>Cascade Field:</strong> Propagates data from a source field on the parent to a target field on all <em>children</em>.<br>
+                  <strong>Cascade Field (New Only):</strong> Propagates data from a source field on the parent to a target field on all <em>children</em>, but only on first-time propagation.<br>
+                  <strong>Set Field:</strong> Replaces or sets the value of the target field to the specified Field Value.
+                </td>
+              </tr>
+              <tr>
+                <td><code>Sequence</code></td>
+                <td><code>1</code>, <code>2</code>, …</td>
+                <td>Determines the execution order of actions.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout tip">
+          <span class="label">Tip</span>
+          <p>Use folders to organize actions, or use cross-tagging to share common action definitions across rules.</p>
+        </div>
+
+        <h3 id="step-other" class="step"><span class="step-num">4</span>Define Pre-Actions, Post-Actions, and Exception</h3>
+        <p>
+          The <code>Pre-Actions</code>, <code>Post-Actions</code>, and <code>Exception</code> sections
+          are optional. Maintain them the same way as the <code>Actions</code> section; they are
+          triggered at different stages or conditions in the execution pipeline.
+        </p>
+
+        <h2 id="testing">Testing &amp; validation</h2>
+
+        <h3>Test environment</h3>
+        <p>
+          Rules configured here are active for Campaigns located in the
+          <a href="https://app-eu.wrike.com/workspace.htm?acc=3128883#/folder/4361704918/tableV2?spaceId=4371879306&viewId=440053154"><strong>CopyToChild v2 Test</strong></a>
+          folder.
+        </p>
+
+        <h3 id="sync">Sync configuration</h3>
+        <p>After modifying rules in Wrike, force the service to reload the configuration:</p>
+        <div class="action-row">
+          <button class="btn-refresh" onclick="refreshRules()">🔄 Refresh rules</button>
+        </div>
+
+        <h3 id="testing-steps">Testing steps</h3>
+        <ol>
+          <li><strong>Duplicate</strong> an existing Campaign (with all custom fields but not the assignee).</li>
+          <li><strong>Move</strong> it to the test folder.</li>
+          <li><strong>Verify</strong> the results.</li>
+        </ol>
+        <div class="callout warning">
+          <span class="label">Important</span>
+          <p>
+            Ensure the test campaign <strong>does not</strong> reside in — or get cross-tagged into —
+            any existing market space. Doing so triggers the legacy CopyToChild V1 logic, which
+            interferes with V2 testing.
+          </p>
+        </div>
+
+        <h3 id="feedback">Feedback and suggestions</h3>
+        <p>
+          Please be generous with your feedback and suggestions
+          <a href="https://app-eu.wrike.com/workspace.htm#/forms?formid=1534723"><strong>here</strong></a>.
+        </p>
+
+        <footer>
+          <p>Wrike XPI · Internal Documentation · CopyToChild V2</p>
+        </footer>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function refreshRules() {
+      var overlay = document.createElement('div');
+      overlay.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);z-index:9999;display:flex;align-items:center;justify-content:center';
+      var modal = document.createElement('div');
+      modal.style.cssText = 'background:white;padding:24px 32px;border-radius:8px;box-shadow:0 2px 10px rgba(0,0,0,0.2);font-family:Roboto,sans-serif;font-size:16px;color:#202124';
+      modal.innerText = 'Refreshing rules…';
+      overlay.appendChild(modal);
+      document.body.appendChild(overlay);
+
+      var url = 'https://732aaf571ac5ec828cbdb4633eecaf.aa.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/f2b262a6f92f4cebaa3e3a420c0acef7/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=giZUkbMX5CjxBbPXAx_6mvjEuuoh8YftnNHUXspp01A';
+
+      fetch(url, { method: 'PUT' })
+        .then(function (r) {
+          modal.innerText = r.ok ? 'Rules refreshed successfully.' : 'Something went wrong, please try again later.';
+          setTimeout(function () { document.body.removeChild(overlay); }, 2000);
+        })
+        .catch(function () {
+          modal.innerText = 'Something went wrong, please try again later.';
+          setTimeout(function () { document.body.removeChild(overlay); }, 2000);
+        });
+    }
+  </script>
+</body>
+</html>

@@ -25,7 +25,7 @@ Key enhancements include:
 
 Rule configurations are managed directly within Wrike.
 
-**Location:** [CopyToChild Configuration](https://app-eu.wrike.com/open.htm?id=4371879499)
+**Location:** [CopyToChild Configuration](https://app-eu.wrike.com/open.htm?id=4354057610)
 
 ![Configuration Snapshot](RuleConfigurationSnapshot.png)
 
