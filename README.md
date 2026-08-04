@@ -79,7 +79,7 @@ Working examples of the WrikeXPI, showcasing the capabilities of the XPI.
 
 ## POA Connectors (PowerAutomate Online)
 
-*   **[Connector Documentation](PAO-Connectors/README.md)**: Instructions for setting up the Power Automate custom connector for Wrike API
+*   **[Connector Documentation](https://wrikeway.gowrike.space/PAO-Connectors/)**: Instructions for setting up the Power Automate custom connector for Wrike API
 
 We are still working to create the connector for WrikeXPI, do reach out if you need that.
 
