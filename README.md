@@ -4,6 +4,10 @@ Please bookmark this page for easy access, as all the links and references in th
 
 [https://gowrike.github.io/WrikeXPI-Resources/](https://gowrike.github.io/WrikeXPI-Resources/)
 
+We've MOVED to a new site for better experience, please visit: [https://wrikeway.gowrike.space](https://wrikeway.gowrike.space)
+
+
+
 For any support request, please [submit a ticket](https://app-eu.wrike.com/workspace.htm?acc=3128883#/forms?formid=1002486) and we will get back to you.
 
 For recorded introduction to Wrike XPI, please [click here](https://insidemedia.sharepoint.com/:v:/r/sites/GRM-GLOBAL-WrikeWorkflow/Shared%20Documents/General/Public%20Access/Training%20%26%20Playbooks/Wrike%20XPI/Wrike%20XPI%20-%20Introduction%20(Session%202)-20251120_230312-Meeting%20Recording.mp4?csf=1&web=1&e=9IcQkv) to view.
@@ -67,8 +71,7 @@ WrikeXPI is integration layer that built on top of Wrike Native API, to make you
 ## Integration Showcase
 
 Working examples of the WrikeXPI, showcasing the capabilities of the XPI.
-*  **[Showcase Portal](Samples/README.md)**: A mock system demonstrating the power of XPI. 
-
+*  **[Showcase Portal](https://wrikeway.gowrike.space)**
 <br/>
 <br/>
 <br/>
