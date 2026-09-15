@@ -1,6 +1,6 @@
 # WrikeXPI - <span style="color: red;">makes Wrike better!</span>
 
-We've moved! please visit https://insidemedia.sharepoint.com/sites/GRM-GLOBAL-WrikeWorkflow/SitePages/Wrike-Integration.aspx for more information.
+We've moved! please visit [https://insidemedia.sharepoint.com/sites/GRM-GLOBAL-WrikeWorkflow/SitePages/Wrike-Integration.aspx](https://insidemedia.sharepoint.com/sites/GRM-GLOBAL-WrikeWorkflow/SitePages/Wrike-Integration.aspx) for more information.
 
 
 <br/>
